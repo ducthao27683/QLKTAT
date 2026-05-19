@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { ArrowLeft, Search, Plus, Info, ClipboardList, Package, Shield, User, Database, Upload, FileText, Download, Trash2, Calendar, ChevronRight, AlertTriangle, Camera, FlaskConical, Filter, Clock, ExternalLink } from 'lucide-react';
+import { ArrowLeft, Search, Plus, Info, ClipboardList, Package, Shield, User, Database, Upload, FileText, Download, Trash2, Calendar, ChevronRight, AlertTriangle, Camera, FlaskConical, Filter, Clock, ExternalLink, Eye } from 'lucide-react';
 import { MOCK_TESTING_DATA } from '../constants';
 import { DesignTooltip } from '../../../components/DesignTooltip';
+import { capitalizeBusinessName } from '../../../shared/utils';
 
 interface KetQuaThiNghiemScreenProps {
   setActiveSubMenu: (menu: string | null) => void;
@@ -26,7 +27,7 @@ export const KetQuaThiNghiemScreen = ({
     let result = MOCK_TESTING_DATA;
 
     // Filter by Active Unit
-    if (activeUnit && activeUnit !== "Công ty Điện lực Hưng Yên") {
+    if (activeUnit && activeUnit !== "Điện lực Thành phố Hưng Yên") {
        // Simulate filtering by unit
        result = result.filter(t => t.id % (activeUnit.length % 3 + 2) !== 0);
     }
@@ -65,7 +66,7 @@ export const KetQuaThiNghiemScreen = ({
             </button>
             <div className="flex flex-col">
               <h2 className="text-[12pt] font-semibold flex items-center gap-2 leading-[1.5]">
-                <span className="text-[#555555]">Thí nghiệm</span>
+                <span className="text-gray-500">Thí nghiệm</span>
                 <span className="font-bold text-[#164399]">- Biên bản kết quả</span>
               </h2>
             </div>
@@ -91,33 +92,33 @@ export const KetQuaThiNghiemScreen = ({
           <div className="mt-2 p-4 bg-gray-50 rounded-xl border border-gray-100 flex flex-wrap items-center gap-x-8 gap-y-[10px] animate-in slide-in-from-top-2 duration-300">
             <div className="flex items-center gap-4">
               <div className="flex flex-col gap-1">
-                <label className="text-[9pt] font-bold text-gray-400 uppercase">Trạng thái</label>
-                <select className="px-4 py-2 bg-white border border-gray-200 rounded-[10px] text-[10pt] font-bold text-gray-700 focus:outline-none focus:border-blue-500 shadow-sm min-w-[150px] appearance-none">
+                <label className="text-[9pt] font-black text-gray-400 uppercase tracking-widest">Trạng thái đánh giá</label>
+                <select className="px-4 py-2 bg-white border border-gray-200 rounded-[10px] text-[10pt] font-bold text-[#164399] shadow-sm min-w-[150px] appearance-none">
                   <option>Tất cả</option>
-                  <option>Đã hoàn thành</option>
-                  <option>Đang thực hiện</option>
-                  <option>Mới tạo</option>
+                  <option>Đạt</option>
+                  <option>Không đạt</option>
+                  <option>Chưa đánh giá</option>
                 </select>
               </div>
               <div className="flex flex-col gap-1">
-                <label className="text-[9pt] font-bold text-gray-400 uppercase">Phân loại</label>
-                <select className="px-4 py-2 bg-white border border-gray-200 rounded-[10px] text-[10pt] font-bold text-gray-700 focus:outline-none focus:border-blue-500 shadow-sm min-w-[150px] appearance-none">
+                <label className="text-[9pt] font-black text-gray-400 uppercase tracking-widest">Nguồn hồ sơ</label>
+                <select className="px-4 py-2 bg-white border border-gray-200 rounded-[10px] text-[10pt] font-bold text-[#164399] shadow-sm min-w-[200px] appearance-none">
                   <option>Tất cả</option>
-                  <option>Định kỳ</option>
-                  <option>Sửa chữa</option>
-                  <option>Sau sự cố</option>
+                  <option>Kế hoạch</option>
+                  <option>Yêu cầu</option>
+                  <option>Phát sinh</option>
                 </select>
               </div>
             </div>
 
             <div className="flex flex-col gap-1 flex-1 min-w-[300px]">
-              <label className="text-[9pt] font-bold text-gray-400 uppercase">Tìm nhanh biên bản</label>
+              <label className="text-[9pt] font-bold text-gray-400 uppercase">Tìm kiếm biên bản</label>
               <div className="relative group/search">
                 <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within/search:text-blue-500 transition-colors" />
                 <input 
                   type="text"
-                  placeholder="Mã biên bản, tên thiết bị, người chủ trì..."
-                  className="w-full pl-9 pr-4 py-2 bg-white border border-gray-200 rounded-[10px] text-[10pt] font-bold focus:outline-none focus:border-blue-500 transition-all shadow-sm"
+                  placeholder="Mã BB, Tên TB, Người thực hiện..."
+                  className="w-full pl-9 pr-4 py-2 bg-white border border-gray-200 rounded-[10px] text-[10pt] font-normal focus:outline-none focus:border-sky-400 focus:ring-1 focus:ring-sky-100 transition-all shadow-sm"
                 />
               </div>
             </div>
@@ -147,31 +148,40 @@ export const KetQuaThiNghiemScreen = ({
                   )}
                   
                   <div className="flex justify-between items-start mb-2">
-                    <span className="text-[9pt] font-black uppercase text-red-600 tracking-wider font-mono">BB-TN-00{atest.id}</span>
-                    <span className={`px-2 py-0.5 rounded text-[8pt] font-black uppercase tracking-tighter ${
-                      atest.result === 'Đạt' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
-                    }`}>{atest.result}</span>
+                    <div className="flex items-center gap-2">
+                      <span className="text-[9pt] font-black text-red-600 tracking-wider font-mono">BB-TN-{atest.id < 10 ? `00${atest.id}` : atest.id}</span>
+                      <span className="text-[8.5pt] font-bold uppercase text-gray-400 tracking-tighter px-1.5 py-0.5 bg-gray-50 rounded">
+                        {atest.sourceType || 'Kế hoạch'}
+                      </span>
+                    </div>
+                    <span className={`px-2 py-0.5 rounded text-[8pt] font-black uppercase tracking-tighter shadow-sm ${
+                      atest.result === 'Đạt' ? 'bg-green-100 text-green-700' : 
+                      atest.result === 'Không đạt' ? 'bg-red-100 text-red-700' :
+                      'bg-gray-100 text-gray-400'
+                    }`}>{atest.result || 'Mới lập'}</span>
                   </div>
                   
-                  <h3 className={`text-[11pt] font-bold mb-1 line-clamp-2 leading-tight transition-colors ${
-  isSelected ? 'text-[#164399]' : 'text-[#164399] group-hover:text-blue-800'
-}`}>
-  Biên bản {atest.type} - {atest.device}
-</h3>
+                  <h3 className={`text-[11.5pt] font-bold mb-1.5 line-clamp-3 leading-tight transition-colors whitespace-normal break-words ${
+                    isSelected ? 'text-[#164399]' : 'text-gray-800 group-hover:text-blue-800'
+                  }`}>
+                    {atest.device}
+                  </h3>
                   
-                  <p className="text-[10pt] text-gray-500 mb-3 flex items-center gap-1">
-                    <FlaskConical className="w-3.5 h-3.5" />
-                    Mã TB: {atest.device.split(' ')[0]}
-                  </p>
+                  <div className="mb-4 space-y-1">
+                    <p className="text-[9.5pt] text-gray-400 font-medium line-clamp-1 flex items-center gap-1.5">
+                      <ExternalLink className="w-3.5 h-3.5" />
+                      {atest.planName || 'Thuộc: Kế hoạch thí nghiệm định kỳ năm 2026'}
+                    </p>
+                  </div>
                   
-                  <div className="flex items-center justify-between text-[9pt] text-gray-400 font-bold uppercase">
-                    <div className="flex items-center gap-3">
+                  <div className="flex items-center justify-between text-[9pt] font-bold uppercase pt-3 border-t border-gray-50 mt-auto">
+                    <div className="flex items-center gap-3 text-gray-400">
                       <div className="flex items-center gap-1">
-                        <Clock className="w-3.5 h-3.5" />
-                        {atest.time.split(' ')[0]}
+                        <Calendar className="w-3.5 h-3.5" />
+                        {atest.signedDate || atest.time.split(' ')[0]}
                       </div>
                     </div>
-                    <span className="text-gray-300">CT: {atest.leader}</span>
+                    <span className="text-gray-500 font-black">Chủ trì: {atest.leader}</span>
                   </div>
                 </div>
               );
@@ -220,14 +230,14 @@ export const KetQuaThiNghiemScreen = ({
                   <div className="space-y-6 animate-in fade-in duration-300">
                     <div className="flex justify-between items-start">
                       <div>
-                        <p className="text-[9pt] font-black text-red-600 uppercase tracking-widest font-mono mb-1">Biên bản: BB-TN-00{test.id}</p>
-                        <h4 className="text-[15pt] font-black text-[#164399] leading-snug uppercase tracking-tight">{test.device}</h4>
+                        <p className="text-[9pt] font-black text-red-600 font-mono mb-1">Biên bản: BB-TN-00{test.id}</p>
+                        <h4 className="text-[15pt] font-black text-[#164399] leading-snug whitespace-normal break-words">{test.device}</h4>
                       </div>
                       <button 
                         onClick={() => setDetailForm({ type: 'test_report', mode: 'view', data: test })}
-                        className="px-4 py-2 bg-blue-50 text-blue-600 rounded-lg font-bold text-[10pt] hover:bg-blue-100 transition-all flex items-center gap-2 whitespace-nowrap shadow-sm border border-blue-100"
+                        className="px-6 py-2 bg-blue-50 text-[#164399] rounded-xl font-bold text-[10pt] hover:bg-blue-100 transition-all flex items-center gap-2 whitespace-nowrap border border-blue-100"
                       >
-                        <ExternalLink className="w-4 h-4" /> Xem chi tiết
+                        <Eye className="w-4 h-4" /> Xem
                       </button>
                     </div>
 
@@ -256,15 +266,15 @@ export const KetQuaThiNghiemScreen = ({
                         <div className={`text-[24pt] font-black uppercase ${test.result === 'Đạt' ? 'text-green-600' : 'text-red-500'}`}>
                           {test.result}
                         </div>
-                        <p className="text-[10pt] text-gray-400 font-medium italic">Ngày cập nhật: {test.time}</p>
+                        <p className="text-[10pt] text-gray-400 font-medium">Ngày cập nhật: {test.time}</p>
                       </div>
                     </div>
 
                     <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm">
-                      <p className="text-[9pt] font-black text-gray-400 uppercase mb-4">Thông tin kề hoạch liên kết</p>
+                      <p className="text-[10pt] font-black text-[#164399] mb-4">Thông tin kế hoạch liên kết</p>
                       <div className="space-y-4">
                         <div>
-                          <p className="text-[9pt] text-gray-400 font-bold uppercase mb-1">Thuộc Kế hoạch/Yêu cầu</p>
+                          <p className="text-[9pt] text-gray-400 font-bold mb-1">Thuộc Kế hoạch/Yêu cầu</p>
                           <div className="text-[12pt] font-bold text-[#164399] flex items-center gap-2">
                              <div className="w-1.5 h-1.5 bg-[#164399] rounded-full"></div>
                              {test.project}
@@ -272,12 +282,12 @@ export const KetQuaThiNghiemScreen = ({
                         </div>
                         <div className="grid grid-cols-2 gap-4">
                           <div>
-                            <p className="text-[9pt] text-gray-400 font-bold uppercase mb-1">Loại hình thí nghiệm</p>
+                            <p className="text-[9pt] text-gray-400 font-bold mb-1">Loại hình thí nghiệm</p>
                             <p className="text-[11pt] font-bold text-gray-700">{test.type}</p>
                           </div>
                           <div>
-                            <p className="text-[9pt] text-gray-400 font-bold uppercase mb-1">Điều kiện môi trường</p>
-                            <p className="text-[11pt] font-medium text-gray-600 italic">{test.condition}</p>
+                            <p className="text-[9pt] text-gray-400 font-bold mb-1">Điều kiện môi trường</p>
+                            <p className="text-[11pt] font-medium text-gray-600">{test.condition}</p>
                           </div>
                         </div>
                       </div>
@@ -354,21 +364,29 @@ export const KetQuaThiNghiemScreen = ({
                 )}
 
                 {testingDetailTab === 'attachments' && (
-                  <div className="space-y-6">
-                    <div className="grid grid-cols-4 gap-4">
-                      {test.images.map((img, i) => (
-                        <div key={i} className="aspect-square bg-gray-50 rounded-xl overflow-hidden border border-gray-100 group relative">
-                          <img src={img} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" referrerPolicy="no-referrer" onClick={() => setPreviewContent({ type: 'image', url: img, name: 'Ảnh hiện trường' })} alt="" />
-                          <div className="absolute inset-0 bg-black/10 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                  <div className="space-y-8 animate-in fade-in duration-300">
+                    <div className="space-y-4">
+                      <p className="text-[10pt] font-black text-gray-400 uppercase tracking-widest pl-1">Hình ảnh hiện trường ({test.images?.length || 0})</p>
+                      <div className="grid grid-cols-2 gap-4">
+                        {(test.images || []).map((img: string, i: number) => (
+                          <div key={i} className="aspect-[4/3] rounded-2xl overflow-hidden border border-gray-100 group relative shadow-sm hover:shadow-md transition-all">
+                             <img src={img} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" referrerPolicy="no-referrer" alt="" />
+                             <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center pointer-events-none">
+                                <div className="p-2 bg-white/20 backdrop-blur-md rounded-full border border-white/20 text-white">
+                                   <Eye className="w-4 h-4" />
+                                </div>
+                             </div>
+                          </div>
+                        ))}
+                        <div className="aspect-[4/3] border-2 border-dashed border-gray-200 rounded-2xl flex flex-col items-center justify-center text-gray-400 hover:bg-gray-50 hover:border-blue-200 transition-all cursor-pointer group">
+                           <Camera className="w-6 h-6 mb-1 text-gray-300 group-hover:text-blue-500 transition-colors" />
+                           <span className="text-[8pt] font-black uppercase tracking-widest group-hover:text-blue-600 transition-colors">Tải ảnh</span>
                         </div>
-                      ))}
-                      <div className="aspect-square border-2 border-dashed border-gray-100 rounded-xl flex flex-col items-center justify-center text-gray-400 hover:bg-gray-50 hover:border-blue-200 transition-all cursor-pointer">
-                        <Camera className="w-6 h-6 mb-1" />
-                        <span className="text-[8pt] font-black uppercase">Thêm ảnh</span>
                       </div>
                     </div>
+
                     <div className="space-y-3">
-                      <p className="text-[10pt] font-bold text-gray-400 uppercase tracking-tight pl-1">Hồ sơ pháp lý đính kèm</p>
+                      <p className="text-[10pt] font-black text-gray-400 uppercase tracking-widest pl-1">Hồ sơ pháp lý đính kèm</p>
                       {test.attachments.map((at, i) => (
                         <div key={i} className="flex items-center justify-between p-4 bg-gray-50 rounded-2xl border border-gray-100 group hover:border-blue-200 transition-all">
                           <div className="flex items-center gap-4">

@@ -72,9 +72,9 @@ export const getDeviceInstances = (rawPath: string[], type: string): string[] =>
     return Array.from(new Set(all));
   }
   
-  // Level 1 Instances (Root - Company level)
+  // Level 1 Instances (Root - Branches level)
   if (path.length === 0) {
-    if (type === "Đơn vị" || type === "Công ty" || type === "ĐV Con") return ["Công ty Điện lực Hưng Yên"];
+    if (type === "Đơn vị" || type === "Chi nhánh" || type === "Tất cả") return BRANCHES;
     if (type === "Công trình") return [
       "Công trình nâng công suất TBA 110kV Phố Nối",
       "Dự án đường dây 110kV đấu nối TBA 110kV Mỹ Hào 2",
@@ -84,7 +84,7 @@ export const getDeviceInstances = (rawPath: string[], type: string): string[] =>
     if (type === "Nhóm Trạm") return ["Nhóm trạm biến áp 110kV", "Nhóm trạm biến áp Trung gian", "Nhóm trạm biến áp Phụ tải"];
     if (type === "Nhóm DZ") return ["Đường dây 110kV", "Đường dây 35kV", "Đường dây 22kV"];
     if (type === "Kho") return ["Kho vật tư thiết bị trung tâm"];
-    return ["Công ty Điện lực Hưng Yên"];
+    return BRANCHES;
   }
 
   // Level 2 Instances
@@ -252,15 +252,12 @@ export const TYPE_ABBR: Record<string, string> = {
 
 export const getDeviceTreeChildren = (rawPath: string[]) => {
   const path = rawPath.filter((_, i) => i % 2 === 0);
-  if (path.length === 0) return ["Công ty Điện lực Hưng Yên"];
+  if (path.length === 0) return BRANCHES;
   
   const last = path[path.length - 1];
   
-  // Level 1: Branches
-  if (path.length === 1) return BRANCHES;
-  
   // Level 2: Stations/Lines
-  if (path.length === 2) {
+  if (path.length === 1) {
     return [
       "Trạm biến áp 110kV Khoái Châu",
       "Trạm biến áp 110kV Văn Lâm",
@@ -290,6 +287,26 @@ export const getDeviceTreeChildren = (rawPath: string[]) => {
 export const formatDevicePath = (path: string[]) => {
   if (!path || path.length === 0) return "";
   return path.filter((_, i) => i % 2 === 0).join(" > ");
+};
+
+export const capitalizeBusinessName = (str: string) => {
+  if (!str) return str;
+  // Preservation list for abbreviations that should remain capitalized
+  const preserves = ["MBA", "TBA", "DZ", "kV", "MC", "DCL", "TU", "TI", "CSV", "PC", "ETC", "EVN", "SF6", "T1", "T2", "E3.1", "E3.2", "E3.3", "E3.4", "E3.5", "E3.6", "110kV", "22kV", "35kV", "500kV", "220kV", "DC", "AC"];
+  
+  // Convert whole string to lowercase first
+  let lowercase = str.toLowerCase();
+  
+  // Capitalize first letter
+  let result = lowercase.charAt(0).toUpperCase() + lowercase.slice(1);
+  
+  // Re-capitalize abbreviations
+  preserves.forEach(abbr => {
+    const regex = new RegExp(`\\b${abbr}\\b`, 'gi');
+    result = result.replace(regex, abbr);
+  });
+  
+  return result;
 };
 
 export const getDeviceDetails = (deviceName: string) => {

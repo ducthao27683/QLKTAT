@@ -18,6 +18,7 @@ import { Dashboard } from '../shared/components/layout/Dashboard';
 import { FileUploader } from './FileUploader';
 import { TestingDialogs } from '../modules/thi-nghiem/components/TestingDialogs';
 import { TestingDetailView } from '../modules/thi-nghiem/components/TestingDetailView';
+import { ReportDetailView } from '../modules/thi-nghiem/components/ReportDetailView';
 import { BranchSelectionPopup } from '../shared/components/layout/BranchSelectionPopup';
 
 import { DesignTooltip } from './DesignTooltip';
@@ -55,8 +56,7 @@ interface PmisLuoiAppProps {
 const VOLTAGES = ["500kV", "220kV", "110kV", "<110kV"];
 
 const BRANCH_ABBR: Record<string, string> = {
-  "Công ty Điện lực Hưng Yên": "PC HUNG YEN",
-  "Điện lực thành phố Hưng Yên": "ĐL THANH PHO",
+  "Điện lực Thành phố Hưng Yên": "ĐL THANH PHO",
   "Điện lực thị xã Mỹ Hào": "ĐL MY HAO",
   "Điện lực huyện Văn Lâm": "ĐL VAN LAM",
   "Điện lực huyện Văn Giang": "ĐL VAN GIANG",
@@ -85,7 +85,7 @@ export const PmisLuoiApp = ({ config, onBack }: PmisLuoiAppProps) => {
   // Device Bar State
   const [devicePath, setDevicePath] = useState<string[]>(["Công ty Điện lực Hưng Yên"]);
   const [showDeviceTreePopup, setShowDeviceTreePopup] = useState(false);
-  const [tempDevicePath, setTempDevicePath] = useState<string[]>(["Công ty Điện lực Hưng Yên"]);
+  const [tempDevicePath, setTempDevicePath] = useState<string[]>(["Điện lực Thành phố Hưng Yên"]);
   const [activeBreadcrumbDropdown, setActiveBreadcrumbDropdown] = useState<string | null>(null);
   const [breadcrumbSearch, setBreadcrumbSearch] = useState('');
   const [deviceFavorites, setDeviceFavorites] = useState<string[][]>([]);
@@ -111,6 +111,14 @@ export const PmisLuoiApp = ({ config, onBack }: PmisLuoiAppProps) => {
   const [showRecordCreation, setShowRecordCreation] = useState(false);
   const [showDeviceParams, setShowDeviceParams] = useState<any>(null);
 
+  const lastInstance = useMemo(() => {
+    // Find the last instance name in the path (even indices)
+    for (let i = devicePath.length - 1; i >= 0; i--) {
+      if (i % 2 === 0 && devicePath[i]) return devicePath[i];
+    }
+    return "Đơn vị";
+  }, [devicePath]);
+
   // Incident Form States
   const [incidentSearch, setIncidentSearch] = useState('');
   const [incidentViewMode, setIncidentViewMode] = useState<'latest' | 'range'>('latest');
@@ -134,7 +142,7 @@ export const PmisLuoiApp = ({ config, onBack }: PmisLuoiAppProps) => {
     { id: '2', name: 'Biến dòng 171-A', type: 'Biến dòng' },
   ]);
   const [deviceSearchQuery, setDeviceSearchQuery] = useState('');
-  const [deviceFilterTypes, setDeviceFilterTypes] = useState<string[]>(['MBA', 'MC']);
+  const [deviceFilterTypes, setDeviceFilterTypes] = useState<string[]>(['']);
   const [showApprovalPopup, setShowApprovalPopup] = useState(false);
   const [approvalDecision, setApprovalDecision] = useState<'approve' | 'reject' | null>(null);
   const [approvalComment, setApprovalComment] = useState('');
@@ -176,18 +184,21 @@ export const PmisLuoiApp = ({ config, onBack }: PmisLuoiAppProps) => {
       if (mode === 'edit') return <><span className="text-gray-900">Cập nhật thiết bị:</span> <span className="text-[#164399]">{deviceName}</span></>;
     } else if (type === 'testing_plan') {
       const isReq = detailForm.data?.category === 'Yêu cầu' || (!detailForm.data?.category && activeSubMenu === 'Yêu cầu thí nghiệm');
-      const textSuffix = isReq ? 'Yêu cầu thí nghiệm' : 'Kế hoạch thí nghiệm';
       
-      if (mode === 'add') return <><span className="text-gray-900">Thêm mới</span> <span className="text-[#164399]">{textSuffix}</span></>;
-      if (mode === 'edit') return <><span className="text-gray-900">Cập nhật</span> <span className="text-[#164399]">{textSuffix}</span></>;
-      return <><span className="text-gray-900">Chi tiết</span> <span className="text-[#164399]">{textSuffix}</span></>;
+      if (mode === 'add') return <><span className="text-gray-900">Thêm mới</span> <span className="text-[#164399]">Yêu cầu / Kế hoạch thí nghiệm</span></>;
+      if (mode === 'edit') return <><span className="text-gray-900">Cập nhật</span> <span className="text-[#164399]">Yêu cầu / Kế hoạch thí nghiệm</span></>;
+      return <><span className="text-[#164399]">Chi tiết Yêu cầu / Kế hoạch thí nghiệm</span></>;
     } else if (type === 'testing_catalog') {
       const deviceName = detailForm.data?.device || 'Thiết bị mới';
       const label = mode === 'view' ? 'Chi tiết Danh mục:' : mode === 'add' ? 'Thiết lập Thiết bị mới:' : 'Cập nhật Danh mục:';
       return <><span className="text-gray-900">{label}</span> <span className="text-[#164399]">{deviceName}</span></>;
+    } else if (type === 'test_report') {
+      const deviceName = detailForm.data?.device || 'Thiết bị';
+      const label = mode === 'view' ? 'Chi tiết Biên bản:' : mode === 'add' ? 'Tạo mới Biên bản:' : 'Cập nhật Biên bản:';
+      return <><span className="text-gray-900">{label}</span> <span className="text-[#164399]">{deviceName}</span></>;
     } else {
       const label = mode === 'view' ? 'Chi tiết Sự cố của:' : mode === 'add' ? 'Thêm mới Sự cố của:' : 'Cập nhật Sự cố của:';
-      return <><span className="text-gray-900">{label}</span> <span className="text-[#164399]">{deviceName}</span></>;
+      return <><span className="text-gray-900">{label}</span> <span className="text-[#164399]">{lastInstance}</span></>;
     }
     return null;
   };
@@ -322,10 +333,8 @@ export const PmisLuoiApp = ({ config, onBack }: PmisLuoiAppProps) => {
             selectedBranch={selectedBranch}
             setSelectedBranch={(branch) => {
               setSelectedBranch(branch);
-              // Also update dashboardBranch to stay in sync if needed, 
-              // but user said choosing in dash shouldn't affect global. 
-              // Usually global should affect dash as a default/starting point.
-              setDashboardBranch(branch);
+              // Selecting branch in breadcrumb/location popup should NOT change dashboardBranch (Top Bar)
+              // Only changing top bar unit manually should change it if needed.
               setDevicePath([branch]);
             }}
           />
@@ -370,7 +379,7 @@ export const PmisLuoiApp = ({ config, onBack }: PmisLuoiAppProps) => {
                     <ArrowLeft className="w-5 h-5 text-gray-500" />
                   </button>
                   <div className="flex flex-col">
-                    <h2 className="text-[12pt] font-bold leading-tight">
+                    <h2 className="text-[12pt] font-bold leading-tight whitespace-normal break-words">
                       {getFormTitle()}
                     </h2>
                   </div>
@@ -450,6 +459,13 @@ export const PmisLuoiApp = ({ config, onBack }: PmisLuoiAppProps) => {
                     setShowDeviceSelection={setShowDeviceSelection}
                     setShowDeviceParams={setShowDeviceParams}
                     setConfirmAction={setConfirmAction}
+                  />
+                ) : detailForm.type === 'test_report' ? (
+                  <ReportDetailView 
+                    detailForm={detailForm}
+                    setDetailForm={setDetailForm}
+                    config={config}
+                    setPreviewContent={setPreviewContent}
                   />
                 ) : (
                   <>

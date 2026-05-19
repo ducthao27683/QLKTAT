@@ -12,9 +12,9 @@ const BRANCH_TREE = {
   name: "Tổng công ty Điện lực Miền Bắc",
   children: [
     {
-      name: "Công ty Điện lực Hưng Yên",
+      name: "Điện lực Thành phố Hưng Yên",
       children: [
-        { name: "Điện lực thành phố Hưng Yên" },
+        { name: "Điện lực Thành phố Hưng Yên" },
         { name: "Điện lực thị xã Mỹ Hào" },
         { name: "Điện lực huyện Văn Lâm" },
         { name: "Điện lực huyện Văn Giang" },

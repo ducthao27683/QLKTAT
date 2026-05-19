@@ -70,6 +70,14 @@ export const IncidentModule = ({
   setConfirmAction,
   selectedBranch
 }: IncidentModuleProps) => {
+  const lastInstance = React.useMemo(() => {
+    // Find the last instance name in the path (even indices)
+    for (let i = devicePath.length - 1; i >= 0; i--) {
+      if (i % 2 === 0 && devicePath[i]) return devicePath[i];
+    }
+    return "Đơn vị";
+  }, [devicePath]);
+
   const inc = MOCK_INCIDENTS.find(i => i.id === selectedIncidentId);
 
   return (
@@ -87,7 +95,7 @@ export const IncidentModule = ({
             <div className="flex flex-col">
               <h2 className="text-[12pt] font-semibold flex items-center gap-2 leading-[1.5]">
                 <span className="text-[#555555]">Sự cố</span>
-                <span className="font-bold text-[#164399] tracking-tight">- Danh sách sự cố của {devicePath[devicePath.length - 1] || 'Đơn vị'}</span>
+                <span className="font-bold text-[#164399] tracking-tight">- Danh sách sự cố của {lastInstance}</span>
               </h2>
             </div>
           </div>
@@ -204,15 +212,15 @@ export const IncidentModule = ({
                     {item.device}
                   </h3>
                   
-                  <p className="text-[10pt] text-gray-500 mb-3 line-clamp-2 italic leading-relaxed">
+                  <p className="text-[10pt] text-gray-500 mb-3 line-clamp-2 leading-relaxed">
                     {item.description}
                   </p>
                   
                   <div className="flex items-center justify-between text-[10pt]">
-                     <div className="flex items-center gap-1 text-purple-600 px-0 py-0 rounded-none border-none">
+                     <div className="flex items-center gap-1 text-gray-400 px-0 py-0 rounded-none border-none">
                         <AlertTriangle className="w-4 h-4" />
                         <span className="font-black">Nguyên nhân:</span> 
-                        <span className="font-semibold">{item.cause}</span>
+                        <span className="text-purple-600 font-normal">{item.cause}</span>
                      </div>
                   </div>
                 </div>
@@ -291,13 +299,13 @@ export const IncidentModule = ({
                           <DesignTooltip id="lbl_dien_bien">
                             <p className="text-[12pt] text-[#164399] mb-1 font-black uppercase tracking-tight">Diễn biến chi tiết</p>
                           </DesignTooltip>
-                          <p className="text-[12pt] text-gray-700 leading-relaxed font-medium">{inc.description}</p>
+                          <p className="text-[12pt] text-gray-700 leading-relaxed font-normal">{inc.description}</p>
                         </div>
                         <div className="pt-4 border-t border-gray-100 bg-transparent p-0 rounded-none">
                           <DesignTooltip id="lbl_nguyen_nhan">
                             <p className="text-[12pt] text-purple-600 mb-1 font-black uppercase tracking-tight">Nguyên nhân xác định</p>
                           </DesignTooltip>
-                          <p className="text-[12pt] text-purple-700 leading-relaxed font-bold italic">"{inc.cause}"</p>
+                          <p className="text-[12pt] text-purple-700 leading-relaxed font-normal">"{inc.cause}"</p>
                         </div>
                       </div>
                     </div>

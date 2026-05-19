@@ -38,7 +38,7 @@ export const SearchPopup: React.FC<SearchPopupProps> = ({
           >
           <input
             type="text"
-            className="flex-1 px-4 py-2 border border-gray-200 rounded-lg text-[12pt] font-medium focus:outline-none focus:border-[#164399]"
+            className="flex-1 px-4 py-2 border border-gray-200 rounded-lg text-[12pt] font-medium focus:outline-none focus:border-sky-400 focus:ring-1 focus:ring-sky-100"
             placeholder="Nhập từ khóa tìm kiếm (VD: 171, MBA...)"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}

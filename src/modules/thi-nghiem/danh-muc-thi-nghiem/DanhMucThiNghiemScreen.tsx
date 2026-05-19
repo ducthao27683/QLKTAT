@@ -1,6 +1,35 @@
 import React, { useState } from 'react';
-import { ArrowLeft, Plus, Filter, Search } from 'lucide-react';
+import { ArrowLeft, Plus, Filter, Search, Zap, Activity, Shield, Binary, GitCommit, Settings, Box, Database, Home, Network, Building2, Radio } from 'lucide-react';
 import { MOCK_TESTING_CATALOG } from '../constants';
+import { capitalizeBusinessName } from '../../../shared/utils';
+
+const normalizeType = (type: string) => {
+  const t = type?.toUpperCase();
+  if (t === 'TBA') return 'Trạm';
+  if (t === 'ĐD') return 'Đường dây';
+  if (t === 'MC') return 'Máy cắt';
+  if (t === 'MBA') return 'Máy biến áp';
+  if (t === 'TI' || t === 'BIẾN DÒNG') return 'Biến dòng';
+  if (t === 'TU' || t === 'BIẾN ĐIỆN ÁP') return 'Biến điện áp';
+  if (t === 'DCL') return 'Dao cách ly';
+  if (t === 'CSV') return 'Chống sét van';
+  return type;
+};
+
+const getTypeIcon = (type: string) => {
+  const normType = normalizeType(type);
+  switch (normType) {
+    case 'Trạm': return <Building2 className="w-4 h-4" />;
+    case 'Đường dây': return <Radio className="w-4 h-4" />;
+    case 'Máy cắt': return <Settings className="w-4 h-4" />;
+    case 'Máy biến áp': return <Box className="w-4 h-4" />;
+    case 'Biến dòng': return <Activity className="w-4 h-4" />;
+    case 'Biến điện áp': return <Activity className="w-4 h-4" />;
+    case 'Dao cách ly': return <Zap className="w-4 h-4" />;
+    case 'Chống sét van': return <Shield className="w-4 h-4" />;
+    default: return <Database className="w-4 h-4" />;
+  }
+};
 
 interface DanhMucThiNghiemScreenProps {
   setActiveSubMenu: (menu: string | null) => void;
@@ -55,7 +84,7 @@ export const DanhMucThiNghiemScreen = ({
             <div className="flex items-center gap-4">
               <div className="flex flex-col gap-1">
                 <label className="text-[9pt] font-bold text-gray-400 uppercase">Trạng thái</label>
-                <select className="px-4 py-2 bg-white border border-gray-200 rounded-[10px] text-[10pt] font-bold text-gray-700 focus:outline-none focus:border-blue-500 shadow-sm min-w-[150px] appearance-none">
+                <select className="px-4 py-2 bg-white border border-gray-200 rounded-[10px] text-[10pt] font-normal text-gray-700 focus:outline-none focus:border-sky-400 focus:ring-1 focus:ring-sky-100 shadow-sm min-w-[150px] appearance-none">
                   <option>Tất cả</option>
                   <option>Sắp đến hạn</option>
                   <option>Quá hạn</option>
@@ -71,7 +100,7 @@ export const DanhMucThiNghiemScreen = ({
                 <input 
                   type="text"
                   placeholder="Nhập tên thiết bị, mã nội bộ..."
-                  className="w-full pl-9 pr-4 py-2 bg-white border border-gray-200 rounded-[10px] text-[10pt] font-bold focus:outline-none focus:border-blue-500 transition-all shadow-sm"
+                  className="w-full pl-9 pr-4 py-2 bg-white border border-gray-200 rounded-[10px] text-[10pt] font-normal focus:outline-none focus:border-sky-400 focus:ring-1 focus:ring-sky-100 transition-all shadow-sm"
                 />
               </div>
             </div>
@@ -82,44 +111,59 @@ export const DanhMucThiNghiemScreen = ({
       <div className="flex-1 p-6 bg-gray-50/30 overflow-y-auto custom-scrollbar">
         <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden text-[12pt]">
           <table className="w-full text-left">
-            <thead className="bg-[#f8fafc] text-gray-500 font-bold uppercase tracking-widest text-[10pt] border-b border-gray-200">
+            <thead className="bg-[#f8fafc] text-gray-500 font-bold uppercase tracking-widest text-[9pt] border-b border-gray-200">
               <tr>
-                <th className="px-6 py-4">Tên thiết bị</th>
+                <th className="px-6 py-4">Thiết bị thí nghiệm</th>
                 <th className="px-6 py-4">Chu kỳ TN</th>
                 <th className="px-6 py-4">Lần TN cuối</th>
                 <th className="px-6 py-4">Hạn TN tiếp</th>
                 <th className="px-6 py-4 text-center">Trạng thái</th>
-                <th className="px-6 py-4 text-center">Ghi chú</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
-              {MOCK_TESTING_CATALOG.map((cat) => (
-                <tr 
-                  key={cat.id} 
-                  className="hover:bg-gray-50 transition-colors cursor-pointer"
-                  onClick={() => setDetailForm({ type: 'testing_catalog', mode: 'view', data: cat })}
-                >
-                  <td className="px-6 py-4 font-bold text-gray-800">{cat.device}</td>
-                  <td className="px-6 py-4 text-gray-500 font-bold">{cat.interval}</td>
-                  <td className="px-6 py-4 text-gray-400 font-bold">{cat.lastTest}</td>
-                  <td className="px-6 py-4 text-[#164399] font-black">{cat.nextDue}</td>
-                  <td className="px-6 py-4 text-center">
-                    <span className={`px-3 py-1 rounded-full text-[10pt] font-black uppercase ${
-                      cat.status === 'Quá hạn' ? 'bg-red-100 text-red-600' : 
-                      cat.status === 'Đến hạn' ? 'bg-orange-100 text-orange-600' :
-                      cat.status === 'Sắp đến hạn' ? 'bg-blue-100 text-blue-600' :
-                      'bg-green-100 text-green-600'
-                    }`}>
-                      {cat.status}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 text-center">
-                    <span className={`text-[10pt] font-bold ${cat.urgency === 'Rất cao' ? 'text-red-500' : cat.urgency === 'Cao' ? 'text-orange-500' : 'text-gray-400'}`}>
-                      Mức độ: {cat.urgency}
-                    </span>
-                  </td>
-                </tr>
-              ))}
+              {MOCK_TESTING_CATALOG.map((cat) => {
+                const isChild = !!(cat as any).parentId;
+                return (
+                  <tr 
+                    key={cat.id} 
+                    className={`hover:bg-gray-50 transition-colors cursor-pointer group ${isChild ? 'bg-gray-50/30' : ''}`}
+                    onClick={() => setDetailForm({ type: 'testing_catalog', mode: 'view', data: cat })}
+                  >
+                    <td className={`px-6 py-4 ${isChild ? 'pl-12 grayscale opacity-40' : ''}`}>
+                      <div className="flex items-center gap-2 mb-1.5 overflow-hidden">
+                        <div className="flex items-center gap-1.5">
+                          <span className={`font-mono font-bold text-[9pt] uppercase px-1.5 py-0.5 rounded shadow-sm ${isChild ? 'bg-gray-100 text-gray-400' : 'bg-red-50 text-red-600 border border-red-100'}`}>
+                            {cat.code || 'N/A'}
+                          </span>
+                          <div className={`flex items-center gap-1.5 px-2 py-0.5 rounded-full border transition-all ${isChild ? 'bg-gray-50 border-gray-100 text-gray-300' : 'bg-blue-50 border-blue-100 text-[#164399]'}`}>
+                            <span className={isChild ? 'opacity-30' : 'opacity-70'}>{getTypeIcon(cat.type)}</span>
+                            <span className="text-[8.5pt] font-black uppercase tracking-tighter">
+                              {normalizeType(cat.type)}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                      <p className={`font-black transition-colors whitespace-normal break-words leading-tight ${isChild ? 'text-gray-300 text-[11pt]' : 'text-gray-800 text-[12pt] group-hover:text-blue-600'}`}>{capitalizeBusinessName(cat.device)}</p>
+                      <p className={`text-[9pt] font-bold uppercase mt-1 tracking-widest ${isChild ? 'text-gray-200' : 'text-gray-400'}`}>{cat.location || 'N/A'}</p>
+                    </td>
+                    <td className={`px-6 py-4 font-normal text-[10pt] ${isChild ? 'text-gray-300' : 'text-gray-500'}`}>{cat.interval}</td>
+                    <td className={`px-6 py-4 font-normal text-[10pt] ${isChild ? 'text-gray-300' : 'text-gray-400'}`}>{cat.lastTest}</td>
+                    <td className={`px-6 py-4 font-normal text-[10pt] ${isChild ? 'text-blue-300' : 'text-[#164399]'}`}>{cat.nextDue}</td>
+                    <td className="px-6 py-4 text-center">
+                      <span className={`px-3 py-1 rounded-full text-[9pt] font-black uppercase ${
+                        isChild ? 'opacity-40 grayscale' : ''
+                      } ${
+                        cat.status === 'Quá hạn' ? 'bg-red-100 text-red-600' : 
+                        cat.status === 'Đến hạn' ? 'bg-orange-100 text-orange-600' :
+                        cat.status === 'Sắp đến hạn' ? 'bg-blue-100 text-blue-600' :
+                        'bg-green-100 text-green-600'
+                      }`}>
+                        {cat.status}
+                      </span>
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>

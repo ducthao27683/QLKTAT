@@ -11,6 +11,15 @@ export const MOCK_TESTING_PLANS = [
     endDate: '2026-05-30',
     creator: 'Nguyễn Kế Hoạch',
     approver: 'Phạm Duyệt Vốn',
+    workTypes: ['Thí nghiệm', 'Kiểm định'],
+    requestType: 'VTTB theo công trình',
+    location: 'Trạm 110kV Phố Nối (E3.1)',
+    contactPerson: 'Nguyễn Văn A',
+    contactPhone: '0912345678',
+    unit: 'Điện lực Thành phố Hưng Yên',
+    department: 'Phòng Kỹ thuật',
+    cycle: 'Định kỳ 2 năm',
+    project: 'Công trình cải tạo trạm E3.1',
     description: 'Thực hiện thí nghiệm định kỳ cho toàn bộ thiết bị ngăn lộ 110kV và MBA T1 Phố Nối.',
     devices: [
       { id: 'MBA-T1', name: 'Máy biến áp T1', type: 'Máy biến áp', status: 'Đã xong', nextDue: '2026-05-15' },
@@ -90,14 +99,104 @@ export const MOCK_TESTING_PLANS = [
     devices: [
       { id: 'DH-172', name: 'Hệ thống đo lường 172', type: 'Thiết bị đo', status: 'Chưa thực hiện', nextDue: '2026-06-01' }
     ]
+  },
+  {
+    id: 5,
+    code: 'KH-TN-2026-008',
+    title: 'Kế hoạch Thí nghiệm định kỳ Trạm 110kV Khoái Châu (E3.1)',
+    type: 'Định kỳ',
+    category: 'Kế hoạch',
+    status: 'Mới lập',
+    createdDate: '2026-05-10',
+    startDate: '10/06',
+    endDate: '25/06',
+    creator: 'Trần Văn Kế',
+    approver: '-',
+    description: 'Bảo dưỡng và thí nghiệm định kỳ MBA T1 và các ngăn lộ 110kV.',
+    devices: [
+      { id: 'MBA-T1-E31', name: 'Máy biến áp T1', type: 'Máy biến áp', status: 'Chưa làm' },
+      { id: 'MC-131-E31', name: 'Máy cắt 131', type: 'Máy cắt', status: 'Chưa làm' }
+    ],
+    outage: { required: true, duration: '8 giờ' }
+  },
+  {
+    id: 6,
+    code: 'YC-TN-2026-012',
+    title: 'Yêu cầu Thí nghiệm đột xuất Máy cắt 171 Trạm 110kV Mỹ Hào (E3.2)',
+    type: 'Đột xuất',
+    category: 'Yêu cầu',
+    status: 'Đã duyệt',
+    createdDate: '2026-05-15',
+    startDate: '20/05',
+    endDate: '21/05',
+    creator: 'Lê Văn Yêu',
+    approver: 'Nguyễn Văn Duyệt',
+    description: 'Kiểm tra hành trình và điện trở tiếp xúc sau khi phát hiện tiếng kêu lạ khi thao tác.',
+    devices: [
+      { id: 'MC-171-E32', name: 'Máy cắt 171', type: 'Máy cắt', status: 'Sẵn sàng' }
+    ],
+    outage: { required: true, duration: '2 giờ' }
+  },
+  {
+    id: 7,
+    code: 'KH-TN-2026-009',
+    title: 'Kế hoạch Thí nghiệm định kỳ Trạm 110kV Kim Động (E3.3)',
+    type: 'Định kỳ',
+    category: 'Kế hoạch',
+    status: 'Đang thực hiện',
+    createdDate: '2026-05-01',
+    startDate: '15/05',
+    endDate: '20/05',
+    creator: 'Vũ Văn Định',
+    approver: 'Phạm Văn Duyệt',
+    description: 'Thí nghiệm định kỳ theo lịch năm 2026.',
+    devices: [
+      { id: 'TU-173-E33', name: 'Biến điện áp 173', type: 'Biến điện áp', status: 'Đang làm' }
+    ],
+    outage: { required: false },
+    requestType: 'Dụng cụ an toàn',
+    location: 'Kho Xí nghiệp Thí nghiệm',
+    contactPerson: 'Trần Văn B',
+    contactPhone: '0987654321',
+    unit: 'Xí nghiệp Thí nghiệm',
+    department: 'Tổ An toàn',
+    cycle: '6 tháng'
+  },
+  {
+    id: 9,
+    code: 'YC-TN-2026-015',
+    title: 'Yêu cầu Thí nghiệm trạm biến áp khách hàng Công ty May mặc Hưng Yên',
+    type: 'Theo yêu cầu',
+    category: 'Yêu cầu',
+    status: 'Đã tiếp nhận',
+    createdDate: '2026-05-18',
+    startDate: '20/05',
+    endDate: '21/05',
+    creator: 'Lê Văn Khách',
+    approver: 'Nguyễn Văn Duyệt',
+    workTypes: ['Thí nghiệm', 'Hiệu chuẩn'],
+    requestType: 'Yêu cầu khách hàng',
+    location: 'KCN Phố Nối A',
+    contactPerson: 'Phạm Văn C',
+    contactPhone: '0911223344',
+    unit: 'Công ty May mặc Hưng Yên',
+    department: 'Phòng Cơ điện',
+    description: 'Thử nghiệm định kỳ các thiết bị trạm biến áp 560kVA.',
+    devices: [
+      { id: 'MBA-KH-01', name: 'Máy biến áp 560kVA', type: 'Máy biến áp', status: 'Sẵn sàng' }
+    ],
+    outage: { required: true, duration: '4 giờ' }
   }
 ];
 
 export const MOCK_TESTING_CATALOG = [
-  { id: 1, device: 'Máy biến áp T1 - TBA Phố Nối', lastTest: '2024-05-15', nextDue: '2026-05-15', interval: '24 tháng', status: 'Đến hạn', urgency: 'Cao' },
-  { id: 2, device: 'Máy cắt 112 - TBA Khoái Châu', lastTest: '2023-06-01', nextDue: '2026-06-01', interval: '36 tháng', status: 'Sắp đến hạn', urgency: 'Trung bình' },
-  { id: 3, device: 'Chống sét van Lộ 173', lastTest: '2025-04-12', nextDue: '2026-04-12', interval: '12 tháng', status: 'Quá hạn', urgency: 'Rất cao' },
-  { id: 4, device: 'Máy biến áp T2 - TBA Gia Lâm', lastTest: '2024-08-20', nextDue: '2026-08-20', interval: '24 tháng', status: 'Bình thường', urgency: 'Thấp' }
+  { id: 1, device: 'Máy biến áp T1 - TBA Phố Nối', lastTest: '2024-05-15', nextDue: '2026-05-15', interval: '24 tháng', status: 'Đến hạn', urgency: 'Cao', code: 'PD-MBA-001', type: 'Trạm', location: 'Trạm 110kV Phố Nối' },
+  { id: 9, device: 'Máy cắt 171 - MBA T1', lastTest: '2024-05-15', nextDue: '2026-05-15', interval: '24 tháng', status: 'Đến hạn', urgency: 'Cao', code: 'PD-MC-171', type: 'Máy cắt', location: 'MBA T1', parentId: 1 },
+  { id: 10, device: 'Biến dòng 171 - MBA T1', lastTest: '2024-05-15', nextDue: '2026-05-15', interval: '24 tháng', status: 'Đến hạn', urgency: 'Cao', code: 'PD-TI-171', type: 'Biến dòng', location: 'MBA T1', parentId: 1 },
+  { id: 2, device: 'Đường dây 171 - Khoái Châu', lastTest: '2023-06-01', nextDue: '2026-06-01', interval: '36 tháng', status: 'Sắp đến hạn', urgency: 'Trung bình', code: 'PD-DD-171', type: 'Đường dây', location: 'Trạm 110kV Khoái Châu' },
+  { id: 3, device: 'Chống sét van Lộ 173', lastTest: '2025-04-12', nextDue: '2026-04-12', interval: '12 tháng', status: 'Quá hạn', urgency: 'Rất cao', code: 'PD-CSV-173', type: 'Chống sét van', location: 'Đường dây 173' },
+  { id: 4, device: 'Máy biến áp T2 - TBA Gia Lâm', lastTest: '2024-08-20', nextDue: '2026-08-20', interval: '24 tháng', status: 'Bình thường', urgency: 'Thấp', code: 'PD-MBA-T2', type: 'Trạm', location: 'Trạm 110kV Gia Lâm' },
+  { id: 5, device: 'Biến dòng 171-A Phố Nối', lastTest: '2025-01-10', nextDue: '2026-07-10', interval: '18 tháng', status: 'Bình thường', urgency: 'Thấp', code: 'PD-TI-171A', type: 'Biến dòng', location: 'Trạm 110kV Phố Nối' },
 ];
 
 export const MOCK_TESTING_DATA = [
@@ -105,67 +204,82 @@ export const MOCK_TESTING_DATA = [
     id: 1,
     time: '2026-05-15 08:00',
     device: 'Máy biến áp T1 - TBA 110kV Phố Nối',
-    type: 'Thí nghiệm định kỳ',
+    type: 'Định kỳ', // Changed from 'Thí nghiệm định kỳ' for cleaner display
+    sourceType: 'Kế hoạch', // New field
     status: 'Đã hoàn thành',
     team: 'Đội thí nghiệm 1 - TT Thí nghiệm điện',
     leader: 'Nguyễn Văn Kết',
     result: 'Đạt',
     project: 'Kế hoạch thí nghiệm định kỳ năm 2026',
+    planName: 'Kế hoạch thí nghiệm định kỳ Trạm 110kV Phố Nối - Quý II/2026', // Link to plan name
+    signedDate: '16/05/2026',
     condition: 'Thời tiết nắng ráo, nhiệt độ 30°C, độ ẩm 65%',
     items: [
       { name: 'Đo điện trở cách điện cuộn dây', unit: 'MΩ', value: '2500', limit: '> 2000', eval: 'Đạt' },
       { name: 'Đo tỷ số biến', unit: '%', value: '0.05', limit: '< 0.5', eval: 'Đạt' },
       { name: 'Đo điện trở một chiều', unit: 'mΩ', value: '12.5', limit: '< 13.0', eval: 'Đạt' },
-      { name: 'Thử nghiệm không tải', unit: 'A', value: '1.2', limit: '< 1.5', eval: 'Đạt' },
-      { name: 'Phân tích hàm lượng ẩm trong dầu', unit: 'ppm', value: '15', limit: '< 20', eval: 'Đạt' },
-      { name: 'Kiểm tra độ chọc thủng điện trường dầu', unit: 'kV', value: '55', limit: '> 50', eval: 'Đạt' },
-      { name: 'Thử nghiệm tăng cao điện áp tần số công nghiệp', unit: 'kV', value: 'OK', limit: '38kV/1p', eval: 'Đạt' }
     ],
-    images: ['https://picsum.photos/seed/test1/800/600', 'https://picsum.photos/seed/test2/800/600', 'https://picsum.photos/seed/test3/800/600', 'https://picsum.photos/seed/test4/800/600'],
-    attachments: [{ name: 'Bien_ban_thi_nghiem_T1_2026.pdf', size: '2.5 MB' }, { name: 'Giay_chung_nhan_hieu_chuan.pdf', size: '1.1 MB' }],
+    images: ['https://picsum.photos/seed/test1/800/600'],
+    attachments: [{ name: 'Bien_ban_thi_nghiem_T1_2026.pdf', size: '2.5 MB' }],
     signing: [
       { role: 'Trưởng nhóm TN', name: 'Nguyễn Văn Kết', time: '15/05/2026 16:30', status: 'Đã ký' },
       { role: 'Đội trưởng TN', name: 'Trần Văn Duyệt', time: '15/05/2026 17:15', status: 'Đã ký' },
-      { role: 'Phòng Kỹ thuật', name: 'Lê Văn Kiểm', time: '16/05/2026 08:45', status: 'Đã ký' },
-      { role: 'Lãnh đạo đơn vị', name: 'Phạm Thế Ký', time: '16/05/2026 10:20', status: 'Đã ký' }
     ]
   },
   {
-    id: 2,
-    time: '2026-05-20 09:30',
-    device: 'Đường dây 110kV 171 E3.1',
-    type: 'Thí nghiệm sau sự cố',
-    status: 'Đang thực hiện',
+    id: 4,
+    time: '2026-05-18 10:00',
+    device: 'Máy cắt 471 Khoái Châu',
+    type: 'Đột xuất',
+    sourceType: 'Yêu cầu',
+    status: 'Đã hoàn thành',
     team: 'Đội thí nghiệm 2 - TT Thí nghiệm điện',
-    leader: 'Lê Văn Đo',
+    leader: 'Phạm Văn Thành',
+    result: 'Đạt',
+    project: 'Yêu cầu xử lý nhiệt độ tiếp xúc cao',
+    planName: 'Yêu cầu thí nghiệm đột xuất Máy cắt 471',
+    signedDate: '19/05/2026',
+    items: [
+      { name: 'Đo điện trở tiếp xúc', unit: 'μΩ', value: '35', limit: '< 50', eval: 'Đạt' }
+    ],
+    images: [],
+    attachments: [],
+    signing: []
+  },
+  {
+    id: 5,
+    time: '2026-05-19 14:30',
+    device: 'Biến áp T2 - TBA 110kV Gia Lâm',
+    type: 'Phát sinh',
+    sourceType: 'Phát sinh',
+    status: 'Mới lập',
+    team: 'Đội kỹ thuật lưu động',
+    leader: 'Hoàng Minh Tâm',
     result: 'Chưa có',
-    project: 'Xử lý sự cố lộ 171 ngày 03/04',
-    condition: 'Thời tiết có mây, nhiệt độ 28°C',
+    project: 'Sự cố rò rỉ dầu qua gioăng cao su',
+    planName: 'Biên bản kiểm tra rò rỉ dầu T2',
+    signedDate: '-',
     items: [],
     images: [],
     attachments: [],
     signing: []
   },
   {
-    id: 3,
-    time: '2026-05-22 14:00',
-    device: 'Máy cắt 112 - TBA Khoái Châu',
-    type: 'Thí nghiệm định kỳ',
-    status: 'Chưa đạt',
-    team: 'Đội thí nghiệm 1 - TT Thí nghiệm điện',
-    leader: 'Trần Văn Chỉnh',
-    result: 'Không đạt',
+    id: 6,
+    time: '2026-05-20 08:30',
+    device: 'Dao cách ly 171-1 Phố Nối',
+    type: 'Định kỳ',
+    sourceType: 'Kế hoạch',
+    status: 'Đã hoàn thành',
+    team: 'Đội thí nghiệm 1',
+    leader: 'Nguyễn Văn Kết',
+    result: 'Đạt',
     project: 'Kế hoạch thí nghiệm định kỳ năm 2026',
-    condition: 'Nhiệt độ 32°C, độ ẩm 60%',
-    items: [
-      { name: 'Đo điện trở tiếp xúc', unit: 'μΩ', value: '85', limit: '< 50', eval: 'Không đạt' },
-      { name: 'Thời gian đóng/cắt', unit: 'ms', value: '45/38', limit: '<50 / <40', eval: 'Đạt' }
-    ],
-    images: ['https://picsum.photos/seed/test5/800/600'],
-    attachments: [{ name: 'BB_TN_MC112.pdf', size: '1.5 MB' }],
-    signing: [
-      { role: 'Trưởng nhóm TN', name: 'Trần Văn Chỉnh', time: '22/05/2026 16:00', status: 'Đã ký' },
-      { role: 'Phòng Kỹ thuật', name: 'Lê Văn Kiểm', time: '-', status: 'Từ chối duyệt' }
-    ]
+    planName: 'Kế hoạch thí nghiệm định kỳ Trạm 110kV Phố Nối - Quý II/2026',
+    signedDate: '21/05/2026',
+    items: [],
+    images: [],
+    attachments: [],
+    signing: []
   }
 ];

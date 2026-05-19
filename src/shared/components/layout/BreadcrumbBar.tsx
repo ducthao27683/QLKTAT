@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import { Search, ZoomIn, Network, Eye, AlertTriangle, Wrench, Activity, ChevronDown } from 'lucide-react';
 import { getDeviceInstances, getDeviceTypes, getDeviceTreeChildren, getDetailedType, BRANCH_ABBR, TYPE_ABBR } from '../../utils';
 
@@ -34,9 +34,20 @@ export const BreadcrumbBar = ({
   setActiveSubMenu
 }: BreadcrumbBarProps) => {
   const isLocked = detailForm !== null;
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
+        setActiveBreadcrumbDropdown(null);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [setActiveBreadcrumbDropdown]);
 
   return (
-    <div className={`flex items-center justify-between px-4 min-h-[48px] py-1 bg-white border-b border-gray-200 shrink-0 z-40 shadow-sm relative w-full ${(isEditing || isLocked) ? 'pointer-events-none opacity-50' : ''}`}>
+    <div ref={containerRef} className={`flex items-center justify-between px-4 min-h-[48px] py-1 bg-white border-b border-gray-200 shrink-0 z-40 shadow-sm relative w-full ${(isEditing || isLocked) ? 'pointer-events-none opacity-50' : ''}`}>
       <div className="flex items-center gap-1 flex-wrap flex-1">
           <button 
             className="p-1.5 hover:bg-blue-50 rounded text-blue-600 transition-colors shrink-0 mr-2"
@@ -72,7 +83,8 @@ export const BreadcrumbBar = ({
                 
                 let displayLabel = label;
                 if (i === 0) {
-                  displayLabel = BRANCH_ABBR[label] || label;
+                  // Cấp 1 là Đơn vị thì không lấy viết tắt nữa, lấy đầy đủ tên.
+                  displayLabel = label;
                 } else {
                   // Try to find if there is an abbreviation for this type too
                   // or just keep as is

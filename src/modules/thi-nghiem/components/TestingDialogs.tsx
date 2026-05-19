@@ -101,9 +101,9 @@ export const TestingDialogs = ({
                   <Plus className="w-5 h-5" />
                 </div>
                 <div>
-                  <h3 className="text-[14pt] font-black text-gray-800">Chọn thiết bị</h3>
-                  <p className="text-[10pt] text-gray-500 font-bold uppercase tracking-widest leading-none mt-1">
-                    Nhánh: {devicePath?.join(' / ') || ""}
+                  <h3 className="text-[14pt] font-black text-gray-800 whitespace-normal break-words">Chọn thiết bị</h3>
+                  <p className="text-[10pt] text-gray-500 font-bold uppercase tracking-widest leading-none mt-1 whitespace-normal break-words">
+                    Nhánh: {devicePath?.filter((p, i) => i % 2 === 0 && p && p.trim().toUpperCase() !== 'TẤT CẢ').join(' / ') || ""}
                   </p>
                 </div>
               </div>
@@ -112,100 +112,94 @@ export const TestingDialogs = ({
               </button>
             </div>
             
-            <div className="flex-1 flex overflow-hidden min-h-0">
-              {/* Left Column: Device Tree (Available) */}
-              <div className="w-[60%] flex flex-col border-r border-gray-100">
+            <div className="flex-1 flex overflow-hidden min-h-0 bg-white">
+              {/* Left Column: Device Selection Table */}
+              <div className="flex-1 flex flex-col border-r border-gray-100">
                 <div className="px-6 py-4 bg-gray-50 border-b border-gray-100 flex flex-col gap-3">
-                  <div className="flex gap-3">
-                     <div className="flex-1 relative">
-                       <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-                       <input 
-                         type="text" 
-                         placeholder="Tìm tên hoặc mã thiết bị..." 
-                         className="w-full pl-9 pr-4 py-2 bg-white border border-gray-200 rounded-[20px] focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-[10pt] outline-none transition-all font-bold"
-                         onChange={(e) => setDeviceSearchQuery(e.target.value)}
-                       />
-                     </div>
-                    <div className="flex bg-white border border-gray-200 rounded-[50px] p-1 shadow-sm shrink-0">
-                      <button 
-                        onClick={() => setDeviceTypeFilter('')}
-                        className={`px-4 py-1 rounded-[50px] text-[10pt] font-black transition-all ${deviceTypeFilter === '' ? 'bg-[#164399] text-white' : 'text-gray-400 hover:bg-gray-100'}`}
-                      >
-                        Tất cả
-                      </button>
-                      <button 
-                        onClick={() => setDeviceTypeFilter('Đến kỳ TN')}
-                        className={`px-4 py-1 rounded-[50px] text-[10pt] font-black transition-all ${deviceTypeFilter === 'Đến kỳ TN' ? 'bg-orange-500 text-white' : 'text-gray-400 hover:bg-gray-100'}`}
-                      >
-                        Đến kỳ TN
-                      </button>
+                  <div className="flex gap-4">
+                    <div className="flex-1">
+                      <label className="text-[9pt] font-black text-gray-400 uppercase tracking-widest block mb-1">Tìm kiếm thiết bị</label>
+                      <div className="relative">
+                        <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                        <input 
+                          type="text" 
+                          placeholder="Mã VTTB, tên thiết bị..." 
+                          className="w-full pl-9 pr-4 py-2 bg-white border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-[10pt] outline-none transition-all font-bold"
+                          onChange={(e) => setDeviceSearchQuery(e.target.value)}
+                        />
+                      </div>
                     </div>
-                     <select 
-                       className="px-3 py-2 bg-white border border-gray-200 rounded-[20px] text-[10pt] font-bold outline-none"
-                       onChange={(e) => {
-                         if (e.target.value !== 'FILTER_CYCLE') setDeviceTypeFilter(e.target.value);
-                       }}
-                     >
-                       <option value="">Loại thiết bị</option>
-                       <option>Máy cắt</option>
-                       <option>Dao cách ly</option>
-                       <option>Biến dòng</option>
-                       <option>Biến điện áp</option>
-                       <option>Chống sét van</option>
-                       <option>Máy biến áp</option>
-                     </select>
-                  </div>
-                  <div className="flex items-center gap-2 flex-wrap">
-                     <span className="text-[9pt] font-black text-gray-400 uppercase tracking-tighter shrink-0">Lọc vị trí:</span>
-                     <div className="relative">
-                       <select className="pl-3 pr-8 py-1.5 bg-blue-50 text-[#164399] border border-blue-200 rounded-[20px] text-[10pt] font-black transition-all appearance-none outline-none cursor-pointer focus:ring-1 focus:ring-blue-500">
-                         <option>{devicePath.join(' / ')} [Tất cả]</option>
-                         <option>{devicePath[devicePath.length - 1]} / Ngăn lộ 171</option>
-                         <option>{devicePath[devicePath.length - 1]} / Ngăn lộ 172</option>
-                         <option>{devicePath[devicePath.length - 1]} / Ngăn lộ 112</option>
-                       </select>
-                       <ChevronDown className="w-4 h-4 text-[#164399] absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
-                     </div>
+                    <div className="flex items-end bg-white border border-gray-200 rounded-[50px] p-1 shadow-sm shrink-0 h-[40px] mt-[20px]">
+                       <button 
+                         onClick={() => setDeviceTypeFilter('')}
+                         className={`px-4 py-1 h-full rounded-[50px] text-[10pt] font-black transition-all ${deviceTypeFilter === '' ? 'bg-[#164399] text-white' : 'text-gray-400 hover:bg-gray-100'}`}
+                       >
+                         Tất cả
+                       </button>
+                       <button 
+                         onClick={() => setDeviceTypeFilter('Đến kỳ TN')}
+                         className={`px-4 py-1 h-full rounded-[50px] text-[10pt] font-black transition-all ${deviceTypeFilter === 'Đến kỳ TN' ? 'bg-orange-500 text-white' : 'text-gray-400 hover:bg-gray-100'}`}
+                       >
+                         Đến kỳ TN
+                       </button>
+                    </div>
                   </div>
                 </div>
-                <div className="flex-1 overflow-y-auto p-4 custom-scrollbar">
-                  <div className="grid grid-cols-1 gap-2">
-                    {[
-                      { id: '1', name: 'Máy cắt 171', type: 'Máy cắt', path: 'Ngăn lộ 110kV 171', nextDue: '2026-05-20' },
-                      { id: '2', name: 'Biến dòng 171-A', type: 'Biến dòng', path: 'Ngăn lộ 110kV 171', nextDue: '2026-06-15' },
-                      { id: '3', name: 'Biến dòng 171-B', type: 'Biến dòng', path: 'Ngăn lộ 110kV 171', nextDue: '2026-06-15' },
-                      { id: '4', name: 'Biến dòng 171-C', type: 'Biến dòng', path: 'Ngăn lộ 110kV 171', nextDue: '2026-06-15' },
-                      { id: '5', name: 'Biến điện áp 171', type: 'Biến điện áp', path: 'Ngăn lộ 110kV 171', nextDue: '2026-05-10' },
-                      { id: '6', name: 'Dao cách ly 171-1', type: 'Dao cách ly', path: 'Ngăn lộ 110kV 171', nextDue: '2026-07-22' },
-                      { id: '7', name: 'Chống sét van 171', type: 'Chống sét van', path: 'Ngăn lộ 110kV 171', nextDue: '2026-04-12' },
-                      { id: '8', name: 'Máy cắt 172', type: 'Máy cắt', path: 'Ngăn lộ 110kV 172', nextDue: '2026-08-05' },
-                    ].filter(d => 
-                       !selectedPlanDevices.find(sd => sd.id === d.id) &&
-                       (deviceSearchQuery === '' || d.name.toLowerCase().includes(deviceSearchQuery.toLowerCase())) &&
-                       (deviceTypeFilter === '' || deviceTypeFilter === 'Đến kỳ TN' || d.type === deviceTypeFilter) &&
-                       (deviceTypeFilter !== 'Đến kỳ TN' || new Date(d.nextDue) <= new Date('2026-06-30'))
-                    ).map(dev => (
-                      <div 
-                        key={dev.id} 
-                        onClick={() => setSelectedPlanDevices([...selectedPlanDevices, dev])}
-                        className="p-3 rounded-xl border border-gray-50 hover:border-[#164399] hover:bg-blue-50/30 transition-all cursor-pointer group flex items-center justify-between"
-                      >
-                        <div className="flex items-center gap-3">
-                          <div className="w-5 h-5 rounded border-2 border-gray-200 flex items-center justify-center group-hover:border-[#164399]">
-                            <Plus className="w-3 h-3 text-[#164399] opacity-0 group-hover:opacity-100" />
-                          </div>
-                          <div className="flex-1">
-                            <p className="text-[11pt] font-black text-gray-700 group-hover:text-[#164399]">{dev.name}</p>
-                            <p className="text-[9pt] font-bold text-gray-400 uppercase tracking-tighter">{dev.type} • {dev.path}</p>
-                          </div>
-                        </div>
-                        <div className="text-right">
-                           <p className="text-[8pt] font-black text-gray-400 uppercase leading-none">Hạn TN kế tiếp</p>
-                           <p className={`text-[10pt] font-black ${new Date(dev.nextDue) < new Date() ? 'text-red-500' : 'text-blue-600'}`}>{dev.nextDue.split('-').reverse().join('/')}</p>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
+
+                <div className="flex-1 overflow-auto custom-scrollbar">
+                  <table className="w-full text-left border-collapse">
+                    <thead className="bg-[#164399] text-white text-[9pt] font-black uppercase sticky top-0 z-10">
+                      <tr>
+                        <th className="px-6 py-3 w-10 text-center">
+                          <input type="checkbox" className="rounded" />
+                        </th>
+                        <th className="px-4 py-3">Thông tin thiết bị (Mã | Loại | Tên)</th>
+                        <th className="px-4 py-3">Vị trí thực hiện</th>
+                        <th className="px-4 py-3 w-32 text-center">Hạn TN</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-100">
+                      {[
+                        { id: '1', code: 'PD-MBA-001', name: 'Máy biến áp T1', type: 'Máy biến áp', path: 'Trạm 110kV Phố Nối', nextDue: '2026-05-20' },
+                        { id: '2', code: 'PD-MC-171', name: 'Máy cắt 171', type: 'Máy cắt', path: 'Ngăn lộ 110kV 171', nextDue: '2026-06-15' },
+                        { id: '3', code: 'PD-TI-171A', name: 'Biến dòng 171-A', type: 'Biến dòng', path: 'Ngăn lộ 110kV 171', nextDue: '2026-06-15' },
+                        { id: '4', code: 'PD-TI-171B', name: 'Biến dòng 171-B', type: 'Biến dòng', path: 'Ngăn lộ 110kV 171', nextDue: '2026-06-15' },
+                        { id: '5', code: 'PD-TI-171C', name: 'Biến dòng 171-C', type: 'Biến dòng', path: 'Ngăn lộ 110kV 171', nextDue: '2026-06-15' },
+                        { id: '6', code: 'PD-TU-171', name: 'Biến điện áp 171', type: 'Biến điện áp', path: 'Ngăn lộ 110kV 171', nextDue: '2026-05-10' },
+                        { id: '7', code: 'PD-DCL-171-1', name: 'Dao cách ly 171-1', type: 'Dao cách ly', path: 'Ngăn lộ 110kV 171', nextDue: '2026-07-22' },
+                        { id: '8', code: 'PD-CSV-171', name: 'Chống sét van 171', type: 'Chống sét van', path: 'Ngăn lộ 110kV 171', nextDue: '2026-04-12' },
+                      ].filter(d => 
+                         !selectedPlanDevices.find(sd => sd.id === d.id) &&
+                         (deviceSearchQuery === '' || d.name.toLowerCase().includes(deviceSearchQuery.toLowerCase()) || d.code.toLowerCase().includes(deviceSearchQuery.toLowerCase())) &&
+                         (deviceTypeFilter === '' || deviceTypeFilter === 'Đến kỳ TN' || d.type === deviceTypeFilter) &&
+                         (deviceTypeFilter !== 'Đến kỳ TN' || new Date(d.nextDue) <= new Date('2026-06-30'))
+                      ).map(dev => (
+                        <tr 
+                          key={dev.id}
+                          className="hover:bg-blue-50/50 transition-colors cursor-pointer"
+                          onClick={() => setSelectedPlanDevices([...selectedPlanDevices, dev])}
+                        >
+                          <td className="px-6 py-4 text-center">
+                            <input type="checkbox" className="rounded" checked={false} onChange={() => {}} />
+                          </td>
+                          <td className="px-4 py-4">
+                             <div className="flex items-center gap-2 mb-1">
+                                <span className="text-[10pt] font-black text-red-600 font-mono italic">{dev.code}</span>
+                                <span className="text-gray-300">|</span>
+                                <span className="text-[10pt] font-normal text-gray-500 uppercase tracking-tighter">{dev.type}</span>
+                             </div>
+                             <p className="text-[11pt] font-bold text-gray-700">{dev.name}</p>
+                          </td>
+                          <td className="px-4 py-4">
+                            <p className="text-[9pt] text-gray-400 font-normal uppercase tracking-widest">{dev.path}</p>
+                          </td>
+                          <td className="px-4 py-4 text-[10pt] font-normal text-gray-500 text-center">
+                             {dev.nextDue.split('-').reverse().join('/')}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
                 </div>
               </div>
 
@@ -223,9 +217,13 @@ export const TestingDialogs = ({
                               <div className="w-8 h-8 rounded-lg bg-blue-50 text-[#164399] flex items-center justify-center">
                                  <Box className="w-4 h-4" />
                               </div>
-                              <div>
-                                 <p className="text-[11pt] font-black text-gray-700">{dev.name}</p>
-                                 <p className="text-[9pt] font-bold text-gray-400 uppercase leading-none">{dev.type}</p>
+                              <div className="flex flex-col">
+                                 <div className="flex items-center gap-2 mb-0.5">
+                                    <span className="text-[9pt] font-black text-red-600 font-mono italic">{dev.code}</span>
+                                    <span className="text-gray-300 text-[8pt]">|</span>
+                                    <span className="text-[9pt] text-gray-400 font-normal uppercase tracking-tighter">{dev.type}</span>
+                                 </div>
+                                 <p className="text-[11pt] font-bold text-gray-700 whitespace-normal break-words leading-tight">{dev.name}</p>
                               </div>
                            </div>
                            <button 
@@ -284,8 +282,8 @@ export const TestingDialogs = ({
                   <ClipboardList className="w-6 h-6" />
                 </div>
                 <div>
-                  <h3 className="text-[16pt] font-black text-gray-800">Lập biên bản thí nghiệm mới</h3>
-                  <p className="text-[10pt] text-gray-500 font-bold uppercase tracking-widest leading-none mt-1">Kế hoạch: {detailForm.data?.title}</p>
+                  <h3 className="text-[16pt] font-black text-gray-800 whitespace-normal break-words">Lập biên bản thí nghiệm mới</h3>
+                  <p className="text-[10pt] text-gray-500 font-bold uppercase tracking-widest leading-none mt-1 whitespace-normal break-words">Kế hoạch: {detailForm.data?.title}</p>
                 </div>
               </div>
               <button onClick={() => setShowRecordCreation(false)} className="p-2 hover:bg-gray-100 rounded-full transition-colors group">
@@ -301,7 +299,7 @@ export const TestingDialogs = ({
                     <div className="space-y-4">
                       <div className="space-y-1">
                         <label className="text-[9pt] font-bold text-gray-500 uppercase">Thiết bị thí nghiệm</label>
-                        <select className="w-full px-3 py-2 bg-white border border-gray-200 rounded-xl text-[11pt] font-bold text-gray-700 outline-none">
+                        <select className="w-full px-3 py-2 bg-white border border-gray-200 rounded-xl text-[11pt] font-normal text-gray-700 outline-none focus:border-sky-400 focus:ring-1 focus:ring-sky-100">
                            {detailForm.data?.devices?.map((dev: any) => (
                              <option key={dev.id} value={dev.id}>{dev.name}</option>
                            ))}
@@ -309,11 +307,11 @@ export const TestingDialogs = ({
                       </div>
                       <div className="space-y-1">
                         <label className="text-[9pt] font-bold text-gray-500 uppercase">Ngày thí nghiệm</label>
-                        <input type="date" className="w-full px-3 py-2 bg-white border border-gray-200 rounded-xl text-[11pt] font-bold text-gray-700 outline-none" defaultValue={new Date().toISOString().split('T')[0]} />
+                        <input type="date" className="w-full px-3 py-2 bg-white border border-gray-200 rounded-xl text-[11pt] font-normal text-gray-700 outline-none focus:border-sky-400 focus:ring-1 focus:ring-sky-100" defaultValue={new Date().toISOString().split('T')[0]} />
                       </div>
                       <div className="space-y-1">
                         <label className="text-[9pt] font-bold text-gray-500 uppercase">Người thí nghiệm chính</label>
-                        <input type="text" className="w-full px-3 py-2 bg-white border border-gray-200 rounded-xl text-[11pt] font-bold text-gray-700 outline-none" placeholder="Nhập tên..." />
+                        <input type="text" className="w-full px-3 py-2 bg-white border border-gray-200 rounded-xl text-[11pt] font-normal text-gray-700 outline-none focus:border-sky-400 focus:ring-1 focus:ring-sky-100" placeholder="Nhập tên..." />
                       </div>
                     </div>
                   </div>
@@ -383,7 +381,7 @@ export const TestingDialogs = ({
                 <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -translate-y-32 translate-x-32 blur-3xl"></div>
                 <div className="relative z-10 flex items-start justify-between">
                    <div className="space-y-1">
-                      <h3 className="text-[20pt] font-black leading-tight tracking-tight">{showDeviceParams.name}</h3>
+                      <h3 className="text-[20pt] font-black leading-tight tracking-tight whitespace-normal break-words">{showDeviceParams.name}</h3>
                       <div className="flex items-center gap-3">
                          <span className="px-3 py-1 bg-white/20 rounded-full text-[10pt] font-black uppercase tracking-widest">{showDeviceParams.type}</span>
                          <span className={`px-3 py-1 rounded-full text-[10pt] font-black uppercase tracking-widest ${showDeviceParams.status === 'Đã xong' ? 'bg-green-400 text-white' : 'bg-orange-400 text-white'}`}>
@@ -481,252 +479,6 @@ export const TestingDialogs = ({
                    Nhập liệu Thí nghiệm
                 </button>
              </div>
-          </div>
-        </div>
-      )}
-      {/* Test Report Form Dialog */}
-      {detailForm?.type === 'test_report' && (
-        <div className="fixed inset-0 z-[500] flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setDetailForm(null)}></div>
-          <div className="relative w-full max-w-6xl h-[95vh] bg-white rounded-3xl shadow-2xl flex flex-col overflow-hidden animate-in zoom-in-95 duration-300">
-            {/* Header */}
-            <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between bg-[#164399] text-white">
-               <div className="flex items-center gap-4">
-                  <div className="p-2.5 bg-white/10 rounded-xl">
-                     <ClipboardList className="w-6 h-6 text-white" />
-                  </div>
-                  <div>
-                    <h3 className="text-[13pt] font-black uppercase tracking-widest leading-none">
-                      {detailForm.mode === 'add' ? 'Lập biên bản thí nghiệm' : 
-                       detailForm.mode === 'edit' ? 'Cập nhật biên bản thí nghiệm' : 'Chi tiết biên bản thí nghiệm'}
-                    </h3>
-                    <p className="text-[9pt] text-white/60 font-bold uppercase mt-1 tracking-tighter">PMIS LƯỚI - QUẢN LÝ THÍ NGHIỆM ĐỊNH KỲ</p>
-                  </div>
-               </div>
-               <button onClick={() => setDetailForm(null)} className="p-2 hover:bg-white/10 rounded-full transition-colors">
-                 <X className="w-5 h-5 text-white/70" />
-               </button>
-            </div>
-            
-            {/* Body */}
-            <div className="flex-1 overflow-y-auto custom-scrollbar p-8 bg-gray-50/30">
-               <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                  {/* Left: General Info */}
-                  <div className="lg:col-span-2 space-y-6">
-                     <div className="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm space-y-6">
-                        <div className="flex items-center gap-3 border-b border-gray-50 pb-4 mb-2">
-                           <Info className="w-5 h-5 text-blue-600" />
-                           <h4 className="text-[11pt] font-black text-[#164399] uppercase tracking-widest">Thông tin chung</h4>
-                        </div>
-                        
-                        <div className="grid grid-cols-2 gap-6">
-                           <div className="space-y-1">
-                              <label className="text-[9pt] font-black text-gray-400 uppercase tracking-widest">Tên thiết bị / Đối tượng</label>
-                              <div className="relative">
-                                 <Database className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-                                 <input 
-                                   type="text" 
-                                   defaultValue={detailForm.data?.device}
-                                   disabled={detailForm.mode === 'view'}
-                                   className="w-full pl-9 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl outline-none font-bold text-[11pt] focus:border-blue-500 focus:bg-white transition-all disabled:opacity-75" 
-                                 />
-                              </div>
-                           </div>
-                           <div className="space-y-1">
-                              <label className="text-[9pt] font-black text-gray-400 uppercase tracking-widest">Loại hình thí nghiệm</label>
-                              <select 
-                                defaultValue={detailForm.data?.type || 'Định kỳ'}
-                                disabled={detailForm.mode === 'view'}
-                                className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl outline-none font-bold text-[11pt] focus:border-blue-500 focus:bg-white transition-all disabled:opacity-75"
-                              >
-                                 <option>Định kỳ</option>
-                                 <option>Sửa chữa</option>
-                                 <option>Mới lắp</option>
-                                 <option>Sau sự cố</option>
-                              </select>
-                           </div>
-                        </div>
-
-                        <div className="grid grid-cols-2 gap-6">
-                           <div className="space-y-1">
-                              <label className="text-[9pt] font-black text-gray-400 uppercase tracking-widest">Đội thực hiện</label>
-                              <input 
-                                type="text" 
-                                defaultValue={detailForm.data?.team || 'Đội thí nghiệm 1'}
-                                disabled={detailForm.mode === 'view'}
-                                className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl outline-none font-bold text-[11pt] focus:border-blue-500 focus:bg-white transition-all disabled:opacity-75" 
-                              />
-                           </div>
-                           <div className="space-y-1">
-                              <label className="text-[9pt] font-black text-gray-400 uppercase tracking-widest">Người chủ trì</label>
-                              <div className="relative">
-                                 <User className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-                                 <input 
-                                   type="text" 
-                                   defaultValue={detailForm.data?.leader}
-                                   disabled={detailForm.mode === 'view'}
-                                   className="w-full pl-9 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl outline-none font-bold text-[11pt] focus:border-blue-500 focus:bg-white transition-all disabled:opacity-75" 
-                                 />
-                              </div>
-                           </div>
-                        </div>
-
-                        <div className="space-y-1">
-                           <label className="text-[9pt] font-black text-gray-400 uppercase tracking-widest">Kết quả đánh giá chung</label>
-                           <div className="flex bg-gray-100 p-1 rounded-full w-full">
-                              <button 
-                                disabled={detailForm.mode === 'view'}
-                                className={`flex-1 py-3 rounded-full text-[12pt] font-black transition-all ${detailForm.data?.result === 'Đạt' || !detailForm.data?.result ? 'bg-white text-green-600 shadow-sm' : 'text-gray-400'}`}
-                              >
-                                ĐẠT
-                              </button>
-                              <button 
-                                disabled={detailForm.mode === 'view'}
-                                className={`flex-1 py-3 rounded-full text-[12pt] font-black transition-all ${detailForm.data?.result === 'Không đạt' ? 'bg-white text-red-600 shadow-sm' : 'text-gray-400'}`}
-                              >
-                                KHÔNG ĐẠT
-                              </button>
-                           </div>
-                        </div>
-                     </div>
-
-                     <div className="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm space-y-6">
-                        <div className="flex items-center justify-between border-b border-gray-50 pb-4 mb-2">
-                           <div className="flex items-center gap-3">
-                              <Activity className="w-5 h-5 text-blue-600" />
-                              <h4 className="text-[11pt] font-black text-[#164399] uppercase tracking-widest">Các hạng mục thí nghiệm</h4>
-                           </div>
-                           {detailForm.mode !== 'view' && (
-                             <button className="flex items-center gap-1.5 text-[10pt] font-bold text-blue-600 hover:bg-blue-50 px-3 py-1 rounded-full transition-colors">
-                               <Plus className="w-4 h-4" /> Thêm hạng mục
-                             </button>
-                           )}
-                        </div>
-                        
-                        <div className="overflow-hidden border border-gray-100 rounded-2xl">
-                           <table className="w-full text-left bg-white border-collapse">
-                              <thead className="bg-[#164399] text-white text-[9pt] font-bold uppercase tracking-widest">
-                                 <tr>
-                                    <th className="px-4 py-3">STT</th>
-                                    <th className="px-4 py-3">Hạng mục thí nghiệm</th>
-                                    <th className="px-4 py-3 text-center">ĐVT</th>
-                                    <th className="px-4 py-3 text-center">Trị số đo</th>
-                                    <th className="px-4 py-3 text-center">ĐG</th>
-                                    <th className="px-4 py-3 text-center w-20"></th>
-                                 </tr>
-                              </thead>
-                              <tbody className="divide-y divide-gray-100">
-                                 {(detailForm.data?.items || [
-                                    { name: 'Điện trở cách điện CA-V', unit: 'MΩ', value: '2500', eval: 'Đạt' },
-                                    { name: 'Tỷ số biến Phase A', unit: '-', value: '1.02', eval: 'Đạt' },
-                                    { name: 'Tỷ số biến Phase B', unit: '-', value: '1.01', eval: 'Đạt' },
-                                    { name: 'Tỷ số biến Phase C', unit: '-', value: '1.01', eval: 'Đạt' },
-                                 ]).map((it: any, i: number) => (
-                                    <tr key={i} className="hover:bg-blue-50/30 transition-colors">
-                                       <td className="px-4 py-3.5 text-gray-400 font-bold text-center">{i+1}</td>
-                                       <td className="px-4 py-3.5 font-bold text-gray-700 text-[11pt]">{it.name}</td>
-                                       <td className="px-4 py-3.5 text-center text-gray-400 font-bold">{it.unit}</td>
-                                       <td className="px-4 py-3.5 text-center">
-                                          <input 
-                                            type="text" 
-                                            defaultValue={it.value}
-                                            disabled={detailForm.mode === 'view'}
-                                            className="w-20 text-center px-1 py-1 border-b border-blue-200 focus:border-blue-600 outline-none text-blue-600 font-black bg-transparent disabled:border-transparent text-[12pt]" 
-                                          />
-                                       </td>
-                                       <td className="px-4 py-3.5 text-center">
-                                          <span className={`text-[9pt] font-black uppercase px-2 py-0.5 rounded ${it.eval === 'Đạt' ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'}`}>{it.eval}</span>
-                                       </td>
-                                       <td className="px-4 py-3.5 text-center">
-                                          {detailForm.mode !== 'view' && <button className="p-1.5 text-gray-400 hover:text-red-500 transition-colors"><Trash2 className="w-4 h-4" /></button>}
-                                       </td>
-                                    </tr>
-                                 ))}
-                              </tbody>
-                           </table>
-                        </div>
-                     </div>
-                  </div>
-
-                  {/* Right: Specifics & Signing */}
-                  <div className="space-y-6">
-                     <div className="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm space-y-6">
-                        <div className="flex items-center gap-3 border-b border-gray-50 pb-4 mb-2">
-                           <FileText className="w-5 h-5 text-blue-600" />
-                           <h4 className="text-[11pt] font-black text-[#164399] uppercase tracking-widest">Chi tiết biên bản</h4>
-                        </div>
-                        
-                        <div className="space-y-4">
-                           <div className="space-y-1">
-                              <label className="text-[9pt] font-black text-gray-400 uppercase tracking-widest">Thời gian thực hiện</label>
-                              <input 
-                                type="datetime-local" 
-                                defaultValue={detailForm.data?.time}
-                                disabled={detailForm.mode === 'view'}
-                                className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl outline-none font-bold text-[11pt] focus:border-blue-500 focus:bg-white transition-all disabled:opacity-75" 
-                              />
-                           </div>
-                           <div className="space-y-1">
-                              <label className="text-[9pt] font-black text-gray-400 uppercase tracking-widest">Điều kiện môi trường</label>
-                              <textarea 
-                                defaultValue={detailForm.data?.condition || 'Nhiệt độ 25°C, Độ ẩm 65%, Trời nắng ráo.'}
-                                disabled={detailForm.mode === 'view'}
-                                rows={2}
-                                className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl outline-none font-bold text-[11pt] focus:border-blue-500 focus:bg-white transition-all disabled:opacity-75" 
-                              />
-                           </div>
-                        </div>
-
-                        <div className="space-y-4 pt-2">
-                           <p className="text-[10pt] font-bold text-gray-400 uppercase tracking-tighter border-b border-gray-50 pb-2">Ký duyệt & Chứng thực</p>
-                           <div className="space-y-3">
-                              {(detailForm.data?.signing || [
-                                 { role: 'Người thí nghiệm', name: 'Nguyễn Văn A', status: 'Đã ký' },
-                                 { role: 'Người chủ trì', name: 'Lê Văn B', status: 'Chờ ký' },
-                                 { role: 'Lãnh đạo đơn vị', name: 'Trần Văn C', status: 'Chờ ký' },
-                              ]).map((s: any, i: number) => (
-                                 <div key={i} className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl border border-gray-100">
-                                    <div className="w-8 h-8 rounded-full bg-[#164399] text-white flex items-center justify-center font-black text-[10pt] italic shrink-0">{i+1}</div>
-                                    <div className="flex-1 min-w-0">
-                                       <p className="text-[8pt] font-black text-gray-400 uppercase tracking-widest truncate">{s.role}</p>
-                                       <p className="text-[11pt] font-bold text-gray-700 truncate">{s.name}</p>
-                                    </div>
-                                    <span className={`text-[8pt] font-black px-2 py-0.5 rounded whitespace-nowrap ${s.status === 'Đã ký' ? 'bg-green-100 text-green-600' : 'bg-orange-100 text-orange-600'}`}>{s.status}</span>
-                                 </div>
-                              ))}
-                           </div>
-                        </div>
-                     </div>
-
-                     <div className="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm space-y-4">
-                        <div className="flex items-center justify-between">
-                           <h4 className="text-[11pt] font-black text-[#164399] uppercase tracking-widest">Đính kèm</h4>
-                           {detailForm.mode !== 'view' && <button className="p-1.5 text-blue-600 hover:bg-blue-50 rounded-full transition-colors"><Plus className="w-4 h-4" /></button>}
-                        </div>
-                        <FileUploader 
-                          type="document"
-                          onFileSelect={() => {}}
-                          mode={detailForm.mode}
-                        />
-                     </div>
-                  </div>
-               </div>
-            </div>
-            
-            {/* Footer */}
-            <div className="px-8 py-5 border-t border-gray-100 bg-white flex justify-end gap-3 shrink-0">
-               <button 
-                 onClick={() => setDetailForm(null)}
-                 className="px-8 py-3 text-gray-500 font-bold rounded-xl hover:bg-gray-100 transition-all uppercase tracking-widest"
-               >
-                 Đóng
-               </button>
-               {detailForm.mode !== 'view' && (
-                 <button className="px-10 py-3 bg-[#164399] text-white font-black rounded-xl shadow-xl shadow-blue-100 hover:shadow-2xl hover:-translate-y-1 transition-all uppercase tracking-widest">
-                   Lưu biên bản
-                 </button>
-               )}
-            </div>
           </div>
         </div>
       )}
