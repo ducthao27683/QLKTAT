@@ -12,6 +12,7 @@ export type UserConfig = {
   fullName: string;
   department: string;
   avatarUrl: string;
+  role: 'Admin' | 'User' | 'Manager';
   mainModuleIds: string[];
   secondaryModuleIds: string[];
 };
@@ -33,6 +34,7 @@ export const INITIAL_USER_CONFIG: UserConfig = {
   username: 'hungyenpc\\chiennv',
   fullName: 'Nguyễn Văn Chiến',
   department: 'Phó phòng - Phòng Kỹ thuật An toàn',
+  role: 'Admin',
   avatarUrl: avatarImage,
   mainModuleIds: ['m1', 'm2', 'm3', 'm4'],
   secondaryModuleIds: ['m5', 'm6', 'm7', 'm8', 'm9', 'm10'],

@@ -1,0 +1,15 @@
+export const MOCK_NOTIFICATIONS = [
+  { id: 1, title: 'Cảnh báo quá tải MBA T2', desc: 'Nhiệt độ dầu MBA T2 tăng cao bất thường vượt ngưỡng 85 độ C, yêu cầu kiểm tra ngay hệ thống làm mát và giảm tải.', time: '10 phút trước', read: false, type: 'alert' },
+  { id: 2, title: 'Lịch cắt điện trạm E28.1', desc: 'Thông báo lịch cắt điện trạm E28.1 từ 08:00 đến 16:00 ngày 05/03/2026 để phục vụ công tác bảo dưỡng định kỳ thiết bị.', time: '1 giờ trước', read: false, type: 'info' },
+  { id: 3, title: 'Phê duyệt phiếu công tác số 1234', desc: 'Phiếu công tác số 1234 về việc thay thế sứ cách điện tại vị trí cột 25 đường dây 110kV đã được giám đốc phê duyệt.', time: '2 giờ trước', read: false, type: 'success' },
+  { id: 4, title: 'Báo cáo tháng 2 đã được duyệt', desc: 'Báo cáo tình hình vận hành lưới điện tháng 2/2026 đã được ban giám đốc phê duyệt và lưu trữ trên hệ thống.', time: '1 ngày trước', read: true, type: 'info' },
+  { id: 5, title: 'Cập nhật phần mềm PMIS Lưới v2.1', desc: 'Hệ thống PMIS Lưới sẽ được cập nhật lên phiên bản v2.1 vào lúc 22:00 ngày 10/03/2026 với nhiều tính năng mới.', time: '2 ngày trước', read: true, type: 'info' },
+  { id: 6, title: 'Hoàn thành sửa chữa ĐD 110kV', desc: 'Đội quản lý vận hành đã hoàn thành công tác sửa chữa, thay thế dây dẫn bị đứt tại khoảng cột 12-13 đường dây 110kV.', time: '3 ngày trước', read: true, type: 'success' },
+  { id: 7, title: 'Cảnh báo nhiệt độ cao tại TBA', desc: 'Hệ thống CBM ghi nhận nhiệt độ tại các điểm tiếp xúc dao cách ly ngăn lộ 171 tăng cao, cần lên kế hoạch xử lý.', time: '4 ngày trước', read: true, type: 'alert' },
+  { id: 8, title: 'Bàn giao ca trực thành công', desc: 'Ca trực sáng ngày 28/02/2026 đã bàn giao thành công cho ca chiều, tình hình vận hành lưới điện bình thường.', time: '5 ngày trước', read: true, type: 'success' },
+  { id: 9, title: 'Lịch kiểm tra định kỳ thiết bị', desc: 'Nhắc nhở lịch kiểm tra định kỳ các thiết bị đóng cắt tại trạm biến áp 110kV E28.2 vào tuần tới.', time: '6 ngày trước', read: true, type: 'info' },
+  { id: 10, title: 'Phát hiện bất thường tại nhánh rẽ', desc: 'Phát hiện hiện tượng phóng điện tại chuỗi sứ đỡ nhánh rẽ khu công nghiệp, cần cử nhân viên kiểm tra hiện trường.', time: '7 ngày trước', read: true, type: 'alert' },
+  { id: 11, title: 'Đã xử lý sự cố lộ 171', desc: 'Sự cố nhảy máy cắt lộ 171 do sét đánh đã được xử lý xong, khôi phục cấp điện cho toàn bộ phụ tải.', time: '8 ngày trước', read: true, type: 'success' },
+  { id: 12, title: 'Thông báo họp giao ban kỹ thuật', desc: 'Mời các trưởng phòng ban kỹ thuật tham dự cuộc họp giao ban định kỳ vào lúc 08:30 sáng thứ 2 tuần sau.', time: '9 ngày trước', read: true, type: 'info' },
+  { id: 13, title: 'Nghiệm thu công trình lưới điện', desc: 'Hoàn thành công tác nghiệm thu đóng điện dự án cải tạo, nâng cấp đường dây trung thế khu vực trung tâm thành phố.', time: '10 ngày trước', read: true, type: 'success' },
+];
