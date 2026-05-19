@@ -103,7 +103,7 @@ export const PmisLuoiApp = ({ config, onBack }: PmisLuoiAppProps) => {
   const [deviceFilterStatuses, setDeviceFilterStatuses] = useState<string[]>(['Đang vận hành']);
   const [deviceFormMenuOpen, setDeviceFormMenuOpen] = useState(false);
   const [childSearch, setChildSearch] = useState('');
-  const [deviceFormTab, setDeviceFormTab] = useState<'info' | 'tracking' | 'lifecycle'>('info');
+  const [deviceFormTab, setDeviceFormTab] = useState<'info' | 'tracking' | 'reports'>('info');
   const [deviceFormCurrentPage, setDeviceFormCurrentPage] = useState(1);
   const [collapsedSections, setCollapsedSections] = useState<Record<string, boolean>>({});
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
@@ -776,7 +776,6 @@ export const PmisLuoiApp = ({ config, onBack }: PmisLuoiAppProps) => {
                   setDetailForm={setDetailForm}
                   setPreviewContent={setPreviewContent}
                   setConfirmAction={setConfirmAction}
-                  getDeviceTreeChildren={getDeviceTreeChildren}
                   getDeviceDetails={getDeviceDetails}
                 />
               ) : (activeSubMenu === 'Yêu cầu thí nghiệm' || activeSubMenu === 'Kế hoạch thí nghiệm') ? (

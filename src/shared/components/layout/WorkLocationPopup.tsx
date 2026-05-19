@@ -137,55 +137,93 @@ export const WorkLocationPopup = ({
         </div>
         
         <div className="flex-1 flex overflow-x-auto p-4 gap-4 bg-gray-100 custom-scrollbar" onClick={() => { setShowDeviceHistory(false); setShowDeviceFavorites(false); }}>
-          {/* Column 1: Branch (Level 0) */}
+          {/* Cấp 1: Đơn vị/Nhóm */}
           <GroupedDeviceColumn 
             hideHeader={true}
-            hideTypeSelection={true}
-            hideSearch={true}
             typeOptions={getDeviceTypes([])}
-            selectedType="Đơn vị"
-            onSelectType={() => {}}
-            instanceOptions={getDeviceInstances([], "Đơn vị")}
+            selectedType={tempDevicePath[1] || "Tất cả"}
+            onSelectType={(opt) => {
+              const newPath = [...tempDevicePath];
+              newPath[1] = opt;
+              // Reset further levels
+              setTempDevicePath(newPath.slice(0, 2));
+            }}
+            instanceOptions={getDeviceInstances([], tempDevicePath[1] || "Tất cả")}
             selectedInstance={tempDevicePath[0]}
-            onSelectInstance={(opt) => setTempDevicePath([opt])}
+            onSelectInstance={(opt) => {
+              const newPath = [...tempDevicePath];
+              newPath[0] = opt;
+              if (newPath.length < 2) newPath[1] = "Tất cả";
+              setTempDevicePath(newPath.slice(0, 2));
+            }}
           />
 
-          {/* Column 2: Type & Instance (Level 1 & 2) */}
-          {tempDevicePath.length >= 1 && (
+          {/* Cấp 2: Công trình/Trạm/DZ */}
+          {tempDevicePath.length >= 2 && tempDevicePath[0] && (
             <GroupedDeviceColumn 
               hideHeader={true}
-              typeOptions={getDeviceTypes(tempDevicePath.slice(0, 1))}
-              selectedType={tempDevicePath[1]}
-              onSelectType={(opt) => setTempDevicePath([tempDevicePath[0], opt])}
-              instanceOptions={tempDevicePath[1] ? getDeviceInstances(tempDevicePath.slice(0, 1), tempDevicePath[1]) : undefined}
+              typeOptions={getDeviceTypes(tempDevicePath.slice(0, 2))}
+              selectedType={tempDevicePath[3] || "Tất cả"}
+              onSelectType={(opt) => {
+                const newPath = [...tempDevicePath.slice(0, 2)];
+                newPath[2] = tempDevicePath[2] || ""; // Keep instance if exists
+                newPath[3] = opt;
+                setTempDevicePath(newPath.slice(0, 4));
+              }}
+              instanceOptions={getDeviceInstances(tempDevicePath.slice(0, 2), tempDevicePath[3] || "Tất cả")}
               selectedInstance={tempDevicePath[2]}
-              onSelectInstance={(opt) => setTempDevicePath([tempDevicePath[0], tempDevicePath[1], opt])}
+              onSelectInstance={(opt) => {
+                const newPath = [...tempDevicePath.slice(0, 2)];
+                newPath[2] = opt;
+                newPath[3] = tempDevicePath[3] || "Tất cả";
+                setTempDevicePath(newPath.slice(0, 4));
+              }}
             />
           )}
 
-          {/* Column 3: SubType & SubInstance (Level 3 & 4) */}
-          {tempDevicePath.length >= 3 && (
+          {/* Cấp 3: Thành phần/Ngăn lộ */}
+          {tempDevicePath.length >= 4 && tempDevicePath[2] && (
             <GroupedDeviceColumn 
               hideHeader={true}
-              typeOptions={getDeviceTypes(tempDevicePath.slice(0, 3))}
-              selectedType={tempDevicePath[3]}
-              onSelectType={(opt) => setTempDevicePath([...tempDevicePath.slice(0, 3), opt])}
-              instanceOptions={tempDevicePath[3] ? getDeviceInstances(tempDevicePath.slice(0, 3), tempDevicePath[3]) : undefined}
+              typeOptions={getDeviceTypes(tempDevicePath.slice(0, 4))}
+              selectedType={tempDevicePath[5] || "Tất cả"}
+              onSelectType={(opt) => {
+                const newPath = [...tempDevicePath.slice(0, 4)];
+                newPath[4] = tempDevicePath[4] || "";
+                newPath[5] = opt;
+                setTempDevicePath(newPath.slice(0, 6));
+              }}
+              instanceOptions={getDeviceInstances(tempDevicePath.slice(0, 4), tempDevicePath[5] || "Tất cả")}
               selectedInstance={tempDevicePath[4]}
-              onSelectInstance={(opt) => setTempDevicePath([...tempDevicePath.slice(0, 3), tempDevicePath[3], opt])}
+              onSelectInstance={(opt) => {
+                const newPath = [...tempDevicePath.slice(0, 4)];
+                newPath[4] = opt;
+                newPath[5] = tempDevicePath[5] || "Tất cả";
+                setTempDevicePath(newPath.slice(0, 6));
+              }}
             />
           )}
 
-          {/* Column 4: Level 5 & 6 */}
-          {tempDevicePath.length >= 5 && (
+          {/* Cấp 4: Thiết bị chi tiết */}
+          {tempDevicePath.length >= 6 && tempDevicePath[4] && (
             <GroupedDeviceColumn 
               hideHeader={true}
-              typeOptions={getDeviceTypes(tempDevicePath.slice(0, 5))}
-              selectedType={tempDevicePath[5]}
-              onSelectType={(opt) => setTempDevicePath([...tempDevicePath.slice(0, 5), opt])}
-              instanceOptions={tempDevicePath[5] ? getDeviceInstances(tempDevicePath.slice(0, 5), tempDevicePath[5]) : undefined}
+              typeOptions={getDeviceTypes(tempDevicePath.slice(0, 6))}
+              selectedType={tempDevicePath[7] || "Tất cả"}
+              onSelectType={(opt) => {
+                const newPath = [...tempDevicePath.slice(0, 6)];
+                newPath[6] = tempDevicePath[6] || "";
+                newPath[7] = opt;
+                setTempDevicePath(newPath.slice(0, 8));
+              }}
+              instanceOptions={getDeviceInstances(tempDevicePath.slice(0, 6), tempDevicePath[7] || "Tất cả")}
               selectedInstance={tempDevicePath[6]}
-              onSelectInstance={(opt) => setTempDevicePath([...tempDevicePath.slice(0, 5), tempDevicePath[5], opt])}
+              onSelectInstance={(opt) => {
+                const newPath = [...tempDevicePath.slice(0, 6)];
+                newPath[6] = opt;
+                newPath[7] = tempDevicePath[7] || "Tất cả";
+                setTempDevicePath(newPath.slice(0, 8));
+              }}
             />
           )}
         </div>

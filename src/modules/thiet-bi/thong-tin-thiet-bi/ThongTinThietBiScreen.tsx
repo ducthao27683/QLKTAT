@@ -3,11 +3,11 @@ import {
   ArrowLeft, Search, Plus, ListChecks, MoreVertical, Edit, Move, Copy, Shield, Trash2, 
   FileText, Database, ChevronUp, ChevronDown, ChevronLeft, ChevronRight, Settings, 
   ExternalLink, Box, Camera, Upload, Download, Maximize2, Activity, Filter, X, Check, Flame, Layout,
-  ClipboardList, FlaskConical, Wrench, GitCommit, Zap
+  ClipboardList, FlaskConical, Wrench, GitCommit, Zap, Package, Layers, MapPin
 } from 'lucide-react';
 import { DesignTooltip } from '../../../components/DesignTooltip';
 import { EvnLogo } from '../../../components/EvnLogo';
-import { getDetailedType, formatNumber } from '../../../shared/utils';
+import { getDetailedType, formatNumber, getDeviceTypes, getDeviceInstances } from '../../../shared/utils';
 import { DEVICE_TYPE_COLORS } from '../constants';
 
 interface DeviceModuleProps {
@@ -25,7 +25,6 @@ interface DeviceModuleProps {
   setDetailForm: (form: any) => void;
   setPreviewContent: (content: any) => void;
   setConfirmAction: (action: any) => void;
-  getDeviceTreeChildren: (path: string[]) => string[];
   getDeviceDetails: (name: string) => any;
 }
 
@@ -44,7 +43,6 @@ export const DeviceModule = ({
   setDetailForm,
   setPreviewContent,
   setConfirmAction,
-  getDeviceTreeChildren,
   getDeviceDetails
 }: DeviceModuleProps) => {
   const currentDevice = devicePath[devicePath.length - 1] || "Thiết bị";
@@ -53,22 +51,22 @@ export const DeviceModule = ({
   const [showTypeSelector, setShowTypeSelector] = React.useState(false);
   const [deviceFilterStatuses, setDeviceFilterStatuses] = React.useState<string[]>(['Đang vận hành']);
 
-  const children = React.useMemo(() => {
-    if (devicePath.length === 1) {
-      // Khi ở cấp Công ty, hiện thẳng danh sách các đơn vị/thiết bị chi tiết
-      // Giả lập bằng cách lấy con của các danh mục chính
-      const categories = ["Trạm 110", "Đường dây 110", "Lưới điện trung gian"];
-      let allDetailedUnits: string[] = [];
-      categories.forEach(cat => {
-        const units = getDeviceTreeChildren([...devicePath, cat]);
-        allDetailedUnits = [...allDetailedUnits, ...units];
-      });
-      return allDetailedUnits;
+  const lastInstance = React.useMemo(() => {
+    // Find the last instance name in the path (even indices)
+    for (let i = devicePath.length - 1; i >= 0; i--) {
+      if (i % 2 === 0 && devicePath[i]) return devicePath[i];
     }
-    return getDeviceTreeChildren(devicePath);
-  }, [devicePath, getDeviceTreeChildren]);
+    return "Thiết bị";
+  }, [devicePath]);
 
-  const deviceTypesList = ['Máy biến áp', 'Máy cắt', 'Dao cách ly', 'Biến dòng', 'Biến điện áp', 'Trạm', 'Đường dây'];
+  const children = React.useMemo(() => {
+    // Get ALL child instances of the current path
+    return getDeviceInstances(devicePath, "Tất cả");
+  }, [devicePath]);
+
+  const deviceTypesList = React.useMemo(() => {
+    return getDeviceTypes(devicePath).filter(t => t !== "Tất cả");
+  }, [devicePath]);
 
   const filteredChildren = children.filter(c => {
     const matchesSearch = c.toLowerCase().includes(childSearch.toLowerCase());
@@ -90,7 +88,7 @@ export const DeviceModule = ({
   const startIndex = (deviceFormCurrentPage - 1) * itemsPerPage;
   const paginatedChildren = filteredChildren.slice(startIndex, startIndex + itemsPerPage);
 
-  const effectiveDevice = selectedChild || currentDevice;
+  const effectiveDevice = selectedChild || lastInstance;
   const details = getDeviceDetails(effectiveDevice);
   const [showDeviceFilter, setShowDeviceFilter] = React.useState(false);
 
@@ -107,10 +105,8 @@ export const DeviceModule = ({
   ];
 
   React.useEffect(() => {
-    if (paginatedChildren.length > 0 && !selectedChild) {
-      setSelectedChild(paginatedChildren[0]);
-    }
-  }, [paginatedChildren, selectedChild]);
+    setSelectedChild(null);
+  }, [devicePath]);
 
   return (
     <div className="bg-[#F8FAFC] flex flex-col h-full overflow-hidden">
@@ -130,7 +126,7 @@ export const DeviceModule = ({
             </button>
             <h2 className="text-[12pt] font-semibold flex items-center gap-2 leading-[1.5]">
                 <span className="text-[#555555]">Thiết bị</span>
-                <span className="font-bold text-[#164399]">- Danh sách {currentDevice}</span>
+                <span className="font-bold text-[#164399] tracking-tight">- Danh sách thiết bị của {lastInstance}</span>
             </h2>
           </div>
           
@@ -252,8 +248,8 @@ export const DeviceModule = ({
       <div className="flex-1 flex overflow-hidden">
         <div className="flex-1 flex bg-white overflow-hidden">
           {/* Left Column: Device Cards List */}
-          <div className="w-[45%] flex flex-col border-r border-gray-100 overflow-hidden p-6">
-            <div className="flex-1 overflow-y-auto custom-scrollbar pr-2 space-y-3">
+          <div className="w-[45%] flex flex-col border-r border-gray-100 overflow-hidden px-6 py-0">
+            <div className="flex-1 overflow-y-auto custom-scrollbar pr-2 space-y-3 pt-6 pb-6">
               {paginatedChildren.map((child, idx) => {
                 const type = getDetailedType(child);
                 const isSelected = selectedChild === child;
@@ -266,23 +262,24 @@ export const DeviceModule = ({
                   if (type.includes('Trạm')) return <Zap className={`w-6 h-6 ${iconColor}`} />;
                   if (type.includes('Đường dây')) return <Activity className={`w-6 h-6 ${iconColor}`} />;
                   if (type.includes('Kho')) return <Box className={`w-6 h-6 ${iconColor}`} />;
+                  if (type.includes('Vị trí')) return <MapPin className={`w-6 h-6 ${iconColor}`} />;
                   if (type.includes('Nút')) return <GitCommit className={`w-6 h-6 ${iconColor}`} />;
-                  if (type.includes('MBA')) return <Settings className={`w-6 h-6 ${iconColor}`} />;
                   if (type.includes('Ngăn lộ')) return <ListChecks className={`w-6 h-6 ${iconColor}`} />;
-                  if (type.includes('Hệ thống')) return <Layout className={`w-6 h-6 ${iconColor}`} />;
-                  return <Box className={`w-6 h-6 ${iconColor}`} />;
+                  if (type.includes('Máy biến áp')) return <Settings className={`w-6 h-6 ${iconColor}`} />;
+                  if (type.includes('Hệ thống')) return <Layers className={`w-6 h-6 ${iconColor}`} />;
+                  return <Package className={`w-6 h-6 ${iconColor}`} />;
                 };
                 
                 return (
                   <div 
                     key={idx}
                     onClick={() => setSelectedChild(child)}
-                    className={`relative group bg-white rounded-xl border transition-all duration-300 cursor-pointer ${isSelected ? 'bg-blue-100/30 border-blue-300 shadow-sm' : 'bg-white border-gray-100 hover:border-blue-100/60 shadow-sm'}`}
+                    className={`relative group rounded-xl border overflow-hidden transition-all duration-300 cursor-pointer ${isSelected ? 'bg-blue-50/50 border-blue-200 shadow-sm transform scale-[1.01]' : 'bg-white border-gray-100 hover:border-blue-100/60 shadow-sm'}`}
                   >
                     {isSelected && (
-                      <div className="absolute left-0 top-0 bottom-0 w-1 bg-red-600 rounded-l-xl"></div>
+                      <div className="absolute left-0 top-0 bottom-0 w-1 bg-red-600 z-20"></div>
                     )}
-                    <div className="p-4 flex gap-4">
+                    <div className="p-5 flex gap-4">
                       {/* Device Icon/Type Badge */}
                       <div className={`w-14 h-14 rounded-xl flex flex-col items-center justify-center shrink-0 border ${isSelected ? 'bg-white border-blue-200' : 'bg-gray-50 border-gray-100 group-hover:bg-blue-50 group-hover:border-blue-100'}`}>
                         {getDeviceIcon()}
@@ -312,26 +309,16 @@ export const DeviceModule = ({
                             </div>
                           </div>
                         </div>
-                        <h4 className={`text-[11pt] font-black mb-2 line-clamp-1 leading-tight transition-colors uppercase tracking-tight ${isSelected ? 'text-[#164399]' : 'text-[#164399] group-hover:text-blue-800'}`}>{child}</h4>
+                        <h4 className={`text-[12pt] font-black mb-2 line-clamp-1 leading-tight transition-colors uppercase tracking-tight ${isSelected ? 'text-[#164399]' : 'text-[#164399] group-hover:text-blue-800'}`}>{child}</h4>
                         <div className="flex items-center gap-2">
-                          <span className="text-[8.5pt] font-bold text-gray-400 uppercase">{type}</span>
+                          <span className="text-[7.5pt] font-bold text-gray-400 uppercase">{type}</span>
                           <div className="w-1 h-1 rounded-full bg-gray-300"></div>
-                          <span className="text-[8.5pt] font-black text-red-600 uppercase">{childCount} thiết bị con</span>
+                          <span className="text-[7.5pt] font-black text-black uppercase">{childCount} thiết bị con</span>
                           <div className="w-1 h-1 rounded-full bg-gray-300"></div>
-                          <span className="text-[8.5pt] font-bold text-green-600 uppercase">Đang vận hành</span>
+                          <span className="text-[7.5pt] font-bold text-green-600 uppercase">Đang vận hành</span>
                         </div>
                       </div>
                     </div>
-                    <button 
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setDevicePath(prev => [...prev, child]);
-                      }}
-                      className="absolute bottom-4 right-4 p-2 bg-blue-50 text-blue-600 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity hover:bg-blue-100 active:scale-95"
-                      title="Vào cấp con"
-                    >
-                      <ExternalLink className="w-3.5 h-3.5" />
-                    </button>
                   </div>
                 );
               })}
@@ -401,7 +388,7 @@ export const DeviceModule = ({
             ))}
           </div>
 
-          <div className="flex-1 overflow-y-auto custom-scrollbar p-8">
+          <div className="flex-1 overflow-y-auto custom-scrollbar p-6">
             {deviceFormTab === 'info' ? (
               <div className="space-y-10 animate-in fade-in duration-500">
                 <div className="flex items-start justify-between border-b border-gray-100 pb-6 mb-8">
@@ -418,15 +405,15 @@ export const DeviceModule = ({
                 </div>
 
                 <div className="space-y-8">
-                    <div className="space-y-4">
-                      <h4 className="text-[11pt] font-bold text-gray-400 uppercase tracking-widest flex items-center gap-2">
-                        <Settings className="w-3.5 h-3.5" /> Đặc tính kỹ thuật
+                    <div className="space-y-4 p-7 bg-[#F1F5F9] rounded-2xl border border-gray-200 shadow-inner">
+                      <h4 className="text-[11pt] font-black text-[#64748B] uppercase tracking-widest flex items-center gap-2">
+                        <Settings className="w-4 h-4" /> Đặc tính kỹ thuật
                       </h4>
-                      <div className="grid grid-cols-2 gap-x-8 gap-y-0">
+                      <div className="grid grid-cols-2 gap-x-10 gap-y-1">
                          {details.specs.filter((s:any) => s.label !== 'Mã thiết bị' && s.label !== 'Tên thiết bị' && s.label !== 'Vị trí').map((spec: any, i: number) => (
-                           <div key={i} className="flex items-center justify-between py-3 border-b border-gray-50 hover:bg-gray-50/50 transition-colors group px-0">
-                              <span className="text-[10pt] font-bold text-gray-400 uppercase tracking-tight">{spec.label}</span>
-                              <span className="text-[11pt] font-black text-gray-800">{spec.value}</span>
+                           <div key={i} className="flex items-center justify-between py-3 border-b border-gray-300/40 hover:bg-white/40 transition-colors group px-0">
+                              <span className="text-[10pt] font-black text-[#475569] uppercase tracking-tight">{spec.label}</span>
+                              <span className="text-[11pt] font-black text-[#164399] tracking-tight">{spec.value}</span>
                            </div>
                          ))}
                       </div>
@@ -485,12 +472,12 @@ export const DeviceModule = ({
                   const trackingData = details.tracking.filter((s:any) => s.id !== 'lich-su');
                   return trackingData.map((section: any, i: number) => {
                     const typeStyles: Record<string, { color: string, bg: string, icon: any }> = {
-                      'su-co': { color: 'text-red-600', bg: 'bg-red-50/50', icon: <Flame className="w-5 h-5 text-red-600" /> },
-                      'thi-nghiem': { color: 'text-pink-600', bg: 'bg-pink-50/50', icon: <FlaskConical className="w-5 h-5 text-pink-600" /> },
-                      'thong-so': { color: 'text-blue-600', bg: 'bg-blue-50/50', icon: <Activity className="w-5 h-5 text-blue-600" /> },
-                      'cong-viec': { color: 'text-green-600', bg: 'bg-green-50/50', icon: <ClipboardList className="w-5 h-5 text-green-600" /> },
-                      'sua-chua': { color: 'text-purple-600', bg: 'bg-purple-50/50', icon: <Wrench className="w-5 h-5 text-purple-600" /> },
-                      'default': { color: 'text-[#164399]', bg: 'bg-gray-50/50', icon: <Activity className="w-5 h-5 text-[#164399]" /> }
+                      'su-co': { color: 'text-red-700', bg: 'bg-red-50/30', icon: <Flame className="w-5 h-5 text-red-600" /> },
+                      'thi-nghiem': { color: 'text-pink-700', bg: 'bg-pink-50/30', icon: <FlaskConical className="w-5 h-5 text-pink-600" /> },
+                      'thong-so': { color: 'text-sky-700', bg: 'bg-sky-50/30', icon: <Activity className="w-5 h-5 text-sky-600" /> },
+                      'cong-viec': { color: 'text-green-700', bg: 'bg-green-50/30', icon: <ClipboardList className="w-5 h-5 text-green-600" /> },
+                      'sua-chua': { color: 'text-purple-700', bg: 'bg-purple-50/30', icon: <Wrench className="w-5 h-5 text-purple-600" /> },
+                      'default': { color: 'text-[#164399]', bg: 'bg-gray-50/30', icon: <Activity className="w-5 h-5 text-[#164399]" /> }
                     };
 
                     const style = typeStyles[section.id as string] || typeStyles.default;

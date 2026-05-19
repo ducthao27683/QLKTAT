@@ -58,10 +58,9 @@ export const BreadcrumbBar = ({
                 if (!label) continue;
                 
                 let options: string[] = [];
-                // If it's the first item (Unit), use branches
-                // Otherwise, get siblings for this branch level
+                // Level 1 options should show all top level entities
                 if (i === 0) {
-                  options = getDeviceInstances([], "Đơn vị");
+                  options = getDeviceInstances([], "Tất cả");
                 } else {
                   // Get parent path and type to find siblings (same level instances)
                   const parentPath = devicePath.slice(0, i - 1);
@@ -74,12 +73,13 @@ export const BreadcrumbBar = ({
                 let displayLabel = label;
                 if (i === 0) {
                   displayLabel = BRANCH_ABBR[label] || label;
+                } else {
+                  // Try to find if there is an abbreviation for this type too
+                  // or just keep as is
                 }
                 
-                const truncatedLabel = displayLabel.length > 40 ? displayLabel.substring(0, 37) + "..." : displayLabel;
-                
                 items.push({
-                  label: truncatedLabel,
+                  label: displayLabel,
                   fullLabel: label,
                   icon: null,
                   dropdownOptions: options,
@@ -98,21 +98,21 @@ export const BreadcrumbBar = ({
               return items.map((item, idx) => (
                 <React.Fragment key={idx}>
                   {idx > 0 && (
-                    <div className="flex items-center gap-1 mx-1">
+                    <div className="flex items-center gap-1 mx-1 shrink-0">
                       <span className="text-gray-300 font-light">/</span>
                     </div>
                   )}
-                  <div className="relative group">
+                  <div className="relative group shrink min-w-0 max-w-[200px] lg:max-w-[300px]">
                     <button 
-                      className={`px-2 py-1 hover:bg-blue-50 hover:text-blue-600 rounded transition-colors flex items-center gap-1.5 whitespace-nowrap ${activeBreadcrumbDropdown === item.dropdownId ? 'bg-blue-50 text-blue-600' : 'text-gray-700 font-bold'}`}
+                      className={`px-2 py-1 hover:bg-blue-50 hover:text-blue-600 rounded transition-colors flex items-center gap-1.5 w-full ${activeBreadcrumbDropdown === item.dropdownId ? 'bg-blue-50 text-blue-600' : 'text-gray-700 font-bold'}`}
                       title={item.fullLabel}
                       onClick={() => {
                         setActiveBreadcrumbDropdown(activeBreadcrumbDropdown === item.dropdownId ? null : item.dropdownId);
                         setBreadcrumbSearch('');
                       }}
                     >
-                      <span>{item.label}</span>
-                      <ChevronDown className={`w-3 h-3 transition-transform duration-200 ${activeBreadcrumbDropdown === item.dropdownId ? 'rotate-180' : ''}`} />
+                      <span className="truncate text-left">{item.label}</span>
+                      <ChevronDown className={`w-3 h-3 shrink-0 transition-transform duration-200 ${activeBreadcrumbDropdown === item.dropdownId ? 'rotate-180' : ''}`} />
                     </button>
                     {activeBreadcrumbDropdown === item.dropdownId && (
                       <div className="absolute top-full left-0 mt-1 w-72 bg-white border border-gray-200 rounded-lg shadow-xl z-50 py-2 overflow-hidden flex flex-col max-h-80">

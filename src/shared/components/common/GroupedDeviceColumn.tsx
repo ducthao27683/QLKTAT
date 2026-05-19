@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Search } from 'lucide-react';
+import { Search, ChevronDown } from 'lucide-react';
 import { getTypeIcon } from '../../utils';
 
 interface GroupedDeviceColumnProps {
@@ -41,38 +41,33 @@ export const GroupedDeviceColumn = ({
   }, [selectedInstance]);
 
   return (
-    <div className="w-72 bg-white border border-gray-200 rounded-lg flex flex-col shrink-0 shadow-sm overflow-hidden h-full">
-      {!hideHeader && headerLabel && (
-        <div className="p-2 border-b border-gray-200 bg-gray-50 font-bold text-secondary text-gray-700 text-center shrink-0 uppercase tracking-wider">
-          {headerLabel}
-        </div>
-      )}
-
+    <div className="w-80 bg-white border border-gray-200 rounded-xl flex flex-col shrink-0 shadow-sm overflow-hidden h-full">
       <div className="sticky top-0 z-10 bg-white shadow-sm">
         {!hideTypeSelection && (
-          <div className="p-2 border-b border-gray-200 bg-gray-50 flex flex-wrap gap-1">
-            {typeOptions.map(opt => (
-              <button
-                key={opt}
-                className={`px-2 py-1.5 text-[10pt] rounded-md transition-all flex-1 text-center whitespace-nowrap flex items-center justify-center gap-1.5 ${selectedType === opt ? 'bg-[#ECF3FE] text-[#555555] border border-transparent' : 'text-gray-600 border border-transparent hover:border-gray-300'}`}
-                onClick={() => onSelectType(opt)}
-                title={opt}
+          <div className="p-3 border-b border-gray-200 bg-[#F8FAFC]">
+            <div className="relative">
+              <ChevronDown className="w-4 h-4 absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+              <select 
+                className="w-full pl-3 pr-10 py-2.5 text-[11pt] font-black text-[#164399] bg-white border border-gray-200 rounded-lg appearance-none focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all cursor-pointer uppercase tracking-tight"
+                value={selectedType}
+                onChange={(e) => onSelectType(e.target.value)}
               >
-                {getTypeIcon(opt, "w-3.5 h-3.5")}
-                <span className="truncate">{opt}</span>
-              </button>
-            ))}
+                {typeOptions.map(opt => (
+                  <option key={opt} value={opt}>{opt}</option>
+                ))}
+              </select>
+            </div>
           </div>
         )}
         
         {!hideSearch && selectedType && instanceOptions && (
-          <div className="p-2 border-b border-gray-100 bg-white">
+          <div className="p-3 border-b border-gray-100 bg-white">
             <div className="relative">
-              <Search className="w-4 h-4 absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400" />
+              <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
               <input 
                 type="text" 
-                placeholder={`Tìm ${selectedType.toLowerCase()}...`} 
-                className="w-full pl-8 pr-3 py-1.5 text-secondary border border-gray-200 rounded-md focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-shadow bg-gray-50 focus:bg-white"
+                placeholder={`Tìm nhanh...`} 
+                className="w-full pl-9 pr-3 py-2 text-[11pt] border border-gray-200 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-shadow bg-gray-50 focus:bg-white"
                 value={search}
                 onChange={e => setSearch(e.target.value)}
                 onKeyDown={(e) => {

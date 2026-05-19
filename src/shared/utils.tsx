@@ -1,5 +1,5 @@
 import React from 'react';
-import { Zap, Home, Package, MapPin, Circle, Server, Battery, Layers } from 'lucide-react';
+import { Zap, Home, Package, MapPin, Circle, Server, Battery, Layers, Activity, Box, GitCommit, ListChecks, Settings } from 'lucide-react';
 import { BRANCHES } from './constants';
 import { VOLTAGES, MOCK_CONG_TRINH, MOCK_DUONG_DAY, MOCK_TRAM, MOCK_VI_TRI, MOCK_NHANH_RE, MOCK_THIET_BI } from '../modules/thiet-bi/constants';
 import { REPORTS_5100, REPORTS_QT } from '../modules/bao-cao/constants';
@@ -11,110 +11,141 @@ export const getDetailedType = (name: string) => {
   if (name.includes('Trạm biến áp 110kV')) return 'Trạm 110';
   if (name.includes('Trạm biến áp 220kV')) return 'Trạm 220';
   if (name.includes('Trạm biến áp 500kV')) return 'Trạm 500';
-  if (name.includes('Trạm biến áp phụ') || name.includes('Trạm biến áp trung gian')) return 'Trạm';
+  if (name.includes('Trạm biến áp phụ') || name.includes('Trạm biến áp trung gian') || name.includes('Trạm')) return 'Trạm';
   if (name.includes('Kho')) return 'Kho';
-  if (name.includes('Vị trí cột')) return 'Móng cột';
+  if (name.includes('Vị trí cột')) return 'Vị trí';
   if (name.includes('Nút')) return 'Nút';
   if (name.includes('Ngăn lộ')) return 'Ngăn lộ';
-  if (name.includes('Máy biến áp') || name.includes('MBA')) return 'MBA';
-  if (name.includes('Máy cắt') || name.includes('MC')) return 'MC';
+  if (name.includes('Hệ thống')) return 'Hệ thống';
+  if (name.includes('Máy biến áp') || name.includes('MBA')) return 'Máy biến áp';
+  if (name.includes('Máy cắt') || name.includes('MC')) return 'Máy cắt';
   if (name.includes('Tụ')) return 'Tụ điện';
-  if (name.includes('Sứ')) return 'Sứ';
-  if (name.includes('Xà')) return 'Xà';
-  if (name.includes('Dây dẫn')) return 'Dây dẫn';
+  if (name.includes('Biến dòng') || name.includes('TI')) return 'Biến dòng';
+  if (name.includes('Biến điện áp') || name.includes('TU')) return 'Biến điện áp';
   return 'Thiết bị';
 };
 
 export const getTypeIcon = (type: string, className = "w-4 h-4") => {
   const t = type.toLowerCase();
-  if (t.includes('đường dây')) return <Zap className={className} />;
-  if (t.includes('trạm')) return <Home className={className} />;
-  if (t.includes('kho')) return <Package className={className} />;
+  if (t.includes('đường dây')) return <Activity className={className} />;
+  if (t.includes('trạm')) return <Zap className={className} />;
+  if (t.includes('kho')) return <Box className={className} />;
   if (t.includes('vị trí') || t.includes('móng')) return <MapPin className={className} />;
-  if (t.includes('nút')) return <Circle className={className} />;
-  if (t.includes('ngăn lộ')) return <Server className={className} />;
-  if (t.includes('máy biến áp') || t.includes('mba')) return <Battery className={className} />;
-  return <Layers className={className} />;
+  if (t.includes('nút')) return <GitCommit className={className} />;
+  if (t.includes('ngăn lộ')) return <ListChecks className={className} />;
+  if (t.includes('máy biến áp') || t.includes('mba')) return <Settings className={className} />;
+  return <Circle className={className} />;
 };
 
-export const getDeviceTypes = (path: string[]) => {
-  if (path.length === 0) return ["Đơn vị"];
-  if (path.length === 1) return ["Đường dây", "Trạm", "Kho"];
+export const getDeviceTypes = (rawPath: string[]) => {
+  const path = rawPath.filter((_, i) => i % 2 === 0);
   
-  if (path.length === 3) {
-    const type = path[1];
-    if (type === "Đường dây") return ["Vị trí", "Nút", "Trạm"];
-    if (type === "Trạm") return ["Ngăn lộ", "Máy biến áp", "Hệ thống"];
-    if (type === "Kho") return ["Thiết bị"];
+  if (path.length === 0) {
+    return ["Tất cả", "ĐV Con", "Công trình", "Nhóm Trạm", "Nhóm DZ", "Kho"];
   }
   
-  if (path.length === 5) {
-    return ["Thiết bị"];
+  if (path.length === 1) {
+    const p1Type = rawPath[1];
+    if (p1Type === "Kho") return ["Tất cả", "Kho TB mới", "Kho thu hồi"];
+    return ["Tất cả", "Công trình", "Trạm", "Đường dây", "Nút"];
+  }
+  
+  if (path.length === 2) {
+    return ["Tất cả", "Ngăn lộ", "Máy biến áp", "Vị trí", "Nút", "Nhánh rẽ", "Hệ thống", "Thiết bị"];
+  }
+  
+  if (path.length === 3) {
+    return ["Tất cả", "Thiết bị chính", "Phụ kiện", "Hệ thống điều khiển"];
+  }
+
+  return ["Tất cả"];
+};
+
+export const getDeviceInstances = (rawPath: string[], type: string): string[] => {
+  const path = rawPath.filter((_, i) => i % 2 === 0);
+  const lastInstance = path[path.length - 1] || "";
+
+  // Helper to aggregate ALL instances if type is "Tất cả"
+  if (type === "Tất cả") {
+    const types = getDeviceTypes(rawPath).filter(t => t !== "Tất cả");
+    const all = types.flatMap(t => getDeviceInstances(rawPath, t));
+    return Array.from(new Set(all));
+  }
+  
+  // Level 1 Instances (Root - Company level)
+  if (path.length === 0) {
+    if (type === "Đơn vị" || type === "Công ty" || type === "ĐV Con") return ["Công ty Điện lực Hưng Yên"];
+    if (type === "Công trình") return [
+      "Công trình nâng công suất TBA 110kV Phố Nối",
+      "Dự án đường dây 110kV đấu nối TBA 110kV Mỹ Hào 2",
+      "Dự án cải tạo lưới điện trung áp khu vực Văn Lâm",
+      "Công trình lắp MBA T2 TBA 110kV Khoái Châu"
+    ];
+    if (type === "Nhóm Trạm") return ["Nhóm trạm biến áp 110kV", "Nhóm trạm biến áp Trung gian", "Nhóm trạm biến áp Phụ tải"];
+    if (type === "Nhóm DZ") return ["Đường dây 110kV", "Đường dây 35kV", "Đường dây 22kV"];
+    if (type === "Kho") return ["Kho vật tư thiết bị trung tâm"];
+    return ["Công ty Điện lực Hưng Yên"];
+  }
+
+  // Level 2 Instances
+  if (path.length === 1) {
+    if (type === "ĐV Con" || type === "Chi nhánh") return BRANCHES;
+    if (type === "Trạm") return [
+      "TBA 110kV Khoái Châu (E3.1)", "TBA 110kV Mỹ Hào (E3.2)", "TBA 110kV Kim Động (E3.3)",
+      "TBA 110kV Văn Lâm (E3.4)", "TBA 110kV Phố Nối (E3.5)", "TBA 110kV Giai Phạm (E3.6)"
+    ];
+    if (type === "Đường dây") return [
+      "ĐD 110kV 171 E3.1 - 173 E3.2", "ĐD 110kV 172 E3.1 - 174 E3.4",
+      "ĐD 110kV 111 E3.1 - 112 E3.5", "ĐD 35kV 371-372 E3.4", "ĐD 22kV 471-472 E3.2"
+    ];
+    if (type === "Kho TB mới") return ["Kho thiết bị vật tư 110kV Phố Nối", "Kho dự phòng Kim Động"];
+    if (type === "Kho thu hồi") return ["Kho vật tư thu hồi Văn Lâm", "Kho thu hồi trung tâm"];
+    if (type === "Công trình") return [
+      "Dự án xuất tuyến 110kV sau TBA 220kV Kim Động",
+      "Công trình cải tạo ĐD 110kV 171 E3.1",
+      "Lắp đặt hệ thống PCCC TBA 110kV Mỹ Hào"
+    ];
+    if (type === "Nút") return ["Nút giao QL5", "Nút rẽ KCN Yên Mỹ", "Nút phân đoạn Văn Giang"];
+    return [];
+  }
+
+  // Level 3 Instances
+  if (path.length === 2) {
+    if (lastInstance.includes("TBA") || lastInstance.includes("Trạm")) {
+      if (type === "Ngăn lộ") return ["Ngăn lộ 171", "Ngăn lộ 172", "Ngăn lộ 110", "Ngăn lộ MBA T1", "Ngăn lộ MBA T2", "Ngăn lộ tụ 110kV", "Ngăn lộ liên lạc"];
+      if (type === "Máy biến áp") return ["Số máy MBA T1 - 63MVA", "Số máy MBA T2 - 63MVA", "Số máy MBA T3 - 40MVA"];
+      if (type === "Hệ thống") return ["Tủ AC phân phối", "Tủ DC 220V", "Giàn ắc quy kiềm", "Hệ thống RTU/Gateway", "Tủ bảo vệ 171"];
+      if (type === "Thiết bị") return ["Hệ thống Camera trạm", "Hệ thống PCCC tự động", "Bản đồ nhất thứ", "Tủ trung gian thiết bị"];
+    }
+    if (lastInstance.includes("ĐD") || lastInstance.includes("Đường dây") || lastInstance.includes("kV")) {
+      if (type === "Vị trí") return Array.from({length: 15}, (_, i) => `Vị trí cột số ${i + 101} - Cột néo góc`);
+      if (type === "Nhánh rẽ") return ["Nhánh rẽ Trạm trung gian Văn Lâm", "Nhánh rẽ Khách hàng Hòa Phát", "Nhánh rẽ chuyển tiếp"];
+      if (type === "Nút") return ["Nút giao chéo vượt sông", "Nút rẽ nhánh số 45", "Điểm đấu nối NR Hòa Phát"];
+      if (type === "Thiết bị") return ["Chống sét van ĐD số 1", "Chống sét van ĐD số 2", "Bộ thu thập dữ liệu sự cố"];
+    }
+    return [];
+  }
+
+  // Level 4 Instances
+  if (path.length === 3) {
+    if (lastInstance.includes("Ngăn lộ")) {
+      if (type === "Thiết bị chính") return ["Máy cắt SF6 - 110kV", "Dao cách ly - 110kV", "Bộ biến dòng TI pha A", "Bộ biến dòng TI pha B", "Bộ biến dòng TI pha C", "Bộ biến điện áp TU"];
+      if (type === "Phụ kiện") return ["Sứ đứng cách điện", "Thanh cái nhôm", "Kẹp cực thiết bị", "Hộp đầu cáp"];
+      if (type === "Hệ thống điều khiển") return ["Rơ le bảo vệ so lệch", "Rơ le khoảng cách", "Bộ điều khiển mức dầu", "Tủ điều khiển tại chỗ"];
+    }
+    if (lastInstance.includes("MBA")) {
+      if (type === "Thiết bị chính") return ["Cuộn dây cao thế", "Cuộn dây hạ thế", "Bộ điều áp OLTC", "Sứ xuyên 110kV", "Sứ xuyên 35kV"];
+      if (type === "Phụ kiện") return ["Bình dầu phụ MBA", "Rơ le hơi Buchholz", "Rơ le dòng dầu", "Hệ thống quạt làm mát T1", "Bộ lọc dầu thông minh"];
+    }
+    if (lastInstance.includes("Vị trí cột")) {
+      if (type === "Thiết bị chính") return ["Móng bê tông cốt thép", "Thân cột thép hình mạ kẽm", "Xà néo 110kV", "Xà đỡ dây OPGW"];
+      if (type === "Phụ kiện") return ["Chuỗi sứ Silicon POLYMER", "Kẹp ép căng dây", "Tạ chống rung", "Tạ bù trọng lượng", "Tiếp địa cột"];
+    }
+    // Specific devices if not matched above
+    return ["Thiết bị đo lường đa năng", "Bộ chỉ thị sự cố", "Công tơ tổng"];
   }
 
   return [];
-};
-
-export const getDeviceInstances = (path: string[], type: string) => {
-  if (type === "Đơn vị") return ["Công ty Điện lực Hưng Yên", ...BRANCHES];
-  
-  const lastInstance = path[path.length - 1] || "";
-  
-  if (type === "Đường dây") {
-    return [
-      "Đường dây 110kV 171 E3.1 - 173 E3.2",
-      "Đường dây 110kV 172 E3.1 - 174 E3.4",
-      "Đường dây 110kV 173 E3.5 - 175 E3.6",
-      "Đường dây 110kV 174 E3.7 - 176 E3.8",
-      "Đường dây 110kV 111 E3.1",
-      "Đường dây 110kV 112 E3.1",
-      ...Array.from({length: 20}, (_, i) => `Đường dây 110kV ${i + 171} E${i + 3}.1`)
-    ];
-  }
-  
-  if (type === "Trạm") {
-    if (lastInstance.includes("Đường dây")) {
-      return Array.from({length: 5}, (_, i) => `Trạm biến áp trung gian ${i + 1} trên ${lastInstance}`);
-    }
-    return [
-      "Trạm biến áp 110kV Khoái Châu",
-      "Trạm biến áp 110kV Văn Lâm",
-      "Trạm biến áp 110kV Kim Động",
-      "Trạm biến áp 110kV Phù Cừ",
-      "Trạm biến áp 110kV Tiên Lữ",
-      "Trạm biến áp 110kV Mỹ Hào",
-      "Trạm biến áp 110kV Phố Nối",
-      "Trạm biến áp 110kV Giai Phạm",
-      ...Array.from({length: 20}, (_, i) => `Trạm biến áp 110kV ${i + 1}`)
-    ];
-  }
-  
-  if (type === "Kho") return ["Kho vật tư trung tâm", "Kho thiết bị dự phòng", "Kho vật tư B", "Kho vật tư C", "Kho thiết bị A"];
-  
-  if (type === "Nút") return Array.from({length: 10}, (_, i) => `Nút vị trí ${i + 1} trên ${lastInstance}`);
-  if (type === "Vị trí") return Array.from({length: 25}, (_, i) => `Vị trí cột số ${i + 100} - ${lastInstance}`);
-  
-  if (type === "Ngăn lộ") return [
-    "Ngăn lộ 110kV 171",
-    "Ngăn lộ 110kV 172",
-    "Ngăn lộ 110kV 112",
-    "Ngăn lộ 110kV 113",
-    "Ngăn lộ MBA T1",
-    "Ngăn lộ MBA T2",
-    ...Array.from({length: 15}, (_, i) => `Ngăn lộ 110kV ${i + 111}`)
-  ];
-  if (type === "Máy biến áp") return [
-    "Máy biến áp T1 - 63MVA",
-    "Máy biến áp T2 - 63MVA",
-    "Máy biến áp T3 - 40MVA",
-    "Máy biến áp T1 - 25MVA",
-    ...Array.from({length: 4}, (_, i) => `Máy biến áp T${i + 1}`)
-  ];
-  if (type === "Hệ thống") return ["Dàn tụ bù 110kV", "Hệ thống tự dùng", "Tủ điều khiển", "Hệ thống SCADA"];
-  
-  if (type === "Thiết bị") return ["Sứ", "Cầu chì", "Thanh cái", "Móng", "Cột", "Xà", "Tụ", "Máy biến áp dự phòng 63MVA", "Máy cắt 110kV ABB", "Sứ cách điện chuỗi 110kV", "Tụ điện cao thế"];
-  
-  return Array.from({length: 4}, (_, i) => `${type} ${i + 1}`);
 };
 
 export const getNextOptions = (rawPath: string[]) => {
@@ -219,47 +250,41 @@ export const TYPE_ABBR: Record<string, string> = {
   "MBA": "MBA"
 };
 
-export const getDeviceTreeChildren = (path: string[]) => {
+export const getDeviceTreeChildren = (rawPath: string[]) => {
+  const path = rawPath.filter((_, i) => i % 2 === 0);
   if (path.length === 0) return ["Công ty Điện lực Hưng Yên"];
   
-  const level1 = ["Lưới điện 110", "Lưới điện trung gian", "Trạm 110", "Đường dây 110", "Kho"];
-  if (path.length === 1) return level1;
+  const last = path[path.length - 1];
   
-  // Level 2 depends on what was selected in level 1
+  // Level 1: Branches
+  if (path.length === 1) return BRANCHES;
+  
+  // Level 2: Stations/Lines
   if (path.length === 2) {
-    const type = path[1];
-    if (type === "Lưới điện 110" || type === "Lưới điện trung gian" || type === "Đường dây 110") return ["Đường dây 111", "Đường dây 112", "Đường dây 171", "Đường dây 172"];
-    if (type === "Trạm 110") return ["Trạm biến áp 110kV Khoái Châu", "Trạm biến áp 110kV Văn Lâm", "Trạm biến áp 110kV Kim Động"];
-    if (type === "Kho") return ["Kho vật tư trung tâm", "Kho thiết bị dự phòng"];
-    return [];
+    return [
+      "Trạm biến áp 110kV Khoái Châu",
+      "Trạm biến áp 110kV Văn Lâm",
+      "110kV 171 E3.1-173 E3.2",
+      "110kV 111 E3.1",
+      "Kho vật tư trung tâm"
+    ];
   }
 
+  // Level 3: Components
   if (path.length === 3) {
-    const parent = path[1];
-    if (parent === "Lưới điện 110" || parent === "Đường dây 110") return ["Vị trí", "Nút", "Nhánh rẽ"];
-    if (parent === "Trạm 110") return ["Ngăn lộ 110kV", "Máy biến áp", "Hệ thống tự dùng"];
-    if (parent === "Kho") return ["Thiết bị trung gian", "Thiết bị đầu cuối"];
-    return [];
+    if (last.includes("Trạm biến áp")) return ["Ngăn lộ 110kV", "Máy biến áp", "Hệ thống tự dùng"];
+    return ["Vị trí", "Nút", "Nhánh rẽ", "Thiết bị"];
   }
 
+  // Level 4: Specific items
   if (path.length === 4) {
-    const type = path[3];
-    if (type === "Vị trí") return Array.from({length: 10}, (_, i) => `Vị trí cột số ${i + 100}`);
-    if (type === "Ngăn lộ 110kV") return ["Ngăn lộ 171", "Ngăn lộ 172", "Ngăn lộ 112"];
-    if (type === "Máy biến áp") return ["Máy biến áp T1", "Máy biến áp T2"];
-    return [`${type} số 1`, `${type} số 2`];
-  }
-  
-  if (path.length === 5) {
-    const devices = ["Sứ cách điện", "Chuỗi sứ", "Máy cắt ABB", "Dao cách ly", "Biến dòng TI", "Biến áp TU", "Chống sét van CSV", "Tủ trung thế", "Rơ le bảo vệ"];
-    return Array.from({ length: 45 }, (_, i) => i < devices.length ? devices[i] : `Thiết bị con ${i + 1}`);
+    if (last.includes("Ngăn lộ")) return ["Ngăn lộ 171", "Ngăn lộ 172"];
+    if (last.includes("Máy biến áp")) return ["Máy biến áp T1", "Máy biến áp T2"];
+    if (last.includes("Vị trí")) return ["Vị trí cột số 101", "Vị trí cột số 102"];
+    return ["Mục 1", "Mục 2"];
   }
 
-  if (path.length === 6) {
-    return ["Bộ phận 1", "Bộ phận 2", "Chi tiết máy"];
-  }
-
-  return [];
+  return ["Chi tiết 1", "Chi tiết 2"];
 };
 
 export const formatDevicePath = (path: string[]) => {
@@ -272,7 +297,7 @@ export const getDeviceDetails = (deviceName: string) => {
     specs: [
       { label: 'Mã thiết bị', value: `TB-${deviceName.substring(0, 3).toUpperCase()}-${Math.floor(Math.random() * 1000 + 1000)}` },
       { label: 'Tên thiết bị', value: deviceName },
-      { label: 'Loại thiết bị', value: deviceName.includes('Máy biến áp') ? 'Máy biến áp' : deviceName.includes('Máy cắt') ? 'Máy cắt' : deviceName.includes('Ngăn lộ') ? 'Ngăn lộ' : deviceName.includes('Đường dây') ? 'Đường dây' : 'Máy cắt' },
+      { label: 'Loại thiết bị', value: getDetailedType(deviceName) },
       { label: 'Cấp điện áp', value: '110 kV' },
       { label: 'Dòng điện định mức', value: '1200 A' },
       { label: 'Tần số định mức', value: '50 Hz' },
