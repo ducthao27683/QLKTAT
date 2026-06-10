@@ -27,6 +27,7 @@ import { KetQuaThiNghiemScreen } from '../modules/thi-nghiem/ket-qua-thi-nghiem/
 import { DanhMucThiNghiemScreen } from '../modules/thi-nghiem/danh-muc-thi-nghiem/DanhMucThiNghiemScreen';
 import { IncidentModule } from '../modules/su-co/thong-tin-su-co/ThongTinSuCoScreen';
 import { DeviceModule } from '../modules/thiet-bi/thong-tin-thiet-bi/ThongTinThietBiScreen';
+import { SoDoThietBiScreen } from '../modules/thiet-bi/SoDoThietBiScreen';
 
 import { 
   MENU_ITEMS, 
@@ -776,7 +777,13 @@ export const PmisLuoiApp = ({ config, onBack }: PmisLuoiAppProps) => {
             </div>
           ) : activeSubMenu ? (
             <div className="bg-white h-full flex flex-col overflow-hidden">
-              {activeSubMenu === 'Danh sách thiết bị' ? (
+              {activeSubMenu === 'Sơ đồ thiết bị' ? (
+                <SoDoThietBiScreen 
+                  setActiveSubMenu={setActiveSubMenu}
+                  setDetailForm={setDetailForm}
+                  setPreviewContent={setPreviewContent}
+                />
+              ) : activeSubMenu === 'Danh sách thiết bị' ? (
                 <DeviceModule 
                   devicePath={devicePath}
                   setDevicePath={setDevicePath}

@@ -90,9 +90,33 @@ export const Sidebar = ({
               <Star className="w-3.5 h-3.5" /> Mở nhiều nhất
             </h4>
             <div className="space-y-1">
-              <button className="w-full text-left text-secondary text-gray-600 hover:bg-[#f6f8fc] hover:text-blue-600 py-1.5 px-2 rounded transition-colors truncate">Bản đồ thiết bị</button>
-              <button className="w-full text-left text-secondary text-gray-600 hover:bg-[#f6f8fc] hover:text-blue-600 py-1.5 px-2 rounded transition-colors truncate">Danh sách sự cố</button>
-              <button className="w-full text-left text-secondary text-gray-600 hover:bg-[#f6f8fc] hover:text-blue-600 py-1.5 px-2 rounded transition-colors truncate">Sổ vận hành</button>
+              <button 
+                onClick={() => {
+                  setActiveMenu('thiet-bi');
+                  setActiveSubMenu('Sơ đồ thiết bị');
+                }}
+                className="w-full text-left text-secondary text-gray-600 hover:bg-[#f6f8fc] hover:text-blue-600 py-1.5 px-2 rounded transition-colors truncate"
+              >
+                Sơ đồ thiết bị
+              </button>
+              <button 
+                onClick={() => {
+                  setActiveMenu('su-co');
+                  setActiveSubMenu('Danh sách sự cố');
+                }}
+                className="w-full text-left text-secondary text-gray-600 hover:bg-[#f6f8fc] hover:text-blue-600 py-1.5 px-2 rounded transition-colors truncate"
+              >
+                Danh sách sự cố
+              </button>
+              <button 
+                onClick={() => {
+                  setActiveMenu('cong-viec');
+                  setActiveSubMenu('Sổ vận hành');
+                }}
+                className="w-full text-left text-secondary text-gray-600 hover:bg-[#f6f8fc] hover:text-blue-600 py-1.5 px-2 rounded transition-colors truncate"
+              >
+                Sổ vận hành
+              </button>
             </div>
           </div>
           <div>

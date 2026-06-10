@@ -2,7 +2,7 @@ import React from 'react';
 import { 
   Check, Share2, Lock, Eye, Zap, ListChecks, Database, 
   Trash2, Box, History, Camera, FileText, Download, Plus, KeyRound,
-  ChevronRight, Calendar, Clock, User, ArrowRight, Activity
+  ChevronRight, Calendar, Clock, User, ArrowRight, Activity, Settings
 } from 'lucide-react';
 import { EvnLogo } from '../../../components/EvnLogo';
 import { FileUploader } from '../../../components/FileUploader';
@@ -10,14 +10,15 @@ import { capitalizeBusinessName } from '../../../shared/utils';
 
 const normalizeType = (type: string) => {
   const t = type?.toUpperCase();
-  if (t === 'TBA') return 'Trạm';
-  if (t === 'ĐD') return 'Đường dây';
-  if (t === 'MC') return 'Máy cắt';
-  if (t === 'MBA') return 'Máy biến áp';
-  if (t === 'TI' || t === 'BIẾN DÒNG') return 'Biến dòng';
+  if (t === 'TBA' || t === 'TRẠM') return 'Trạm';
+  if (t === 'ĐD' || t === 'ĐƯỜNG DÂY') return 'Đường dây';
+  if (t === 'MC' || t === 'MÁY CẮT') return 'Máy cắt';
+  if (t === 'MBA' || t === 'MÁY BIẾN ÁP') return 'Máy biến áp';
+  if (t === 'TI' || t === 'BIẾN DÒNG' || t === 'BIẾN DÒNG ĐIỆN') return 'Biến dòng';
   if (t === 'TU' || t === 'BIẾN ĐIỆN ÁP') return 'Biến điện áp';
-  if (t === 'DCL') return 'Dao cách ly';
-  if (t === 'CSV') return 'Chống sét van';
+  if (t === 'DCL' || t === 'DAO CÁCH LY') return 'Dao cách ly';
+  if (t === 'CSV' || t === 'CHỐNG SÉT VAN') return 'Chống sét van';
+  if (t === 'TU-TI') return 'TU-TI';
   return type;
 };
 
@@ -293,13 +294,31 @@ export const TestingDetailView = ({
               <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
                 <div className="space-y-6">
                   <div className="flex items-center gap-4">
-                     <span className="bg-red-50 text-red-600 font-mono font-black text-[12pt] uppercase px-3 py-1 rounded shadow-sm border border-red-100">
-                       {detailForm.data?.code || 'PD-MBA-001'}
-                     </span>
-                     <span className="text-gray-300">|</span>
-                     <span className="bg-blue-50 text-[#164399] font-black text-[11pt] uppercase px-3 py-1 rounded-full border border-blue-100 flex items-center gap-2">
-                        <Box className="w-4 h-4" /> {normalizeType(detailForm.data?.type) || 'Loại thiết bị'}
-                     </span>
+                     <div className="flex flex-col gap-1">
+                        <label className="text-[8pt] font-black text-gray-400 uppercase tracking-widest ml-1">Mã thiết bị / PMIS</label>
+                        <span className="bg-red-50 text-red-600 font-mono font-black text-[13pt] uppercase px-3 py-1.5 rounded shadow-sm border border-red-100 block w-fit">
+                          {detailForm.data?.code || 'PD-MBA-001'}
+                        </span>
+                     </div>
+                     <span className="text-gray-200 mt-6 h-10 w-[1px] bg-gray-100"></span>
+                     <div className="flex flex-col gap-1 flex-1">
+                        <label className="text-[8pt] font-black text-gray-400 uppercase tracking-widest ml-1">Loại thiết bị</label>
+                        <div className="bg-blue-50 text-[#164399] font-black text-[11pt] uppercase px-4 py-2 rounded-xl border border-blue-100 flex items-center gap-3 w-fit transition-all hover:bg-blue-100">
+                           <Box className="w-5 h-5 opacity-70" /> 
+                           {detailForm.mode !== 'view' ? (
+                             <select className="bg-transparent border-none outline-none focus:ring-0">
+                                <option>{normalizeType(detailForm.data?.type) || 'Máy biến áp'}</option>
+                                <option>Trạm</option>
+                                <option>Đường dây</option>
+                                <option>Máy cắt</option>
+                                <option>Biến dòng</option>
+                                <option>Biến điện áp</option>
+                             </select>
+                           ) : (
+                             <span>{normalizeType(detailForm.data?.type) || 'Máy biến áp'}</span>
+                           )}
+                        </div>
+                     </div>
                   </div>
 
                   <div className="space-y-1">
@@ -318,19 +337,20 @@ export const TestingDetailView = ({
                 <div className="grid grid-cols-2 gap-8 pt-8 border-t border-gray-100">
                    <div className="space-y-6">
                       <h4 className="text-[10pt] font-black text-gray-400 uppercase tracking-[0.1em] flex items-center gap-2">
-                        <History className="w-5 h-5 text-blue-600" /> CHU KỲ
+                        <History className="w-5 h-5 text-blue-600" /> Chu kỳ thí nghiệm
                       </h4>
                       <div className="space-y-4">
                         <div className="space-y-2">
                           <label className="text-[9pt] font-black text-gray-400 uppercase tracking-widest ml-1">Chu kỳ định kỳ</label>
                           <select 
                             disabled={detailForm.mode === 'view'}
-                            defaultValue={detailForm.data?.interval || "12 tháng"}
-                            className={`w-full px-4 py-2 text-[11pt] font-medium rounded-[10px] transition-all bg-white border border-gray-200 focus:border-blue-400 focus:ring-4 focus:ring-blue-50 shadow-sm disabled:bg-gray-50`}
+                            defaultValue={detailForm.data?.interval || "24 tháng"}
+                            className={`w-full px-4 py-2 text-[11pt] font-bold rounded-[10px] transition-all bg-white border border-gray-200 focus:border-blue-400 focus:ring-4 focus:ring-blue-50 shadow-sm disabled:bg-gray-50`}
                           >
-                            <option>3 tháng</option>
-                            <option>6 tháng</option>
                             <option>12 tháng</option>
+                            <option>24 tháng</option>
+                            <option>36 tháng</option>
+                            <option>72 tháng</option>
                           </select>
                         </div>
                       </div>
@@ -338,13 +358,37 @@ export const TestingDetailView = ({
 
                    <div className="space-y-6">
                       <h4 className="text-[10pt] font-black text-gray-400 uppercase tracking-[0.1em] flex items-center gap-2">
-                        <Activity className="w-5 h-5 text-green-500" /> THỜI GIAN
+                        <Activity className="w-5 h-5 text-green-500" /> Theo dõi thời gian
                       </h4>
                       <div className="space-y-4">
                         <div className="space-y-2">
-                          <label className="text-[9pt] font-black text-gray-400 uppercase tracking-widest ml-1">Lần cuối</label>
-                          <input type="date" className={`w-full px-4 py-2 text-[11pt] font-medium rounded-[10px] transition-all bg-white border border-gray-200 shadow-sm read-only:bg-gray-50`} readOnly={detailForm.mode === 'view'} />
+                          <label className="text-[9pt] font-black text-gray-400 uppercase tracking-widest ml-1">Lần thí nghiệm cuối</label>
+                          <input type="text" value={detailForm.data?.lastTest || "15/05/2024"} className={`w-full px-4 py-2 text-[11pt] font-bold rounded-[10px] transition-all bg-white border border-gray-200 shadow-sm read-only:bg-gray-50`} readOnly />
                         </div>
+                      </div>
+                   </div>
+                </div>
+
+                <div className="space-y-6 pt-8 border-t border-gray-100">
+                   <h4 className="text-[10pt] font-black text-[#164399] uppercase tracking-[0.1em] flex items-center gap-2">
+                      <Settings className="w-5 h-5" /> Đặc tính kỹ thuật
+                   </h4>
+                   <div className="p-6 bg-blue-50/20 rounded-[1.5rem] border border-blue-100/30 grid grid-cols-2 gap-6 shadow-inner">
+                      <div className="space-y-2">
+                         <label className="text-[8.5pt] font-black text-gray-400 uppercase tracking-widest ml-1">Cấp điện áp</label>
+                         <input type="text" defaultValue="110kV" readOnly={detailForm.mode === 'view'} className="w-full px-4 py-2 bg-white border border-gray-100 rounded-xl text-[11pt] font-bold text-gray-700 focus:border-blue-400 outline-none" />
+                      </div>
+                      <div className="space-y-2">
+                         <label className="text-[8.5pt] font-black text-gray-400 uppercase tracking-widest ml-1">Công suất/Dòng định mức</label>
+                         <input type="text" defaultValue="63MVA" readOnly={detailForm.mode === 'view'} className="w-full px-4 py-2 bg-white border border-gray-100 rounded-xl text-[11pt] font-bold text-gray-700 focus:border-blue-400 outline-none" />
+                      </div>
+                      <div className="space-y-2">
+                         <label className="text-[8.5pt] font-black text-gray-400 uppercase tracking-widest ml-1">Hãng sản xuất</label>
+                         <input type="text" defaultValue="ABB" readOnly={detailForm.mode === 'view'} className="w-full px-4 py-2 bg-white border border-gray-100 rounded-xl text-[11pt] font-bold text-gray-700 focus:border-blue-400 outline-none" />
+                      </div>
+                      <div className="space-y-2">
+                         <label className="text-[8.5pt] font-black text-gray-400 uppercase tracking-widest ml-1">Năm sản xuất</label>
+                         <input type="text" defaultValue="2020" readOnly={detailForm.mode === 'view'} className="w-full px-4 py-2 bg-white border border-gray-100 rounded-xl text-[11pt] font-bold text-gray-700 focus:border-blue-400 outline-none" />
                       </div>
                    </div>
                 </div>

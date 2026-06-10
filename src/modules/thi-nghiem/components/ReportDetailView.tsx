@@ -30,91 +30,154 @@ export const ReportDetailView = ({
 
   if (isAddMode) {
     return (
-      <div className="flex-1 overflow-y-auto custom-scrollbar p-8 space-y-8 bg-gray-50/30">
-        <div className="max-w-5xl mx-auto space-y-8">
-          <div className="bg-white p-10 rounded-[2.5rem] border border-gray-100 shadow-xl shadow-blue-50/50 space-y-8 animate-in slide-in-from-bottom-8 duration-700">
-            <div className="flex items-center gap-5">
-              <div className="p-4 bg-[#164399] text-white rounded-[1.5rem] shadow-lg shadow-blue-200">
-                <ClipboardList className="w-8 h-8" />
+      <div className="flex-1 overflow-y-auto custom-scrollbar p-6 space-y-6 bg-gray-50/30">
+        <div className="max-w-5xl mx-auto">
+          {/* Header */}
+          <div className="bg-white p-8 rounded-[2rem] border border-gray-100 shadow-sm mb-6 flex items-center justify-between">
+            <div className="flex items-center gap-6">
+              <div className="p-4 bg-[#164399]/10 text-[#164399] rounded-2xl">
+                <ClipboardList className="w-10 h-10" />
               </div>
               <div>
-                <h3 className="text-[20pt] font-black text-gray-800 tracking-tight">Lập biên bản thí nghiệm mới</h3>
-                <p className="text-[11pt] text-gray-500 font-bold tracking-widest mt-1">Khởi tạo dữ liệu đo lường hiện trường</p>
+                <h3 className="text-[22pt] font-black text-gray-800 tracking-tight leading-tight">Lập biên bản thí nghiệm mới</h3>
+                <p className="text-[11pt] text-gray-500 font-bold mt-1">Khởi tạo dữ liệu đo lường và biên bản hiện trường</p>
               </div>
             </div>
+            <div className="hidden md:block">
+               <EvnLogo className="h-12 text-[#164399]/20" />
+            </div>
+          </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-10 pt-4">
-              <div className="space-y-6">
-                <h4 className="text-[11pt] font-black text-[#164399] uppercase tracking-widest border-b border-gray-100 pb-3 flex items-center gap-2">
-                  <Database className="w-5 h-5" /> Thông tin nguồn
-                </h4>
-                <div className="space-y-5">
-                  <div className="space-y-2">
-                    <label className="text-[9.5pt] font-black text-gray-400 uppercase tracking-widest ml-1">Kế hoạch / Yêu cầu nguồn</label>
-                    <select className="w-full px-5 py-3 text-[12pt] font-bold text-gray-700 outline-none bg-white border border-gray-200 rounded-2xl focus:border-blue-500 transition-all shadow-sm">
-                       <option>{test.planName || 'Kế hoạch thí nghiệm định kỳ năm 2026'}</option>
-                    </select>
-                  </div>
-                  <div className="space-y-2">
-                    <label className="text-[9.5pt] font-black text-gray-400 uppercase tracking-widest ml-1">Thiết bị thí nghiệm</label>
-                    <select className="w-full px-5 py-3 text-[12pt] font-bold text-gray-700 outline-none bg-white border border-gray-200 rounded-2xl focus:border-blue-500 transition-all shadow-sm">
-                       <option>{test.device || 'MBA T1 - Trạm 110kV Phố Nối'}</option>
-                    </select>
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+            <div className="lg:col-span-8 space-y-6">
+              {/* Core Source Info */}
+              <div className="bg-white p-8 rounded-[2rem] border border-gray-100 shadow-sm space-y-8">
+                <div className="space-y-6">
+                  <h4 className="text-[10pt] font-black text-[#164399] uppercase tracking-widest flex items-center gap-2 border-b border-gray-50 pb-3">
+                    <Database className="w-5 h-5" /> Thông tin nguồn dữ liệu
+                  </h4>
+                  <div className="grid grid-cols-1 gap-6">
+                    <div className="space-y-2">
+                      <label className="text-[8.5pt] font-black text-gray-400 uppercase tracking-widest ml-1">Kế hoạch / Yêu cầu nguồn</label>
+                      <select className="w-full px-5 py-3 text-[12pt] font-bold text-gray-700 outline-none bg-gray-50 border border-gray-100 rounded-2xl focus:bg-white focus:border-blue-500 transition-all shadow-inner">
+                         <option>{test.planName || 'Kế hoạch thí nghiệm định kỳ năm 2026'}</option>
+                      </select>
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-[8.5pt] font-black text-gray-400 uppercase tracking-widest ml-1">Thiết bị thí nghiệm</label>
+                      <select className="w-full px-5 py-3 text-[12pt] font-bold text-gray-700 outline-none bg-gray-50 border border-gray-100 rounded-2xl focus:bg-white focus:border-blue-500 transition-all shadow-inner">
+                         <option>{test.device || 'MBA T1 - Trạm 110kV Phố Nối'}</option>
+                      </select>
+                    </div>
                   </div>
                 </div>
-              </div>
 
-              <div className="space-y-6">
-                <h4 className="text-[11pt] font-black text-orange-500 uppercase tracking-widest border-b border-gray-100 pb-3 flex items-center gap-2">
-                  <Clock className="w-5 h-5" /> Thực hiện & Thời gian
-                </h4>
-                <div className="space-y-5">
-                  <div className="space-y-2">
-                    <label className="text-[9.5pt] font-black text-gray-400 uppercase tracking-widest ml-1">Ngày giờ thực hiện</label>
-                    <input type="datetime-local" className="w-full px-5 py-3 bg-white border border-gray-200 rounded-2xl text-[12pt] font-bold text-gray-700 outline-none focus:border-blue-500 transition-all shadow-sm" defaultValue={new Date().toISOString().slice(0, 16)} />
-                  </div>
-                  <div className="space-y-2">
-                    <label className="text-[9.5pt] font-black text-gray-400 uppercase tracking-widest ml-1">Thời tiết</label>
-                    <div className="flex gap-2">
-                       {['Nắng', 'Mưa', 'Nhiều mây'].map(w => (
-                         <button key={w} className={`flex-1 py-3 rounded-xl font-bold border transition-all ${w === 'Nắng' ? 'bg-orange-50 border-orange-200 text-orange-600 shadow-sm' : 'bg-white border-gray-100 text-gray-400 hover:border-blue-100'}`}>{w}</button>
-                       ))}
+                <div className="space-y-6 pt-4">
+                  <h4 className="text-[10pt] font-black text-blue-600 uppercase tracking-widest flex items-center gap-2 border-b border-gray-50 pb-3">
+                    <Clock className="w-5 h-5" /> Thời gian & Thực hiện
+                  </h4>
+                  <div className="grid grid-cols-2 gap-6">
+                    <div className="space-y-2">
+                      <label className="text-[8.5pt] font-black text-gray-400 uppercase tracking-widest ml-1">Ngày thực hiện</label>
+                      <input type="date" className="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-[11pt] font-bold text-gray-700 outline-none focus:border-blue-500 shadow-sm" defaultValue={new Date().toISOString().split('T')[0]} />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-[8.5pt] font-black text-gray-400 uppercase tracking-widest ml-1">Giờ bắt đầu</label>
+                      <input type="time" className="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-[11pt] font-bold text-gray-700 outline-none focus:border-blue-500 shadow-sm" defaultValue="08:00" />
                     </div>
                   </div>
                 </div>
               </div>
+
+              {/* Personnel */}
+              <div className="bg-white p-8 rounded-[2rem] border border-gray-100 shadow-sm space-y-6">
+                <h4 className="text-[10pt] font-black text-gray-400 uppercase tracking-widest flex items-center gap-2 border-b border-gray-50 pb-3">
+                  <User className="w-5 h-5 text-green-500" /> Nhân sự thực hiện
+                </h4>
+                <div className="grid grid-cols-2 gap-6">
+                  <div className="space-y-2">
+                    <label className="text-[8.5pt] font-black text-gray-400 uppercase tracking-widest ml-1">Người chủ trì</label>
+                    <input type="text" className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-[11pt] font-bold text-gray-700" defaultValue={config.fullName} readOnly />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-[8.5pt] font-black text-gray-400 uppercase tracking-widest ml-1">Thành viên tham gia</label>
+                    <input type="text" className="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-[11pt] font-bold text-gray-700 outline-none focus:border-blue-500 shadow-sm" placeholder="Nhập tên các thành viên..." />
+                  </div>
+                </div>
+              </div>
             </div>
 
-            <div className="pt-8 border-t border-gray-100 flex items-center justify-between">
-              <button 
-                onClick={() => setDetailForm(null)}
-                className="px-10 py-4 text-[13pt] font-black text-gray-400 hover:text-gray-600 transition-colors tracking-widest"
-              >
-                Hủy bỏ
-              </button>
-              <button 
-                onClick={() => {
-                  setDetailForm({ 
-                    type: 'test_report', 
-                    mode: 'view', 
-                    data: { 
-                      id: 99, 
-                      device: test.device || 'Thiết bị mới', 
-                      team: 'Phòng Kỹ thuật 1', 
-                      leader: config.fullName, 
-                      time: new Date().toLocaleDateString('vi-VN'),
-                      result: 'Đạt',
-                      type: 'Định kỳ',
-                      items: [
-                        { name: 'Kiểm tra bên ngoài', unit: '-', value: 'Tốt', limit: 'Bình thường', eval: 'Đạt' }
-                      ]
-                    } 
-                  });
-                }}
-                className="px-12 py-4 bg-[#164399] text-white rounded-[1.5rem] font-black text-[14pt] shadow-2xl shadow-blue-200 hover:bg-blue-800 hover:-translate-y-1 transition-all tracking-tighter"
-              >
-                Khởi tạo biểu mẫu
-              </button>
+            <div className="lg:col-span-4 space-y-6">
+              {/* Conditions */}
+              <div className="bg-white p-8 rounded-[2rem] border border-gray-100 shadow-sm space-y-6">
+                <h4 className="text-[10pt] font-black text-gray-400 uppercase tracking-widest flex items-center gap-2 border-b border-gray-50 pb-3">
+                  <Activity className="w-5 h-5 text-orange-500" /> Điều kiện môi trường
+                </h4>
+                <div className="space-y-5">
+                   <div className="space-y-2">
+                      <label className="text-[8.5pt] font-black text-gray-400 uppercase tracking-widest ml-1">Thời tiết</label>
+                      <div className="grid grid-cols-2 gap-2">
+                        {['Nắng', 'Nhiều mây', 'Mưa', 'Độ ẩm cao'].map(w => (
+                          <button key={w} className={`py-2 text-[10pt] rounded-lg font-bold border transition-all ${w === 'Nắng' ? 'bg-orange-50 border-orange-200 text-orange-600 shadow-sm' : 'bg-white border-gray-100 text-gray-400'}`}>
+                            {w}
+                          </button>
+                        ))}
+                      </div>
+                   </div>
+                   <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                         <label className="text-[8.5pt] font-black text-gray-400 uppercase tracking-widest ml-1">Nhiệt độ (°C)</label>
+                         <input type="number" className="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg text-[11pt] font-bold text-[#164399] outline-none focus:border-blue-500 shadow-sm" defaultValue={28} />
+                      </div>
+                      <div className="space-y-2">
+                         <label className="text-[8.5pt] font-black text-gray-400 uppercase tracking-widest ml-1">Độ ẩm (%)</label>
+                         <input type="number" className="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg text-[11pt] font-bold text-[#164399] outline-none focus:border-blue-500 shadow-sm" defaultValue={75} />
+                      </div>
+                   </div>
+                </div>
+              </div>
+
+              {/* Action */}
+              <div className="space-y-4">
+                <button 
+                  onClick={() => {
+                    setDetailForm({ 
+                      type: 'test_report', 
+                      mode: 'view', 
+                      data: { 
+                        id: 99, 
+                        device: test.device || 'MBA T1 - Trạm 110kV Phố Nối', 
+                        planName: test.planName || 'Kế hoạch thí nghiệm định kỳ năm 2026',
+                        team: 'Đội Thí nghiệm Điện', 
+                        leader: config.fullName, 
+                        time: `${new Date().toLocaleDateString('vi-VN')} 08:30`,
+                        result: 'Đang thực hiện',
+                        type: 'Định kỳ',
+                        items: [
+                          { name: 'Đo điện trở cách điện cuộn dây', unit: 'MΩ', value: '4500', limit: '≥ 2000', eval: 'Đạt' },
+                          { name: 'Đo điện trở một chiều cuộn dây', unit: 'Ω', value: '0.012', limit: '± 2% so với XM', eval: 'Đạt' },
+                          { name: 'Thử nghiệm không tải', unit: 'A', value: '0.15', limit: 'XM', eval: 'Đạt' }
+                        ],
+                        images: [],
+                        attachments: [],
+                        signing: [
+                          { role: 'Người thí nghiệm', name: config.fullName, status: 'Đang xử lý', time: '' },
+                          { role: 'Lãnh đạo đơn vị', name: 'Nguyễn Văn A', status: 'Chờ duyệt', time: '' }
+                        ]
+                      } 
+                    });
+                  }}
+                  className="w-full py-5 bg-[#164399] text-white rounded-2xl font-black text-[14pt] shadow-2xl shadow-blue-200 hover:bg-blue-800 hover:-translate-y-1 transition-all flex items-center justify-center gap-3"
+                >
+                  Khởi tạo biểu mẫu <ArrowRight className="w-6 h-6" />
+                </button>
+                <button 
+                  onClick={() => setDetailForm(null)}
+                  className="w-full py-4 text-gray-400 font-bold text-[11pt] hover:text-gray-600 transition-colors uppercase tracking-widest"
+                >
+                  Hủy bỏ
+                </button>
+              </div>
             </div>
           </div>
         </div>

@@ -10,7 +10,7 @@ export const MENU_ITEMS = [
     id: 'thiet-bi',
     title: 'Thiết bị',
     icon: <Cpu className="w-6 h-6 text-blue-500" />,
-    subItems: ['Bản đồ thiết bị', 'Danh sách thiết bị', 'Thiết bị dự phòng', 'Tồn kho và Điều động']
+    subItems: ['Sơ đồ thiết bị', 'Danh sách thiết bị', 'Thiết bị dự phòng', 'Tồn kho và Điều động']
   },
   {
     id: 'cong-viec',

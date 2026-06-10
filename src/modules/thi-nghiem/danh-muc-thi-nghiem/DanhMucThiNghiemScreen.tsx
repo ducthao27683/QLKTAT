@@ -5,14 +5,15 @@ import { capitalizeBusinessName } from '../../../shared/utils';
 
 const normalizeType = (type: string) => {
   const t = type?.toUpperCase();
-  if (t === 'TBA') return 'Trạm';
-  if (t === 'ĐD') return 'Đường dây';
-  if (t === 'MC') return 'Máy cắt';
-  if (t === 'MBA') return 'Máy biến áp';
-  if (t === 'TI' || t === 'BIẾN DÒNG') return 'Biến dòng';
+  if (t === 'TBA' || t === 'TRẠM') return 'Trạm';
+  if (t === 'ĐD' || t === 'ĐƯỜNG DÂY') return 'Đường dây';
+  if (t === 'MC' || t === 'MÁY CẮT') return 'Máy cắt';
+  if (t === 'MBA' || t === 'MÁY BIẾN ÁP') return 'Máy biến áp';
+  if (t === 'TI' || t === 'BIẾN DÒNG' || t === 'BIẾN DÒNG ĐIỆN') return 'Biến dòng';
   if (t === 'TU' || t === 'BIẾN ĐIỆN ÁP') return 'Biến điện áp';
-  if (t === 'DCL') return 'Dao cách ly';
-  if (t === 'CSV') return 'Chống sét van';
+  if (t === 'DCL' || t === 'DAO CÁCH LY') return 'Dao cách ly';
+  if (t === 'CSV' || t === 'CHỐNG SÉT VAN') return 'Chống sét van';
+  if (t === 'TU-TI') return 'TU-TI';
   return type;
 };
 
@@ -20,12 +21,12 @@ const getTypeIcon = (type: string) => {
   const normType = normalizeType(type);
   switch (normType) {
     case 'Trạm': return <Building2 className="w-4 h-4" />;
-    case 'Đường dây': return <Radio className="w-4 h-4" />;
-    case 'Máy cắt': return <Settings className="w-4 h-4" />;
+    case 'Đường dây': return <Network className="w-4 h-4" />;
+    case 'Máy cắt': return <Zap className="w-4 h-4" />;
     case 'Máy biến áp': return <Box className="w-4 h-4" />;
     case 'Biến dòng': return <Activity className="w-4 h-4" />;
-    case 'Biến điện áp': return <Activity className="w-4 h-4" />;
-    case 'Dao cách ly': return <Zap className="w-4 h-4" />;
+    case 'Biến điện áp': return <Binary className="w-4 h-4" />;
+    case 'Dao cách ly': return <GitCommit className="w-4 h-4" />;
     case 'Chống sét van': return <Shield className="w-4 h-4" />;
     default: return <Database className="w-4 h-4" />;
   }
@@ -129,29 +130,29 @@ export const DanhMucThiNghiemScreen = ({
                     className={`hover:bg-gray-50 transition-colors cursor-pointer group ${isChild ? 'bg-gray-50/30' : ''}`}
                     onClick={() => setDetailForm({ type: 'testing_catalog', mode: 'view', data: cat })}
                   >
-                    <td className={`px-6 py-4 ${isChild ? 'pl-12 grayscale opacity-40' : ''}`}>
+                    <td className={`px-6 py-4 ${isChild ? 'pl-12 opacity-60' : ''}`}>
                       <div className="flex items-center gap-2 mb-1.5 overflow-hidden">
-                        <div className="flex items-center gap-1.5">
-                          <span className={`font-mono font-bold text-[9pt] uppercase px-1.5 py-0.5 rounded shadow-sm ${isChild ? 'bg-gray-100 text-gray-400' : 'bg-red-50 text-red-600 border border-red-100'}`}>
+                        <div className="flex items-center gap-2">
+                          <span className={`font-mono font-bold text-[9pt] uppercase px-1.5 py-0.5 rounded shadow-sm ${isChild ? 'bg-gray-100 text-gray-400 border border-gray-200' : 'bg-red-50 text-red-600 border border-red-100'}`}>
                             {cat.code || 'N/A'}
                           </span>
-                          <div className={`flex items-center gap-1.5 px-2 py-0.5 rounded-full border transition-all ${isChild ? 'bg-gray-50 border-gray-100 text-gray-300' : 'bg-blue-50 border-blue-100 text-[#164399]'}`}>
-                            <span className={isChild ? 'opacity-30' : 'opacity-70'}>{getTypeIcon(cat.type)}</span>
-                            <span className="text-[8.5pt] font-black uppercase tracking-tighter">
+                          <div className={`flex items-center gap-1.5 px-2 py-0.5 rounded-full border transition-all ${isChild ? 'bg-gray-50 border-gray-200 text-gray-400' : 'bg-blue-50 border-blue-100 text-[#164399]'}`}>
+                            <span className={isChild ? 'opacity-40' : 'opacity-70'}>{getTypeIcon(cat.type)}</span>
+                            <span className="text-[8pt] font-black uppercase tracking-tighter">
                               {normalizeType(cat.type)}
                             </span>
                           </div>
                         </div>
                       </div>
-                      <p className={`font-black transition-colors whitespace-normal break-words leading-tight ${isChild ? 'text-gray-300 text-[11pt]' : 'text-gray-800 text-[12pt] group-hover:text-blue-600'}`}>{capitalizeBusinessName(cat.device)}</p>
-                      <p className={`text-[9pt] font-bold uppercase mt-1 tracking-widest ${isChild ? 'text-gray-200' : 'text-gray-400'}`}>{cat.location || 'N/A'}</p>
+                      <p className={`font-black transition-colors whitespace-normal break-words leading-tight ${isChild ? 'text-gray-500 text-[11pt]' : 'text-gray-800 text-[12pt] group-hover:text-blue-600'}`}>{cat.device}</p>
+                      <p className={`text-[9pt] font-bold uppercase mt-1 tracking-widest ${isChild ? 'text-gray-400' : 'text-gray-400'}`}>{cat.location || 'N/A'}</p>
                     </td>
-                    <td className={`px-6 py-4 font-normal text-[10pt] ${isChild ? 'text-gray-300' : 'text-gray-500'}`}>{cat.interval}</td>
-                    <td className={`px-6 py-4 font-normal text-[10pt] ${isChild ? 'text-gray-300' : 'text-gray-400'}`}>{cat.lastTest}</td>
-                    <td className={`px-6 py-4 font-normal text-[10pt] ${isChild ? 'text-blue-300' : 'text-[#164399]'}`}>{cat.nextDue}</td>
+                    <td className={`px-6 py-4 font-normal text-[10pt] ${isChild ? 'text-gray-400' : 'text-gray-500'}`}>{cat.interval}</td>
+                    <td className={`px-6 py-4 font-normal text-[10pt] ${isChild ? 'text-gray-400' : 'text-gray-400'}`}>{cat.lastTest}</td>
+                    <td className={`px-6 py-4 font-normal text-[10pt] ${isChild ? 'text-blue-400' : 'text-[#164399]'}`}>{cat.nextDue}</td>
                     <td className="px-6 py-4 text-center">
                       <span className={`px-3 py-1 rounded-full text-[9pt] font-black uppercase ${
-                        isChild ? 'opacity-40 grayscale' : ''
+                        isChild ? 'opacity-60 grayscale' : ''
                       } ${
                         cat.status === 'Quá hạn' ? 'bg-red-100 text-red-600' : 
                         cat.status === 'Đến hạn' ? 'bg-orange-100 text-orange-600' :
