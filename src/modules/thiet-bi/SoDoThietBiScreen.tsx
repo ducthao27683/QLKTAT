@@ -3,7 +3,7 @@ import {
   Search, ZoomIn, ZoomOut, Image as ImageIcon, FileText, Database, 
   Settings, X, Edit, Trash2, ArrowLeft, Maximize2, Shield, AlertTriangle, 
   Battery, Box, Activity, Cpu, Check, Wrench, Package, Info, Download, ExternalLink,
-  ChevronLeft, ChevronRight, Plus
+  ChevronLeft, ChevronRight, Plus, MapPin
 } from 'lucide-react';
 import luoiImage from '../../assets/sodo.jpg';
 import { WorkLocationPopup } from '../../shared/components/layout/WorkLocationPopup';
@@ -15,6 +15,7 @@ interface MappedDevice {
   type: string;
   status: string;
   path: string[];
+  fullPath?: string[];
   x: number; // percentage (0 - 100)
   y: number; // percentage (0 - 100)
   w: number; // width percentage (0 - 100)
@@ -203,16 +204,34 @@ const generate200Devices = (): MappedDevice[] => {
   return results;
 };
 
+const getDeviceIllustration = (type: string) => {
+  const normalized = (type || '').toLowerCase();
+  if (normalized.includes('biến áp')) {
+    return 'https://images.unsplash.com/photo-1621905251189-08b45d6a269e?auto=format&fit=crop&w=600&q=80';
+  }
+  if (normalized.includes('máy cắt')) {
+    return 'https://images.unsplash.com/photo-1581092160607-ee22621dd758?auto=format&fit=crop&w=600&q=80';
+  }
+  if (normalized.includes('cách ly')) {
+    return 'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?auto=format&fit=crop&w=600&q=80';
+  }
+  return 'https://images.unsplash.com/photo-1621905252507-b354bc25edac?auto=format&fit=crop&w=600&q=80';
+};
+
 interface SoDoThietBiScreenProps {
   setActiveSubMenu: (subMenu: string | null) => void;
   setDetailForm: (form: any) => void;
   setPreviewContent: (content: any) => void;
+  devicePath?: string[];
+  setDevicePath?: React.Dispatch<React.SetStateAction<string[]>>;
 }
 
 export const SoDoThietBiScreen = ({
   setActiveSubMenu,
   setDetailForm,
-  setPreviewContent
+  setPreviewContent,
+  devicePath,
+  setDevicePath,
 }: SoDoThietBiScreenProps) => {
   const [devices, setDevices] = useState<MappedDevice[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
@@ -231,12 +250,15 @@ export const SoDoThietBiScreen = ({
     return luoiImage ? `${luoiImage}?v=${Date.now()}` : '';
   });
   const [searchMatchIdx, setSearchMatchIdx] = useState<number>(0);
+  const [previewingImgDev, setPreviewingImgDev] = useState<MappedDevice | null>(null);
+  const [imgModalZoom, setImgModalZoom] = useState(1);
 
   // States for adding dynamic devices from canvas clicking
   const [selectedClickCoords, setSelectedClickCoords] = useState<{ x: number; y: number } | null>(null);
   const [isAddingDevice, setIsAddingDevice] = useState(false);
+  const [editingDeviceId, setEditingDeviceId] = useState<string | null>(null);
   const [showDeviceTreePopup, setShowDeviceTreePopup] = useState(false);
-  const [tempDevicePathState, setTempDevicePathState] = useState<string[]>(['Công ty Điện lực Ninh Bình', 'Tất cả']);
+  const [tempDevicePathState, setTempDevicePathState] = useState<string[]>(['Công ty Điện lực Hưng Yên', 'Tất cả']);
   const [deviceFavorites, setDeviceFavorites] = useState<string[][]>([]);
   const [deviceHistory, setDeviceHistory] = useState<string[][]>([]);
   const [locPath, setLocPath] = useState<string[]>([]);
@@ -274,18 +296,46 @@ export const SoDoThietBiScreen = ({
     setDevices(list);
   }, []);
 
+  const determineDeviceType = (name: string, pathTypes: string[]) => {
+    const lowercaseName = name.toLowerCase();
+    
+    if (lowercaseName.includes('máy biến áp') || lowercaseName.includes('mba')) return 'Máy biến áp';
+    if (lowercaseName.includes('máy cắt') || lowercaseName.includes('mc')) return 'Máy cắt';
+    if (lowercaseName.includes('dao cách ly') || lowercaseName.includes('dcl')) return 'Dao cách ly';
+    if (lowercaseName.includes('biến dòng') || lowercaseName.includes('ti')) return 'Biến dòng';
+    if (lowercaseName.includes('biến điện áp') || lowercaseName.includes('tu')) return 'Biến điện áp';
+    if (lowercaseName.includes('hệ thống')) return 'Hệ thống';
+    if (lowercaseName.includes('kho')) return 'Kho';
+    if (lowercaseName.includes('vị trí')) return 'Vị trí';
+    if (lowercaseName.includes('ngăn lộ')) return 'Ngăn lộ';
+    if (lowercaseName.includes('đường dây')) return 'Đường dây';
+    if (lowercaseName.includes('trạm')) return 'Trạm';
+    
+    // Back up option: look through pathTypes from right to left, avoiding "Tất cả"
+    for (let i = pathTypes.length - 1; i >= 0; i--) {
+      const typeOption = pathTypes[i];
+      if (typeOption && typeOption !== 'Tất cả' && typeOption !== '') {
+        return typeOption;
+      }
+    }
+    
+    return 'Thiết bị khác';
+  };
+
   // Update addDevState when a device path is picked from the tree popup
   useEffect(() => {
     if (locPath.length > 0) {
       const urlPath = locPath.filter((_, idx) => idx % 2 === 0);
+      const pathTypes = locPath.filter((_, idx) => idx % 2 !== 0);
       const lastPart = urlPath[urlPath.length - 1] || 'Thiết bị mới';
+      const deducedType = determineDeviceType(lastPart, pathTypes);
       setAddDevState(prev => ({
         ...prev,
         selectedPath: locPath,
         name: lastPart,
         url: urlPath.join(' → '),
         code: 'PMIS-' + (Math.floor(Math.random() * 89999) + 10000),
-        type: locPath[1] || 'Thiết bị khác',
+        type: deducedType,
         manufacturer: 'ABB',
         specs: {
           'Điện áp định mức': '22 kV',
@@ -447,6 +497,7 @@ export const SoDoThietBiScreen = ({
 
   const handleStartAddingDevice = () => {
     if (selectedClickCoords) {
+      setEditingDeviceId(null);
       setAddDevState({
         x: selectedClickCoords.x,
         y: selectedClickCoords.y,
@@ -533,7 +584,7 @@ export const SoDoThietBiScreen = ({
   const activeTooltipDev = hoveredDev || (searchMatches.length > 0 ? searchMatches[searchMatchIdx % searchMatches.length] : null);
 
   const handleDeleteDevice = (id: string, name: string) => {
-    if (confirm(`Bạn có chắc chắn muốn xóa mapping cấu hình liên kết thiết bị "${name}" khỏi sơ đồ lưới?`)) {
+    if (confirm("Bạn có chắc chắn muốn xóa vị trí Thiết bị này không?")) {
       setDevices(prev => prev.filter(d => d.id !== id));
       setClickedDev(null);
       setAlertMsg(`Đã xóa liên kết thiết bị "${name}" thành công!`);
@@ -543,10 +594,33 @@ export const SoDoThietBiScreen = ({
   };
 
   const handleEditDevice = (dev: MappedDevice) => {
-    setDetailForm({ 
-      type: 'device', 
-      mode: 'edit', 
-      data: dev.name 
+    setEditingDeviceId(dev.id);
+    setIsAddingDevice(true);
+    setClickedDev(null); // Smoothly dismiss the right panel to show the left panel clearly
+
+    // Build locPath alternating names & types
+    const reconstructedLocPath: string[] = [];
+    dev.path.forEach((segment, idx) => {
+      reconstructedLocPath.push(segment);
+      reconstructedLocPath.push(idx === 0 ? 'Công ty Điện lực Hưng Yên' : 'Cấp');
+    });
+
+    setLocPath(reconstructedLocPath);
+    setAddDevState({
+      x: dev.x,
+      y: dev.y,
+      wPx: Math.round((dev.w / 100) * 2400) || 20,
+      hPx: Math.round((dev.h / 100) * 1350) || 20,
+      url: dev.path.join(' → '),
+      selectedPath: reconstructedLocPath,
+      name: dev.name,
+      code: dev.code,
+      status: dev.status,
+      type: dev.type,
+      manufacturer: dev.manufacturer || 'ABB',
+      year: dev.yearOfManufacture || '2020',
+      country: dev.country || 'Thụy Điển',
+      specs: dev.technicalSpecs || {},
     });
   };
 
@@ -583,9 +657,8 @@ export const SoDoThietBiScreen = ({
             </button>
             <div className="flex flex-col justify-center">
               <h2 className="text-[13.5pt] font-extrabold flex items-center leading-none">
-                <span className="text-[#8B4513] font-extrabold">Thiết bị</span>
-                <span className="text-gray-400 mx-1.5 font-normal">|</span>
-                <span className="text-[#164399] font-black">Sơ đồ lưới điện</span>
+                <span className="text-[#7C7267] font-extrabold">Thiết bị |</span>
+                <span className="text-[#164399] font-black ml-1.5">Sơ đồ lưới điện</span>
               </h2>
             </div>
           </div>
@@ -680,12 +753,19 @@ export const SoDoThietBiScreen = ({
             {/* Header */}
             <div className="p-4 border-b border-gray-200 bg-slate-50 flex items-center justify-between sticky top-0 z-10 shadow-sm">
               <h3 className="font-extrabold text-[11.5pt] text-[#164399] flex items-center gap-2">
-                <Plus className="w-5 h-5 text-emerald-600" />
-                <span className="font-black text-slate-800">Thêm điểm thiết bị sơ đồ</span>
+                {editingDeviceId ? (
+                  <Edit className="w-5 h-5 text-blue-600" />
+                ) : (
+                  <Plus className="w-5 h-5 text-emerald-600" />
+                )}
+                <span className="font-black text-slate-800">
+                  {editingDeviceId ? 'Cập nhật vị trí thiết bị' : 'Thêm điểm thiết bị sơ đồ'}
+                </span>
               </h3>
               <button 
                 onClick={() => {
                   setIsAddingDevice(false);
+                  setEditingDeviceId(null);
                   setLocPath([]);
                 }}
                 className="p-1 hover:bg-slate-200 rounded-full transition-colors text-gray-500"
@@ -872,6 +952,7 @@ export const SoDoThietBiScreen = ({
               <button 
                 onClick={() => {
                   setIsAddingDevice(false);
+                  setEditingDeviceId(null);
                   setLocPath([]);
                 }}
                 className="px-4 py-2 border border-gray-300 rounded-lg text-gray-600 text-[9pt] hover:bg-slate-50 font-bold transition-all active:scale-95"
@@ -884,36 +965,69 @@ export const SoDoThietBiScreen = ({
                     alert('Quy trình yêu cầu bạn phải chọn thiết bị/vị trí làm việc từ cây thư mục PMIS bằng nút Chọn!');
                     return;
                   }
-                  const idStr = `mapped-dev-${Date.now()}`;
                   const wPct = parseFloat(((addDevState.wPx / 2400) * 100).toFixed(2));
                   const hPct = parseFloat(((addDevState.hPx / 1350) * 100).toFixed(2));
 
-                  const newDevice: MappedDevice = {
-                    id: idStr,
-                    name: addDevState.name,
-                    code: addDevState.code,
-                    type: addDevState.type,
-                    status: addDevState.status,
-                    path: addDevState.selectedPath.filter((_, idx) => idx % 2 === 0),
-                    x: addDevState.x,
-                    y: addDevState.y,
-                    w: wPct,
-                    h: hPct,
-                    manufacturer: addDevState.manufacturer,
-                    yearOfManufacture: addDevState.year,
-                    serialNumber: 'SN-' + (Math.floor(Math.random() * 899999) + 100000),
-                    country: addDevState.country,
-                    technicalSpecs: addDevState.specs,
-                    importance: 'Trung bình'
-                  };
+                  if (editingDeviceId) {
+                    const originalDev = devices.find(d => d.id === editingDeviceId);
+                    const updatedDevice: MappedDevice = {
+                      id: editingDeviceId,
+                      name: addDevState.name,
+                      code: addDevState.code,
+                      type: addDevState.type,
+                      status: addDevState.status,
+                      path: addDevState.selectedPath.filter((_, idx) => idx % 2 === 0),
+                      fullPath: addDevState.selectedPath,
+                      x: addDevState.x,
+                      y: addDevState.y,
+                      w: wPct,
+                      h: hPct,
+                      manufacturer: addDevState.manufacturer,
+                      yearOfManufacture: addDevState.year,
+                      serialNumber: originalDev?.serialNumber || 'SN-' + (Math.floor(Math.random() * 899999) + 100000),
+                      country: addDevState.country,
+                      technicalSpecs: addDevState.specs,
+                      importance: originalDev?.importance || 'Trung bình'
+                    };
 
-                  setDevices(prev => [newDevice, ...prev]);
-                  setClickedDev(newDevice);
-                  setIsAddingDevice(false);
-                  setLocPath([]);
-                  setAlertMsg(`Đã lưu và liên kết thiết bị "${newDevice.name}" thành công!`);
-                  setIsAlertOpen(true);
-                  setTimeout(() => setIsAlertOpen(false), 3000);
+                    setDevices(prev => prev.map(d => d.id === editingDeviceId ? updatedDevice : d));
+                    setClickedDev(updatedDevice);
+                    setIsAddingDevice(false);
+                    setEditingDeviceId(null);
+                    setLocPath([]);
+                    setAlertMsg(`Đã cập nhật vị trí thiết bị "${updatedDevice.name}" thành công!`);
+                    setIsAlertOpen(true);
+                    setTimeout(() => setIsAlertOpen(false), 3000);
+                  } else {
+                    const idStr = `mapped-dev-${Date.now()}`;
+                    const newDevice: MappedDevice = {
+                      id: idStr,
+                      name: addDevState.name,
+                      code: addDevState.code,
+                      type: addDevState.type,
+                      status: addDevState.status,
+                      path: addDevState.selectedPath.filter((_, idx) => idx % 2 === 0),
+                      fullPath: addDevState.selectedPath,
+                      x: addDevState.x,
+                      y: addDevState.y,
+                      w: wPct,
+                      h: hPct,
+                      manufacturer: addDevState.manufacturer,
+                      yearOfManufacture: addDevState.year,
+                      serialNumber: 'SN-' + (Math.floor(Math.random() * 899999) + 100000),
+                      country: addDevState.country,
+                      technicalSpecs: addDevState.specs,
+                      importance: 'Trung bình'
+                    };
+
+                    setDevices(prev => [newDevice, ...prev]);
+                    setClickedDev(newDevice);
+                    setIsAddingDevice(false);
+                    setLocPath([]);
+                    setAlertMsg(`Đã lưu và liên kết thiết bị "${newDevice.name}" thành công!`);
+                    setIsAlertOpen(true);
+                    setTimeout(() => setIsAlertOpen(false), 3000);
+                  }
                 }}
                 className="px-5 py-2 bg-[#164399] hover:bg-[#113272] text-white text-[9.5pt] font-black rounded-lg transition-all shadow-md active:scale-95"
               >
@@ -1026,15 +1140,15 @@ export const SoDoThietBiScreen = ({
                   top: `${selectedClickCoords.y}%`,
                   transform: 'translate(-50%, -100%)',
                 }}
-                className="no-canvas-click z-50 bg-slate-900 border border-slate-700 text-white p-3.5 rounded-xl shadow-2xl w-[250px] flex flex-col gap-2.5 animate-in fade-in slide-in-from-top-2 duration-150 mb-3"
+                className="no-canvas-click z-50 bg-white border border-slate-200 text-slate-800 p-3.5 rounded-xl shadow-2xl w-[250px] flex flex-col gap-2.5 animate-in fade-in slide-in-from-top-2 duration-150 mb-3"
               >
-                <p className="text-[9.5pt] font-semibold leading-relaxed text-center text-slate-100">
+                <p className="text-[9.5pt] font-extrabold leading-relaxed text-center text-slate-800">
                   Bạn có muốn thêm vị trí thiết bị ở đây không?
                 </p>
                 <div className="flex items-center justify-end gap-1.5 text-[8.5pt]">
                   <button 
                     onClick={() => setSelectedClickCoords(null)}
-                    className="px-2.5 py-1 text-slate-300 hover:text-white hover:bg-slate-800 rounded transition-colors font-bold"
+                    className="px-2.5 py-1 text-slate-500 hover:text-slate-800 hover:bg-slate-100 rounded transition-colors font-bold"
                   >
                     Hủy
                   </button>
@@ -1058,7 +1172,7 @@ export const SoDoThietBiScreen = ({
                   transform: 'translateX(-50%)',
                   pointerEvents: 'none',
                 }}
-                className="z-50 bg-white text-slate-800 p-4 rounded-xl shadow-2xl border border-slate-200 w-[320px] flex flex-col gap-2 pointer-events-none animate-in fade-in slide-in-from-top-2 duration-150 mt-2"
+                className="z-50 bg-white text-slate-800 p-4 rounded-xl shadow-2xl border border-slate-200 w-[320px] flex flex-col gap-2 pointer-events-none animate-in fade-in slide-in-from-top-2 duration-150 mt-2 h-auto"
               >
                 <div className="flex items-center justify-between gap-4 border-b border-slate-100 pb-2">
                   <span className="text-[10pt] font-black text-red-600 uppercase tracking-wider">{activeTooltipDev.code}</span>
@@ -1068,12 +1182,12 @@ export const SoDoThietBiScreen = ({
                 </div>
                 <div className="flex flex-col">
                   <h4 className="text-[10.5pt] font-black tracking-tight text-[#164399]">{activeTooltipDev.name}</h4>
-                  <p className="text-[8.5pt] text-gray-500 font-bold leading-tight truncate mt-1">
+                  <p className="text-[8.5pt] text-gray-500 font-bold leading-normal break-words whitespace-normal mt-1">
                     Vị trí: {activeTooltipDev.path.join(' → ')}
                   </p>
                 </div>
                 <div className="flex items-center gap-2 mt-1 justify-between text-[9pt]">
-                  <span className="text-slate-500 font-bold">Trạng thái vận hành:</span>
+                  <span className="text-slate-500 italic font-normal">Trạng thái thiết bị:</span>
                   <span className={`px-2 py-0.5 text-[8.5pt] font-extrabold rounded-md ${
                     activeTooltipDev.status === 'Đang vận hành' ? 'text-emerald-700 bg-emerald-50 border border-emerald-200' :
                     activeTooltipDev.status === 'Sự cố' ? 'text-red-700 bg-red-50 border border-red-200' :
@@ -1091,84 +1205,95 @@ export const SoDoThietBiScreen = ({
         {clickedDev && !isAddingDevice && (
           <div className="w-96 bg-white border-l border-gray-200 flex flex-col shrink-0 shadow-2xl z-30 animate-in slide-in-from-right duration-300 popup-card relative">
             
-            {/* STICKY/NEO Header showing detailed device breadcrumb and Actions */}
-            <div className="p-4 border-b border-gray-200 bg-slate-50 flex flex-col sticky top-0 z-10 shadow-sm gap-2">
-              <div className="flex items-start justify-between">
-                {/* Full Device URL/Breadcrumb */}
-                <div className="min-w-0 flex-1">
-                  <div className="flex items-center gap-1.5 text-gray-400 text-[8pt] font-black uppercase tracking-wider flex-wrap leading-tight">
-                    <span>LƯỚI</span>
-                    <span>/</span>
-                    {clickedDev.path.slice(0, clickedDev.path.length - 1).map((segment, sIdx) => (
-                      <React.Fragment key={sIdx}>
-                        <span className="truncate max-w-[80px]" title={segment}>{segment}</span>
-                        <span>/</span>
-                      </React.Fragment>
-                    ))}
-                  </div>
-                </div>
-                
-                {/* Actions: Edit, Delete, Close */}
-                <div className="flex items-center gap-1.5 shrink-0 ml-2">
-                  <button 
-                    onClick={() => handleEditDevice(clickedDev)}
-                    title="Chỉnh sửa chi tiết thiết bị"
-                    className="p-1.5 hover:bg-slate-200 rounded-lg text-gray-500 hover:text-blue-600 transition-all duration-150 active:scale-90"
-                  >
-                    <Edit className="w-4.5 h-4.5" />
-                  </button>
-                  <button 
-                    onClick={() => handleDeleteDevice(clickedDev.id, clickedDev.name)}
-                    title="Xóa mapping thiết bị khỏi sơ đồ"
-                    className="p-1.5 hover:bg-red-50 rounded-lg text-gray-500 hover:text-red-600 transition-all duration-150 active:scale-90"
-                  >
-                    <Trash2 className="w-4.5 h-4.5" />
-                  </button>
-                  <button 
-                    onClick={() => setClickedDev(null)}
-                    title="Đóng trang"
-                    className="p-1.5 hover:bg-slate-200 rounded-lg text-gray-400 hover:text-gray-600 transition-all duration-150"
-                  >
-                    <X className="w-4.5 h-4.5" />
-                  </button>
-                </div>
-              </div>
-
-              {/* Title representation block */}
-              <div className="flex items-center justify-between gap-2 mt-1">
-                <span className="truncate text-[12pt] font-extrabold text-[#164399] leading-tight" title={clickedDev.name}>
-                  {clickedDev.name}
-                </span>
-                <span className={`shrink-0 px-2.5 py-1 text-[8pt] font-black uppercase leading-none rounded-full shadow-sm text-center ${getStatusColor(clickedDev.status)}`}>
+            {/* STICKY/NEO Header showing detailed device status and Actions (reduced height) */}
+            <div className="py-2.5 px-4 border-b border-gray-200 bg-slate-50 flex items-center justify-between sticky top-0 z-10 shadow-sm gap-2">
+              {/* Trang thai thiet bi o tren cung */}
+              <div className="min-w-0 flex-1">
+                <span className={`inline-block px-2.5 py-1 text-[8pt] font-black uppercase leading-none rounded-full shadow-sm text-center ${getStatusColor(clickedDev.status)}`}>
                   {clickedDev.status}
                 </span>
+              </div>
+              
+              {/* Actions: Edit, Delete, Close matching the exact general form style */}
+              <div className="flex items-center gap-1.5 shrink-0 ml-2">
+                <button 
+                  onClick={() => handleEditDevice(clickedDev)}
+                  title="Chỉnh sửa vị trí thiết bị trên sơ đồ"
+                  className="p-1.5 text-[#164399] hover:bg-blue-50 rounded-lg transition-all border border-gray-200"
+                >
+                  <Edit className="w-4 h-4" />
+                </button>
+                <button 
+                  onClick={() => handleDeleteDevice(clickedDev.id, clickedDev.name)}
+                  title="Xóa mapping thiết bị khỏi sơ đồ"
+                  className="p-1.5 text-red-600 hover:bg-red-50 rounded-lg transition-all border border-gray-200"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </button>
+                <button 
+                  onClick={() => setClickedDev(null)}
+                  title="Đóng trang"
+                  className="p-1.5 text-gray-500 hover:bg-gray-100 rounded-lg transition-all border border-gray-200"
+                >
+                  <X className="w-4 h-4" />
+                </button>
               </div>
             </div>
 
             {/* Scrollable specs and additional technical parameters container */}
-            <div className="flex-1 overflow-y-auto custom-scrollbar p-5 space-y-6">
+            <div className="flex-1 overflow-y-auto custom-scrollbar p-5 space-y-5">
               
-              {/* Row: Code and Type badges */}
+              {/* Mã và Loại thiết bị đưa lên trên trước Tên (Bỏ các tiêu đề) */}
               <div className="grid grid-cols-2 gap-3 pb-4 border-b border-gray-100">
-                <div className="flex flex-col gap-1">
-                  <span className="text-[8pt] font-bold text-gray-400 uppercase tracking-widest ml-0.5">Mã PMIS</span>
-                  <span className="bg-red-50 text-red-600 font-mono font-black text-[10pt] uppercase px-3 py-1.5 rounded-xl border border-red-100 w-fit">
-                    {clickedDev.code}
+                <span className="bg-red-50 text-red-600 font-mono font-black text-[9pt] uppercase px-3 py-2 rounded-xl border border-red-100 text-center w-full flex items-center justify-center">
+                  {clickedDev.code}
+                </span>
+                <span className={`font-black text-[8.5pt] uppercase px-3 py-2 rounded-xl border flex items-center justify-center gap-1.5 w-full text-center ${getTypeBadgeColor(clickedDev.type)}`}>
+                  <Cpu className="w-3.5 h-3.5 shrink-0" />
+                  <span className="truncate">{clickedDev.type}</span>
+                </span>
+              </div>
+
+              {/* Tên Thiết Bị & Vị trí trực thuộc quản lý (Hủy bỏ các nhãn tiêu đề, vị trí cha nhỏ mờ ngay dưới) */}
+              <div className="space-y-1.5 pb-4 border-b border-gray-100">
+                <h3 className="text-[12pt] font-black text-[#164399] tracking-tight leading-relaxed">
+                  {clickedDev.name}
+                </h3>
+                <div className="flex items-center gap-1.5 text-[8.5pt] font-medium text-gray-400 hover:text-gray-500 transition-colors leading-tight">
+                  <MapPin className="w-3.5 h-3.5 shrink-0 text-gray-400" />
+                  <span className="truncate" title={clickedDev.path.slice(0, clickedDev.path.length - 1).join(' → ') || 'Đơn vị gốc'}>
+                    {clickedDev.path.slice(0, clickedDev.path.length - 1).join(' → ') || 'Đơn vị gốc'}
                   </span>
                 </div>
-                <div className="flex flex-col gap-1">
-                  <span className="text-[8pt] font-bold text-gray-400 uppercase tracking-widest ml-0.5">Loại Thiết Bị</span>
-                  <span className={`font-black text-[9pt] uppercase px-3 py-1.5 rounded-xl border flex items-center gap-1.5 w-fit ${getTypeBadgeColor(clickedDev.type)}`}>
-                    <Cpu className="w-3.5 h-3.5" />
-                    {clickedDev.type}
-                  </span>
+              </div>
+
+              {/* Hình ảnh giả lập minh họa thiết bị có hỗ trợ click để Xem, Zoom và Tải ảnh rõ nét */}
+              <div 
+                onClick={() => {
+                  setPreviewingImgDev(clickedDev);
+                  setImgModalZoom(1);
+                }}
+                className="overflow-hidden rounded-2xl border border-slate-200/60 bg-slate-50 relative aspect-video shadow-inner group cursor-pointer"
+                title="Bấm vào để xem ảnh đầy đủ"
+              >
+                <img 
+                  src={getDeviceIllustration(clickedDev.type)}
+                  alt={clickedDev.name}
+                  className="w-full h-full object-cover select-none transition-all duration-300 group-hover:scale-105"
+                  referrerPolicy="no-referrer"
+                />
+                <div className="absolute inset-0 bg-slate-900/40 opacity-0 group-hover:opacity-100 transition-all duration-200 flex flex-col items-center justify-center gap-1.5 text-white">
+                  <div className="p-2 bg-white/20 backdrop-blur-md rounded-full shadow-lg border border-white/30 transform scale-90 group-hover:scale-100 transition-all">
+                    <ZoomIn className="w-4.5 h-4.5 text-white" />
+                  </div>
+                  <span className="text-[8.5pt] font-black uppercase tracking-wider text-white">Xem & Phóng to ảnh</span>
                 </div>
               </div>
 
               {/* Specific details specifications */}
               <div className="space-y-3 bg-[#164399]/5 rounded-2xl p-4 border border-[#164399]/10">
                 <h4 className="text-[10pt] font-black text-[#164399] uppercase tracking-wider flex items-center gap-2 pb-2 border-b border-[#164399]/10">
-                  <Settings className="w-4 h-4" /> Đặc tính kỹ thuật
+                  <Settings className="w-4 h-4" /> Thông số kỹ thuật
                 </h4>
                 <div className="space-y-2 text-[9.5pt]">
                   <div className="flex items-center justify-between border-b border-gray-100 py-1.5 group">
@@ -1196,43 +1321,28 @@ export const SoDoThietBiScreen = ({
                 </div>
               </div>
 
-              {/* Document attachment & links list */}
-              <div className="space-y-3">
-                <h4 className="text-[10pt] font-black text-[#1e293b] uppercase tracking-wider flex items-center gap-2">
-                  <FileText className="w-4 h-4 text-gray-500" /> Hồ sơ đính kèm
-                </h4>
-                <div className="space-y-2">
-                  {[
-                    { name: `Hồ_sơ_phê_duyệt_${clickedDev.code}.pdf`, size: '2.1 MB' },
-                    { name: `Biên_bản_thí_nghiệm_${clickedDev.code}.pdf`, size: '1.4 MB' }
-                  ].map((doc, dIdx) => (
-                    <div 
-                      key={dIdx} 
-                      onClick={() => setPreviewContent({ type: 'file', url: '#', name: doc.name })}
-                      className="flex items-center justify-between p-2.5 bg-slate-50 border border-slate-100 rounded-xl hover:border-blue-200 transition-all cursor-pointer group shadow-sm"
-                    >
-                      <div className="flex items-center gap-2 min-w-0">
-                        <div className="p-1.5 bg-white rounded-lg text-blue-600 shadow-sm border border-gray-100 shrink-0">
-                          <FileText className="w-3.5 h-3.5" />
-                        </div>
-                        <div className="flex flex-col min-w-0">
-                          <span className="text-[9pt] font-bold text-[#164399] group-hover:text-blue-600 transition-colors truncate">{doc.name}</span>
-                          <span className="text-[7.5pt] text-gray-400 font-bold uppercase">{doc.size}</span>
-                        </div>
-                      </div>
-                      <Download className="w-3.5 h-3.5 text-gray-400 group-hover:text-blue-500 transition-colors shrink-0" />
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* View Full details screen trigger */}
+              {/* View Full details screen trigger redirected to the respective Device view */}
               <button 
-                onClick={() => setDetailForm({ type: 'device', mode: 'view', data: clickedDev.name })}
+                onClick={() => {
+                  if (setDevicePath) {
+                    const alternatingPath: string[] = [];
+                    clickedDev.path.forEach((segment, idx) => {
+                      alternatingPath.push(segment);
+                      if (idx < clickedDev.path.length - 1) {
+                        let lvlType = 'Phân cấp';
+                        if (idx === 1) lvlType = 'Thiết bị chính';
+                        else if (idx === 0) lvlType = 'Đơn vị';
+                        alternatingPath.push(lvlType);
+                      }
+                    });
+                    setDevicePath(alternatingPath);
+                  }
+                  setActiveSubMenu('Danh sách thiết bị');
+                }}
                 className="w-full py-3 text-[10.5pt] font-extrabold text-[#164399] bg-blue-50 hover:bg-blue-100 border border-blue-200 rounded-xl transition-all flex items-center justify-center gap-2 shadow-sm"
               >
                 <ExternalLink className="w-4 h-4" />
-                <span>Xem Lý lịch thiết bị đầy đủ</span>
+                <span>Xem thông tin chi tiết</span>
               </button>
 
             </div>
@@ -1256,9 +1366,107 @@ export const SoDoThietBiScreen = ({
 
       {/* Floating Status alert messages banner (Toast counterpart) */}
       {isAlertOpen && (
-        <div className="absolute top-20 left-1/2 -translate-x-1/2 z-[100] px-6 py-3 bg-slate-900 text-white rounded-2xl shadow-2xl flex items-center gap-3 border border-slate-700 animate-in fade-in zoom-in-95 duration-200">
-          <Check className="w-5 h-5 text-emerald-400 shrink-0" />
-          <span className="text-[10pt] font-bold tracking-tight">{alertMsg}</span>
+        <div className="absolute top-20 left-1/2 -translate-x-1/2 z-[100] px-6 py-3.5 bg-white text-slate-800 rounded-2xl shadow-2xl flex items-center gap-3 border border-slate-100 animate-in fade-in zoom-in-95 duration-200">
+          <Check className="w-5 h-5 text-emerald-600 shrink-0" />
+          <span className="text-[10pt] font-extrabold tracking-tight">{alertMsg}</span>
+        </div>
+      )}
+
+      {/* Interactive High-Fidelity Device Image Viewer Mockup Modal */}
+      {previewingImgDev && (
+        <div className="fixed inset-0 bg-slate-900/85 backdrop-blur-sm z-[200] flex flex-col items-center justify-center p-4 animate-in fade-in duration-200">
+          
+          {/* Modal Box */}
+          <div className="bg-white rounded-3xl w-full max-w-4xl max-h-[85vh] overflow-hidden shadow-2xl flex flex-col border border-slate-100">
+            
+            {/* Modal Header */}
+            <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between bg-slate-50 gap-4 flex-wrap">
+              <div className="flex flex-col min-w-0">
+                <span className="text-[7.5pt] font-black uppercase tracking-widest text-[#164399]">Hồ sơ ảnh thiết bị chính</span>
+                <h4 className="text-[11.5pt] font-black text-slate-800 tracking-tight flex items-center gap-2 truncate">
+                  <span className="bg-red-50 text-red-600 font-mono text-[8pt] px-2 py-0.5 rounded border border-red-100 shrink-0">
+                    {previewingImgDev.code}
+                  </span>
+                  <span className="truncate">{previewingImgDev.name}</span>
+                </h4>
+              </div>
+              
+              {/* Modal controls in the header */}
+              <div className="flex items-center gap-1.5 shrink-0 ml-auto">
+                <button 
+                  onClick={() => setImgModalZoom(prev => Math.max(0.5, prev - 0.25))}
+                  title="Thu nhỏ"
+                  className="p-1.5 text-slate-600 hover:bg-slate-100 active:scale-95 rounded-xl border border-gray-200 transition-all"
+                >
+                  <ZoomOut className="w-4 h-4" />
+                </button>
+                <div className="text-[8.5pt] font-bold text-slate-500 font-mono px-2 py-1 bg-white border border-gray-200 rounded-xl min-w-[50px] text-center select-none">
+                  {Math.round(imgModalZoom * 100)}%
+                </div>
+                <button 
+                  onClick={() => setImgModalZoom(prev => Math.min(3, prev + 0.25))}
+                  title="Phóng to"
+                  className="p-1.5 text-slate-600 hover:bg-slate-100 active:scale-95 rounded-xl border border-gray-200 transition-all"
+                >
+                  <ZoomIn className="w-4 h-4" />
+                </button>
+                <button 
+                  onClick={() => setImgModalZoom(1)}
+                  title="Reset kích thước"
+                  className="px-2.5 py-1 text-[8pt] font-black uppercase text-[#164399] bg-blue-50 border border-blue-100 hover:bg-blue-100 rounded-lg transition-all"
+                >
+                  100%
+                </button>
+                <a 
+                  href={getDeviceIllustration(previewingImgDev.type)}
+                  download={`PMIS-${previewingImgDev.code}-Image.jpg`}
+                  target="_blank"
+                  rel="noreferrer"
+                  title="Tải ảnh gốc rõ nét"
+                  className="p-1.5 text-emerald-600 hover:bg-emerald-50 active:scale-95 rounded-xl border border-emerald-200 transition-all flex items-center gap-1 bg-emerald-50/25 px-2.5"
+                >
+                  <Download className="w-4 h-4 text-emerald-600" />
+                  <span className="text-[8.5pt] font-black uppercase">Tải về</span>
+                </a>
+                <button 
+                  onClick={() => setPreviewingImgDev(null)}
+                  title="Đóng trang"
+                  className="p-1.5 text-gray-500 hover:bg-red-50 hover:text-red-600 transition-all rounded-xl border border-gray-200 ml-2"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+
+            {/* Modal Body / Scrollable Viewer Grid */}
+            <div className="flex-1 overflow-auto bg-slate-900 p-8 flex items-center justify-center min-h-[400px] relative custom-scrollbar">
+              <div 
+                className="transition-transform duration-200 ease-out origin-center select-none"
+                style={{ transform: `scale(${imgModalZoom})` }}
+              >
+                <img 
+                  src={getDeviceIllustration(previewingImgDev.type)}
+                  alt={previewingImgDev.name}
+                  className="max-w-full max-h-[50vh] object-contain rounded-lg shadow-2xl pointer-events-none"
+                  referrerPolicy="no-referrer"
+                />
+              </div>
+              
+              {/* Floating absolute badges inside the viewer */}
+              <div className="absolute bottom-4 left-4 bg-black/60 backdrop-blur-md text-white/95 text-[7.5pt] font-mono p-3 rounded-xl border border-white/10 flex flex-col gap-1 select-none pointer-events-none">
+                <div>• Thiết bị: <span className="font-bold text-blue-400">{previewingImgDev.name}</span></div>
+                <div>• Loại: <span className="font-bold text-blue-400">{previewingImgDev.type}</span></div>
+                <div>• Hãng SX: <span className="font-bold text-gray-300">{previewingImgDev.manufacturer}</span></div>
+                <div>• Chế độ: <span className="font-bold text-emerald-400">Hình ảnh mô phỏng chất lượng cao</span></div>
+              </div>
+            </div>
+
+            {/* Modal Footer */}
+            <div className="px-6 py-3.5 border-t border-gray-100 bg-slate-50 flex items-center justify-between text-[8pt] font-bold text-gray-400">
+              <div className="truncate text-slate-500">Vị trí PMIS: {previewingImgDev.path.join(' → ')}</div>
+              <div className="shrink-0 text-slate-400">Sử dụng nút thu nhỏ / phóng to để kiểm tra chi tiết thiết bị</div>
+            </div>
+          </div>
         </div>
       )}
     </div>

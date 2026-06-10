@@ -339,21 +339,23 @@ export const PmisLuoiApp = ({ config, onBack }: PmisLuoiAppProps) => {
               setDevicePath([branch]);
             }}
           />
-          <BreadcrumbBar
-            isEditing={isEditing}
-            devicePath={devicePath}
-            setDevicePath={setDevicePath}
-            setTempDevicePath={setTempDevicePath}
-            setShowDeviceTreePopup={setShowDeviceTreePopup}
-            setDeviceFormCurrentPage={setDeviceFormCurrentPage}
-            activeBreadcrumbDropdown={activeBreadcrumbDropdown}
-            setActiveBreadcrumbDropdown={setActiveBreadcrumbDropdown}
-            breadcrumbSearch={breadcrumbSearch}
-            setBreadcrumbSearch={setBreadcrumbSearch}
-            setDetailForm={setDetailForm}
-            detailForm={detailForm}
-            setActiveSubMenu={setActiveSubMenu}
-          />
+          {activeSubMenu !== 'Sơ đồ thiết bị' && (
+            <BreadcrumbBar
+              isEditing={isEditing}
+              devicePath={devicePath}
+              setDevicePath={setDevicePath}
+              setTempDevicePath={setTempDevicePath}
+              setShowDeviceTreePopup={setShowDeviceTreePopup}
+              setDeviceFormCurrentPage={setDeviceFormCurrentPage}
+              activeBreadcrumbDropdown={activeBreadcrumbDropdown}
+              setActiveBreadcrumbDropdown={setActiveBreadcrumbDropdown}
+              breadcrumbSearch={breadcrumbSearch}
+              setBreadcrumbSearch={setBreadcrumbSearch}
+              setDetailForm={setDetailForm}
+              detailForm={detailForm}
+              setActiveSubMenu={setActiveSubMenu}
+            />
+          )}
 
           <WorkLocationPopup
             showDeviceTreePopup={showDeviceTreePopup}
@@ -782,6 +784,8 @@ export const PmisLuoiApp = ({ config, onBack }: PmisLuoiAppProps) => {
                   setActiveSubMenu={setActiveSubMenu}
                   setDetailForm={setDetailForm}
                   setPreviewContent={setPreviewContent}
+                  devicePath={devicePath}
+                  setDevicePath={setDevicePath}
                 />
               ) : activeSubMenu === 'Danh sách thiết bị' ? (
                 <DeviceModule 

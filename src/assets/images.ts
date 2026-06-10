@@ -3,7 +3,7 @@ import bgLoginImage from './bgLog.jpg';
 import avatarImage from './avatar.png';
 import csdlImage from './csdl.jpg';
 import nguonImage from './nguon.jpg';
-import luoiImage from './sodo.jpg';
+import luoiImage from './luoi.jpg';
 import smisImage from './smis.jpg';
 import modulesImage from './Modules.png';
 
