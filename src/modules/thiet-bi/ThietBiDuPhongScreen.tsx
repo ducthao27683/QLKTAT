@@ -601,7 +601,7 @@ export const ThietBiDuPhongScreen = ({
                 </button>
                 <button 
                   onClick={() => handleSaveForm(false)}
-                  className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-655 border border-slate-250 rounded-lg text-[10pt] font-bold transition-all shadow-sm"
+                  className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-600 border border-gray-200 rounded-lg text-[10pt] font-bold transition-all shadow-sm"
                 >
                   Lưu nháp
                 </button>
@@ -1545,8 +1545,8 @@ export const ThietBiDuPhongScreen = ({
                     </div>
 
                     {/* High-Fidelity Unified Information block */}
-                    <div className="bg-white p-6 rounded-2xl border border-gray-150 shadow-sm space-y-6">
-                      <div className="flex items-center justify-between pb-3 border-b border-gray-150 flex-wrap gap-2">
+                    <div className="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm space-y-6">
+                      <div className="flex items-center justify-between pb-3 border-b border-gray-200 flex-wrap gap-2">
                         <h4 className="text-[10pt] font-black text-slate-800 uppercase tracking-widest flex items-center gap-2">
                           <FileText className="w-5 h-5 text-[#164399]" /> Thông tin phiếu đăng ký
                         </h4>
@@ -1571,13 +1571,13 @@ export const ThietBiDuPhongScreen = ({
                           </div>
                         </div>
 
-                        <div className="space-y-1 md:col-span-2 pt-3 border-t border-gray-150 text-[10pt]">
+                        <div className="space-y-1 md:col-span-2 pt-3 border-t border-gray-200 text-[10pt]">
                           <span className="text-gray-400 font-bold block uppercase text-[8pt] tracking-wider mb-1">Ghi chú</span>
                           <p className="text-gray-750 font-normal leading-relaxed whitespace-pre-wrap mb-4">{selectedTicket.notes || "Không có ghi chú"}</p>
                         </div>
 
-                        <div className="space-y-2 md:col-span-2 pt-3 border-t border-gray-150 text-[10pt]">
-                          <span className="text-gray-400 font-bold block uppercase text-[8pt] tracking-wider mb-1.5">Tài liệu hồ sơ đính kèm ({[
+                        <div className="space-y-2 md:col-span-2 pt-3 border-t border-gray-200 text-[10pt]">
+                          <span className="text-gray-400 font-bold block uppercase text-[8pt] tracking-wider mb-1.5 font-sans">Tài liệu hồ sơ đính kèm ({[
                             { name: 'Ke_hoach_du_phat_thiet_bi_2026.pdf', size: '1.4 MB' },
                             { name: 'Bang_ke_dinh_muc_du_phong_xuong_110kV.xlsx', size: '850 KB' }
                           ].length})</span>
@@ -1587,7 +1587,7 @@ export const ThietBiDuPhongScreen = ({
                               { name: 'Ke_hoach_du_phat_thiet_bi_2026.pdf', size: '1.4 MB' },
                               { name: 'Bang_ke_dinh_muc_du_phong_xuong_110kV.xlsx', size: '850 KB' }
                             ].map((file, fIdx) => (
-                              <div key={fIdx} className="flex items-center justify-between p-3.5 bg-gray-50 rounded-2xl border border-gray-150 hover:bg-[#ECF3FE]/20 hover:border-blue-200 transition-all text-left">
+                              <div key={fIdx} className="flex items-center justify-between p-3.5 bg-gray-50 rounded-2xl border border-gray-200 hover:bg-[#ECF3FE]/20 hover:border-blue-200 transition-all text-left">
                                 <div className="flex items-center gap-3 min-w-0 flex-1">
                                   <FileText className="w-5 h-5 text-[#164399] shrink-0" />
                                   <div className="min-w-0 flex-1">
@@ -1961,7 +1961,7 @@ export const ThietBiDuPhongScreen = ({
 
               {/* Manager Feedback Form overlay inside viewState */}
               {formOverlay.mode === 'approve' && (
-                <div className="p-5 bg-indigo-50/50 border border-indigo-150 rounded-2xl space-y-3.5">
+                <div className="p-5 bg-indigo-50/50 border border-indigo-200 rounded-2xl space-y-3.5">
                   <h4 className="text-[9.5pt] font-black text-indigo-700 uppercase tracking-wider flex items-center gap-1.5">
                     <CheckCircle2 className="w-5 h-5" /> Ý KIẾN CHỈ ĐẠO CẤP QUẢN LÝ (PHÊ DUYỆT)
                   </h4>
@@ -1982,7 +1982,7 @@ export const ThietBiDuPhongScreen = ({
               )}
 
               {formOverlay.data.approvalDate && formOverlay.mode !== 'approve' && (
-                <div className="p-5 bg-slate-50 border border-slate-150 rounded-2xl space-y-3">
+                <div className="p-5 bg-slate-50 border border-gray-200 rounded-2xl space-y-3">
                   <h4 className="text-[9.5pt] font-black text-slate-700 uppercase tracking-wider flex items-center gap-1.5 border-b border-slate-200 pb-2">
                     <History className="w-4 h-4 text-[#164399]" /> NHẬN XÉT PHÊ KÝ CHI TIẾT
                   </h4>
@@ -2059,7 +2059,7 @@ export const ThietBiDuPhongScreen = ({
       {/* NESTED MULTI-SELECT DEVICE POPUP (Chọn thiết bị vào danh sách đăng ký) */}
       {showDeviceModal && formOverlay && (
         <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-md z-[200] flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl w-full max-w-xl max-h-[80vh] overflow-hidden shadow-2xl flex flex-col border border-slate-150 text-left">
+          <div className="bg-white rounded-3xl w-full max-w-xl max-h-[80vh] overflow-hidden shadow-2xl flex flex-col border border-gray-200 text-left">
             
             {/* Modal Sub header */}
             <div className="px-5 py-4 bg-slate-50 border-b border-gray-100 flex items-center justify-between">
@@ -2123,7 +2123,7 @@ export const ThietBiDuPhongScreen = ({
                     <div 
                       key={device.id}
                       onClick={() => handleSelectModalDevice(device, !isChecked)}
-                      className={`p-3 bg-white border rounded-xl hover:border-[#164399] cursor-pointer transition-all flex items-center justify-between gap-3 ${isChecked ? 'border-[#164399] bg-blue-50/20' : 'border-gray-150 shadow-sm'}`}
+                      className={`p-3 bg-white border rounded-xl hover:border-[#164399] cursor-pointer transition-all flex items-center justify-between gap-3 ${isChecked ? 'border-[#164399] bg-blue-50/20' : 'border-gray-200 shadow-sm'}`}
                     >
                       <div className="flex items-center gap-3 min-w-0">
                         {/* Icon loại bao trùm dòng Mã và Tên */}
@@ -2163,7 +2163,7 @@ export const ThietBiDuPhongScreen = ({
             </div>
 
             {/* Sub-footer submit */}
-            <div className="p-4 bg-slate-50 border-t border-gray-150 flex items-center justify-between text-[8.5pt] font-black text-slate-400 uppercase select-none shrink-0">
+            <div className="p-4 bg-slate-50 border-t border-gray-200 flex items-center justify-between text-[8.5pt] font-black text-slate-400 uppercase select-none shrink-0">
               <span>Đã thêm ({formOverlay.data.items.length}) loại</span>
               <button 
                 onClick={() => setShowDeviceModal(false)}

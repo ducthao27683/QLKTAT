@@ -823,7 +823,7 @@ export const DeviceModule = ({
                           </div>
 
                           {/* Content Card */}
-                          <div className="p-4 bg-white rounded-xl border border-gray-150 hover:shadow-sm hover:border-blue-200 transition-all relative">
+                          <div className="p-4 bg-white rounded-xl border border-gray-200 hover:shadow-sm hover:border-blue-200 transition-all relative">
                             <div className="flex items-start justify-between gap-4">
                               <div className="flex-1 min-w-0 space-y-1">
                                 <div className="flex items-center gap-2 flex-wrap">

@@ -315,7 +315,7 @@ export const ReportDetailView = ({
 
                 <div className="bg-white rounded-3xl border border-gray-100 overflow-hidden shadow-sm">
                   <table className="w-full text-left">
-                    <thead className="bg-slate-50 border-b border-gray-150 text-slate-700 text-[9.5pt] font-black uppercase tracking-widest">
+                    <thead className="bg-slate-50 border-b border-gray-200 text-slate-700 text-[9.5pt] font-black uppercase tracking-widest">
                       <tr>
                         <th className="px-8 py-5">Hạng mục thí nghiệm</th>
                         <th className="px-6 py-5 text-center">ĐVT</th>

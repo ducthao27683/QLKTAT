@@ -829,7 +829,7 @@ export const PmisLuoiApp = ({ config, onBack }: PmisLuoiAppProps) => {
                   devicePath={devicePath}
                   activeUnit={selectedBranch}
                 />
-              ) : activeSubMenu === 'Danh mục thiết bị thí nghiệm' ? (
+              ) : (activeSubMenu === 'Danh mục thiết bị thí nghiệm' || activeSubMenu === 'Danh mục thí nghiệm') ? (
                 <DanhMucThiNghiemScreen 
                   setActiveSubMenu={setActiveSubMenu} 
                   setDetailForm={setDetailForm} 
