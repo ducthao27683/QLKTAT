@@ -28,6 +28,7 @@ import { DanhMucThiNghiemScreen } from '../modules/thi-nghiem/danh-muc-thi-nghie
 import { IncidentModule } from '../modules/su-co/thong-tin-su-co/ThongTinSuCoScreen';
 import { DeviceModule } from '../modules/thiet-bi/thong-tin-thiet-bi/ThongTinThietBiScreen';
 import { SoDoThietBiScreen } from '../modules/thiet-bi/SoDoThietBiScreen';
+import { ThietBiDuPhongScreen } from '../modules/thiet-bi/ThietBiDuPhongScreen';
 
 import { 
   MENU_ITEMS, 
@@ -171,7 +172,8 @@ export const PmisLuoiApp = ({ config, onBack }: PmisLuoiAppProps) => {
     }
   }, [devicePath, detailForm]);
 
-  const isEditing = detailForm && (detailForm.mode === 'add' || detailForm.mode === 'edit');
+  const [isDuPhongEditing, setIsDuPhongEditing] = useState(false);
+  const isEditing = (detailForm && (detailForm.mode === 'add' || detailForm.mode === 'edit')) || isDuPhongEditing;
 
   const getFormTitle = () => {
     if (!detailForm) return null;
@@ -339,7 +341,7 @@ export const PmisLuoiApp = ({ config, onBack }: PmisLuoiAppProps) => {
               setDevicePath([branch]);
             }}
           />
-          {activeSubMenu !== 'Sơ đồ thiết bị' && (
+          {activeSubMenu && activeSubMenu !== 'Sơ đồ thiết bị' && activeSubMenu !== 'Thiết bị dự phòng' && activeSubMenu !== 'Yêu cầu thí nghiệm' && activeSubMenu !== 'Kế hoạch thí nghiệm' && (
             <BreadcrumbBar
               isEditing={isEditing}
               devicePath={devicePath}
@@ -805,6 +807,12 @@ export const PmisLuoiApp = ({ config, onBack }: PmisLuoiAppProps) => {
                   setConfirmAction={setConfirmAction}
                   getDeviceDetails={getDeviceDetails}
                 />
+              ) : activeSubMenu === 'Thiết bị dự phòng' ? (
+                <ThietBiDuPhongScreen 
+                  setActiveSubMenu={setActiveSubMenu}
+                  devicePath={devicePath}
+                  onEditingChange={setIsDuPhongEditing}
+                />
               ) : (activeSubMenu === 'Yêu cầu thí nghiệm' || activeSubMenu === 'Kế hoạch thí nghiệm') ? (
                 <YeuCauThiNghiemScreen 
                   setActiveSubMenu={setActiveSubMenu} 
@@ -881,7 +889,7 @@ export const PmisLuoiApp = ({ config, onBack }: PmisLuoiAppProps) => {
               )}
             </div>
           ) : (
-            <div className="flex-1 overflow-y-auto bg-[#F2F5F9] p-6 pb-20 custom-scrollbar">
+            <div className="h-full overflow-y-auto bg-[#F2F5F9] p-6 pb-20 custom-scrollbar">
               <Dashboard 
                 config={config}
                 selectedBranch={dashboardBranch}

@@ -449,7 +449,7 @@ export const DeviceModule = ({
         <div className="flex-1 flex bg-white overflow-hidden">
           {/* Left Column: Device Cards List */}
           <div className="w-[45%] flex flex-col border-r border-gray-100 overflow-hidden px-6 py-0">
-            <div className="flex-1 overflow-y-auto custom-scrollbar pr-2 space-y-3 pt-6 pb-6">
+            <div className="flex-1 overflow-y-auto custom-scrollbar pl-1.5 pr-2 space-y-3 pt-6 pb-6">
               {paginatedChildren.map((child, idx) => {
                 const type = getDetailedChildType(child);
                 const normType = normalizeType(type);
@@ -763,7 +763,23 @@ export const DeviceModule = ({
                                       }
                                     }}
                                  >
-                                    <span className="w-24 shrink-0 text-[10pt] font-bold text-blue-600 font-mono tracking-tight">{item.date}</span>
+                                    {(() => {
+                                      const parts = item.date.split('/');
+                                      const d = parts[0] || '11';
+                                      const m = parts[1] || '06';
+                                      const y = parts[2] || '2026';
+                                      return (
+                                        <div className="w-12 h-12 rounded-xl border border-gray-200 overflow-hidden flex flex-col items-center bg-white shrink-0 shadow-sm">
+                                          <div className="w-full bg-[#164399] text-[6.5pt] font-black uppercase text-white py-0.5 text-center leading-none tracking-wider">
+                                            T.{m}
+                                          </div>
+                                          <div className="flex-1 flex flex-col items-center justify-center bg-white leading-none">
+                                            <span className="text-[11pt] font-black text-slate-800 font-mono">{d}</span>
+                                            <span className="text-[5.5pt] text-gray-400 font-black tracking-tighter mt-0.5">{y}</span>
+                                          </div>
+                                        </div>
+                                      );
+                                    })()}
                                     <div className="w-[1px] h-6 bg-gray-100 shrink-0"></div>
                                     <span className="flex-1 text-[12pt] font-medium text-gray-700 tracking-tight leading-snug group-hover:text-blue-600 transition-colors">{item.content}</span>
                                     <div className={`px-2.5 py-1 rounded-lg text-[8pt] font-bold uppercase tracking-tighter shrink-0 ${
@@ -788,33 +804,52 @@ export const DeviceModule = ({
                     </h5>
                     <button className="text-[9pt] font-bold text-blue-600 hover:underline">Xem tất cả</button>
                  </div>
-                 <div className="space-y-4">
-                    {LIFECYCLE_STEPS.map((item, j) => (
-                      <div key={j} className="flex items-center gap-4 p-4 bg-white rounded-xl border border-gray-100 hover:shadow-sm hover:border-blue-200 transition-all group relative overflow-hidden">
-                         <div className="w-14 h-14 rounded-xl bg-gray-50 flex flex-col items-center justify-center border border-gray-100 group-hover:bg-blue-50 transition-all shrink-0">
-                            <span className="text-[12pt] font-bold text-gray-700 leading-none">{item.date.split('/')[1]}</span>
-                            <span className="text-[7pt] text-gray-400 font-bold uppercase leading-none mt-1">Tháng</span>
-                         </div>
-                         <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-2 mb-1">
-                               <span className={`px-2 py-0.5 rounded text-[8pt] font-bold uppercase ${
-                                 item.type === 'Sự cố' ? 'bg-red-50 text-red-600' : 
-                                 item.type === 'Thí nghiệm' ? 'bg-blue-50 text-blue-600' :
-                                 item.type === 'Sửa chữa lớn' ? 'bg-purple-50 text-purple-600' :
-                                 item.type === 'Hòa lưới' ? 'bg-green-50 text-green-600' :
-                                 'bg-blue-50 text-blue-500'
-                               }`}>{item.type}</span>
-                               <span className="text-[9pt] text-gray-400 font-medium">{item.date}</span>
+                 <div className="relative pl-8 border-l-2 border-slate-100 space-y-6 ml-4 pt-2">
+                    {LIFECYCLE_STEPS.map((item, j) => {
+                      const colors: Record<string, { bg: string, border: string, text: string, dot: string }> = {
+                        'Sự cố': { bg: 'bg-red-500/10', border: 'border-red-200', text: 'text-red-700', dot: 'bg-red-500' },
+                        'Thí nghiệm': { bg: 'bg-blue-500/10', border: 'border-blue-200', text: 'text-blue-700', dot: 'bg-blue-600' },
+                        'Sửa chữa lớn': { bg: 'bg-purple-500/10', border: 'border-purple-200', text: 'text-purple-700', dot: 'bg-purple-500' },
+                        'Hòa lưới': { bg: 'bg-green-500/10', border: 'border-green-200', text: 'text-green-700', dot: 'bg-green-600' },
+                        'default': { bg: 'bg-slate-500/10', border: 'border-slate-200', text: 'text-slate-700', dot: 'bg-slate-500' }
+                      };
+                      const c = colors[item.type] || colors.default;
+
+                      return (
+                        <div key={j} className="relative group text-left">
+                          {/* Timeline circular dot on the vertical line */}
+                          <div className="absolute -left-[41px] top-1.5 w-6 h-6 rounded-full bg-white border-2 border-slate-200 flex items-center justify-center group-hover:border-blue-500 transition-all z-10 shadow-sm">
+                            <div className={`w-2 h-2 rounded-full ${c.dot} group-hover:scale-125 transition-transform`}></div>
+                          </div>
+
+                          {/* Content Card */}
+                          <div className="p-4 bg-white rounded-xl border border-gray-150 hover:shadow-sm hover:border-blue-200 transition-all relative">
+                            <div className="flex items-start justify-between gap-4">
+                              <div className="flex-1 min-w-0 space-y-1">
+                                <div className="flex items-center gap-2 flex-wrap">
+                                  <span className={`px-2 py-0.5 rounded text-[7.5pt] font-black uppercase tracking-wider border ${c.bg} ${c.border} ${c.text}`}>
+                                    {item.type}
+                                  </span>
+                                  <span className="text-[9pt] text-gray-400 font-bold font-mono">{item.date}</span>
+                                </div>
+                                <p className="text-[11.5pt] text-slate-800 font-extrabold leading-snug tracking-tight">
+                                  {item.content}
+                                </p>
+                                {item.result && (
+                                  <div className="flex items-center gap-1 mt-1">
+                                    <span className="text-[8.5pt] font-bold text-gray-400 uppercase tracking-tighter">Kết quả:</span>
+                                    <span className="text-[9pt] font-bold text-green-600 uppercase tracking-tight">{item.result}</span>
+                                  </div>
+                                )}
+                              </div>
+                              <div className="pt-1.5 shrink-0">
+                                <ChevronRight className="w-4 h-4 text-gray-300 group-hover:text-blue-500 group-hover:translate-x-1 transition-all" />
+                              </div>
                             </div>
-                            <p className="text-[11pt] text-gray-800 font-semibold leading-snug">{item.content}</p>
-                            <div className="flex items-center gap-2 mt-1">
-                               <span className="text-[9pt] font-bold text-gray-400 uppercase tracking-tighter">Kết quả:</span>
-                               <span className="text-[9pt] font-bold text-green-600 uppercase">{item.result}</span>
-                            </div>
-                         </div>
-                         <ChevronRight className="w-4 h-4 text-gray-200 group-hover:text-blue-500 group-hover:translate-x-1 transition-all" />
-                      </div>
-                    ))}
+                          </div>
+                        </div>
+                      );
+                    })}
                  </div>
               </div>
             )}

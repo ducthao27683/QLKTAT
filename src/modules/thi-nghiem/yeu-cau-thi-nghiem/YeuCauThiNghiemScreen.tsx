@@ -169,7 +169,7 @@ export const YeuCauThiNghiemScreen = ({
                   }`}>{plan.status}</span>
                 </div>
                 
-                <h3 className={`text-[12pt] font-black mb-3 line-clamp-2 leading-tight transition-all whitespace-normal break-words ${
+                <h3 className={`text-[12pt] font-normal text-slate-700 mb-3 line-clamp-2 leading-tight transition-all whitespace-normal break-words ${
                   selectedTestingPlanId === plan.id ? 'text-[#164399]' : 'text-gray-800 group-hover:text-blue-600 group-hover:translate-x-1'
                 }`}>
                   {plan.title.replace(/Yêu cầu |Kế hoạch /g, '')}
@@ -186,7 +186,7 @@ export const YeuCauThiNghiemScreen = ({
                       {plan.devices.length} THIẾT BỊ
                     </div>
                   </div>
-                  <span className="text-gray-400 italic font-medium lowercase">Người lập: {plan.creator}</span>
+                  <span className="text-gray-500 italic font-medium">Người cập nhật: <span className="text-black font-bold not-italic">{plan.creator ? plan.creator.toLowerCase().split(' ').map(w => w.charAt(0).toUpperCase() + w.substring(1)).join(' ') : ''}</span></span>
                 </div>
               </div>
             ))}
@@ -195,9 +195,11 @@ export const YeuCauThiNghiemScreen = ({
           <div className="p-3 border-t border-gray-100 bg-white flex items-center justify-between text-[10pt] font-bold text-gray-400 shrink-0">
              <button className="px-3 py-1 hover:bg-gray-50 rounded border border-gray-100 text-gray-400 cursor-not-allowed uppercase">Trước</button>
              <div className="flex items-center gap-2">
+                <span>Trang</span>
                 <span className="text-blue-600">1</span>
                 <span>/</span>
                 <span>4</span>
+                <span className="text-[9pt] text-gray-400 font-normal ml-2">(Hiển thị {filteredPlans.length}/{filteredPlans.length * 4} bản ghi)</span>
              </div>
              <button className="px-3 py-1 hover:bg-blue-50 rounded border border-blue-100 text-blue-600 uppercase">Tiếp</button>
           </div>

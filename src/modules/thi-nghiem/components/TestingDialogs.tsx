@@ -148,7 +148,7 @@ export const TestingDialogs = ({
 
                 <div className="flex-1 overflow-auto custom-scrollbar">
                   <table className="w-full text-left border-collapse">
-                    <thead className="bg-[#164399] text-white text-[9pt] font-black uppercase sticky top-0 z-10">
+                    <thead className="bg-slate-100/90 backdrop-blur-sm text-slate-700 text-[9pt] font-black uppercase sticky top-0 z-10 border-b border-gray-200">
                       <tr>
                         <th className="px-6 py-3 w-10 text-center">
                           <input type="checkbox" className="rounded" />

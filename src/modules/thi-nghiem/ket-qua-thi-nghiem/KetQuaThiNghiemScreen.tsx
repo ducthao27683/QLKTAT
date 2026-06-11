@@ -336,7 +336,7 @@ export const KetQuaThiNghiemScreen = ({
                          <h5 className="text-[11pt] font-bold text-gray-700 uppercase tracking-tight">Chi tiết hạng mục thí nghiệm</h5>
                       </div>
                       <table className="w-full text-left">
-                        <thead className="bg-[#164399] text-white text-[9pt] font-bold uppercase tracking-widest">
+                        <thead className="bg-slate-50 border-b border-gray-150 text-slate-700 text-[9pt] font-bold uppercase tracking-widest">
                           <tr>
                             <th className="px-6 py-4">Hạng mục thí nghiệm</th>
                             <th className="px-6 py-4 w-24 text-center">ĐVT</th>
