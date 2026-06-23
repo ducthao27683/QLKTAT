@@ -97,7 +97,7 @@ export const DocumentLibraryModal: React.FC<DocumentLibraryModalProps> = ({
   });
 
   return (
-    <div className="fixed inset-0 z-[500] flex items-center justify-center p-4">
+    <div className="fixed inset-0 z-[99999999] flex items-center justify-center p-4">
       <div 
         className="absolute inset-0 bg-slate-900/60 backdrop-blur-md transition-opacity"
         onClick={onClose}
@@ -113,7 +113,10 @@ export const DocumentLibraryModal: React.FC<DocumentLibraryModalProps> = ({
               <span className="text-[12pt] font-black text-slate-800 tracking-tight block">Chọn tài liệu kỹ thuật từ Thư viện hệ thống</span>
             </div>
           </div>
-          <button className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors cursor-pointer">
+          <button 
+            onClick={onClose}
+            className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors cursor-pointer"
+          >
             <X className="w-5 h-5 text-gray-500" />
           </button>
         </div>
@@ -123,7 +126,7 @@ export const DocumentLibraryModal: React.FC<DocumentLibraryModalProps> = ({
           <div className="flex flex-col gap-1">
             <span className="text-[9.5pt] text-slate-500 font-bold">
               {headerConfigLabel ? (
-                <span>Cấu hình hiện tại: <span className="text-[#164399] font-black">{headerConfigLabel}</span></span>
+                <span>Nghiệp vụ hiện tại: <span className="text-[#164399] font-black">{headerConfigLabel}</span></span>
               ) : (
                 <span>Thư viện dùng chung của hệ thống lưới điện truyền tải</span>
               )}
@@ -346,7 +349,7 @@ export const DocumentLibraryModal: React.FC<DocumentLibraryModalProps> = ({
                       <tr 
                         key={doc.id} 
                         onClick={() => onToggleDoc(doc)}
-                        className={`hover:bg-slate-50/50 transition-colors cursor-pointer ${isSelected ? 'bg-blue-50/20' : ''}`}
+                        className={`group hover:bg-blue-50/30 transition-all duration-150 cursor-pointer ${isSelected ? 'bg-blue-50/25' : ''}`}
                       >
                         <td className="px-4 py-3.5 text-center">
                           <input
@@ -357,10 +360,10 @@ export const DocumentLibraryModal: React.FC<DocumentLibraryModalProps> = ({
                           />
                         </td>
                         <td className="px-4 py-3.5 leading-snug">
-                          <div className={`font-black text-[10.5pt] ${isSelected ? 'text-[#164399]' : 'text-slate-800'}`}>
+                          <div className={`font-black text-[10.5pt] transition-colors duration-150 ${isSelected ? 'text-[#164399]' : 'text-slate-800 group-hover:text-blue-600'}`}>
                             {doc.name}
                           </div>
-                          <div className="text-[8pt] font-bold text-gray-700 mt-1 uppercase tracking-wider max-w-lg truncate">
+                          <div className="text-[7.5pt] font-medium text-slate-400 mt-1 uppercase tracking-wider whitespace-normal break-words transition-colors duration-150 group-hover:text-slate-500">
                             {doc.type} {doc.code ? `| Ký hiệu: ${doc.code}` : ''} {doc.desc ? `— ${doc.desc}` : ''}
                           </div>
                         </td>
@@ -380,11 +383,14 @@ export const DocumentLibraryModal: React.FC<DocumentLibraryModalProps> = ({
             </table>
           </div>
         </div>
-
+ 
         {/* Footer */}
         <div className="px-6 py-4 border-t border-slate-200/60 bg-slate-50/50 flex justify-end">
-          <button className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors cursor-pointer">
-            Hoàn tất
+          <button 
+            onClick={onClose}
+            className="px-6 py-2 bg-[#164399] hover:bg-blue-850 text-white font-black rounded-[10px] text-[9.5pt] transition-all shadow-sm cursor-pointer select-none active:scale-98"
+          >
+            Xong
           </button>
         </div>
       </div>

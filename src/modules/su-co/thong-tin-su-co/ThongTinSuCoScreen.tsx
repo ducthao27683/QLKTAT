@@ -8,6 +8,7 @@ import { DesignTooltip } from '../../../components/DesignTooltip';
 import { EvnLogo } from '../../../components/EvnLogo';
 import { MOCK_INCIDENTS } from '../constants';
 import CSKH_ICON from '../../../assets/CSKH.png';
+import { DocumentLibraryModal } from '../../../shared/components/common/DocumentLibraryModal';
 
 interface IncidentModuleProps {
   setActiveSubMenu: (menu: string | null) => void;
@@ -70,18 +71,205 @@ export const IncidentModule = ({
   setConfirmAction,
   selectedBranch
 }: IncidentModuleProps) => {
-  const lastInstance = React.useMemo(() => {
-    // Find the last instance name in the path (even indices)
+  const lastDeviceName = React.useMemo(() => {
+    // Find the last instance name in the path (even indices) that is not "Tất cả"
     for (let i = devicePath.length - 1; i >= 0; i--) {
-      if (i % 2 === 0 && devicePath[i]) return devicePath[i];
+      if (i % 2 === 0) {
+        const val = devicePath[i];
+        if (val && val !== "Tất cả") {
+          return val;
+        }
+      }
     }
-    return "Đơn vị";
+    return devicePath[0] || "Đơn vị";
   }, [devicePath]);
+
+  // States for standard document library popup
+  const [isLibraryOpen, setIsLibraryOpen] = React.useState(false);
+  const [selectedLibraryIds, setSelectedLibraryIds] = React.useState<string[]>([]);
+
+  // Comments dynamic state mapped by ID with default comments matching mock incidents
+  const [incComments, setIncComments] = React.useState<Record<number, Array<{author: string, text: string, time: string, isMe?: boolean}>>>({
+    1: [
+      { author: "Nguyễn Văn A", text: "Đã bổ sung biên bản xác nhận của bên thứ 3.", time: "08/04/2026 10:30" },
+      { author: "Trần Quản Lý", text: "Biên bản hợp lệ, đã duyệt giảm trừ.", time: "08/04/2026 14:15" }
+    ],
+    2: [
+      { author: "Nguyễn Văn A", text: "Đã gửi báo cáo tự động đóng lại (ARC).", time: "03/04/2026 15:30" },
+      { author: "Trần Quản Lý", text: "Đang lưu trữ thông tin kiểm tra sự cố.", time: "03/04/2026 16:10" }
+    ],
+    4: [
+      { author: "Nguyễn Văn A", text: "Đã khắc phục xong hư hỏng cáp hạ thế.", time: "25/03/2026 14:30" }
+    ],
+    5: [
+      { author: "Nguyễn Văn A", text: "Đội sự cố đã hoàn tất công tác kéo dây.", time: "20/03/2026 09:00" }
+    ]
+  });
+
+  const [newCommentText, setNewCommentText] = React.useState("");
+
+  const handleSendComment = React.useCallback((incidentId: number) => {
+    if (!newCommentText.trim()) return;
+    const now = new Date();
+    const padStr = (num: number) => String(num).padStart(2, '0');
+    const formattedDate = `${padStr(now.getDate())}/${padStr(now.getMonth() + 1)}/${now.getFullYear()} ${padStr(now.getHours())}:${padStr(now.getMinutes())}`;
+    
+    setIncComments(prev => ({
+      ...prev,
+      [incidentId]: [
+        ...(prev[incidentId] || []),
+        { author: "Tôi (Admin/Kỹ sư)", text: newCommentText.trim(), time: formattedDate, isMe: true }
+      ]
+    }));
+    setNewCommentText("");
+  }, [newCommentText]);
+
+  // Local helper to match incident to chosen device tree branch
+  const matchIncidentToPath = React.useCallback((incidentDevice: string, path: string[]) => {
+    if (path.length === 0) return true;
+    
+    // Find the last instance in the path that is NOT "Tất cả"
+    let lastNonAllNode = "Đơn vị";
+    for (let i = path.length - 1; i >= 0; i--) {
+      if (i % 2 === 0 && path[i] && path[i] !== "Tất cả") {
+        lastNonAllNode = path[i];
+        break;
+      }
+    }
+
+    if (lastNonAllNode.includes("Hưng Yên") || lastNonAllNode === "Đơn vị" || lastNonAllNode === "Công ty Điện lực Hưng Yên") {
+      return true;
+    }
+
+    // Standard normalize & clean helper
+    const cleanString = (str: string) => {
+      return str.toLowerCase()
+        .replace(/[\(\),\-\/\.]/g, ' ')
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '') // remove vietnamese diacritics
+        .trim();
+    };
+
+    const nodeCleaned = cleanString(lastNonAllNode);
+    const deviceCleaned = cleanString(incidentDevice);
+
+    // Check if either word patterns contain each other or have intersecting keywords
+    const nodeWords = nodeCleaned.split(/\s+/).filter(w => w.length >= 3 && w !== "tba" && w !== "110kv" && w !== "220kv" && w !== "500kv" && w !== "tram" && w !== "bien" && w !== "day" && w !== "duong" && w !== "ngan" && w !== "may" && w !== "cat" && w !== "thiet" && w !== "phan");
+    const deviceWords = deviceCleaned.split(/\s+/).filter(w => w.length >= 3 && w !== "tba" && w !== "110kv" && w !== "220kv" && w !== "500kv" && w !== "tram" && w !== "bien" && w !== "day" && w !== "duong" && w !== "ngan" && w !== "may" && w !== "cat" && w !== "thiet" && w !== "phan");
+
+    const hasOverlap = nodeWords.some(w => deviceWords.includes(w));
+    if (hasOverlap) return true;
+
+    if (deviceCleaned.includes(nodeCleaned) || nodeCleaned.includes(deviceCleaned)) {
+      return true;
+    }
+
+    // direct manual fallbacks for robustness
+    if (lastNonAllNode.includes("Phố Nối") && incidentDevice.includes("Phố Nối")) return true;
+    if (lastNonAllNode.includes("Khoái Châu") && incidentDevice.includes("Khoái Châu")) return true;
+    if (lastNonAllNode.includes("Văn Lâm") && incidentDevice.includes("Văn Lâm")) return true;
+    if (lastNonAllNode.includes("Mỹ Hào") && incidentDevice.includes("Mỹ Hào")) return true;
+    if (lastNonAllNode.includes("Kim Động") && incidentDevice.includes("Kim Động")) return true;
+    if (lastNonAllNode.includes("Giai Phạm") && incidentDevice.includes("Giai Phạm")) return true;
+
+    return false;
+  }, []);
+
+  const getIncidentStatusBadge = React.useCallback((status: string) => {
+    let bgClass = "bg-rose-50 text-rose-750 border-rose-250";
+    let text = status || "Mới";
+    
+    if (status === 'Xử lý xong') {
+      bgClass = "bg-emerald-50 text-emerald-700 border-emerald-200/60";
+    } else if (status === 'Đang xử lý') {
+      bgClass = "bg-amber-50 text-amber-700 border-amber-200/60";
+    } else if (status === 'Đang tồn tại') {
+      bgClass = "bg-indigo-50 text-indigo-700 border-indigo-200";
+    } else {
+      bgClass = "bg-rose-50 text-rose-700 border-rose-200/60";
+      text = "Mới tạo";
+    }
+
+    return (
+      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[7.5pt] font-black uppercase tracking-wider border shadow-xs ${bgClass}`}>
+        {text}
+      </span>
+    );
+  }, []);
+
+  const getReductionStatusBadge = React.useCallback((status: string) => {
+    let bgClass = "bg-gray-50 text-gray-700 border-gray-200/60 shadow-xs";
+    if (status === 'Đã duyệt') {
+      bgClass = "bg-emerald-50 text-emerald-700 border-emerald-200/60 shadow-xs";
+    } else if (status === 'Chờ duyệt') {
+      bgClass = "bg-amber-50 text-amber-700 border-amber-200/60 shadow-xs";
+    } else if (status === 'Từ chối') {
+      bgClass = "bg-red-50 text-red-750 border-red-200/60 shadow-xs";
+    }
+    return (
+      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[7.5pt] font-black uppercase tracking-wider border ${bgClass}`}>
+        {status}
+      </span>
+    );
+  }, []);
+
+  const handleToggleDoc = React.useCallback((doc: any, incObj: any) => {
+    if (!incObj) return;
+    setSelectedLibraryIds(prev => {
+      const isSelected = prev.includes(doc.id);
+      if (isSelected) {
+        incObj.attachments = (incObj.attachments || []).filter((a: any) => a.name !== doc.name);
+        return prev.filter(id => id !== doc.id);
+      } else {
+        if (!incObj.attachments) incObj.attachments = [];
+        incObj.attachments.push({ name: doc.name, size: doc.size });
+        return [...prev, doc.id];
+      }
+    });
+  }, []);
 
   const [currentPage, setCurrentPage] = React.useState(1);
   const itemsPerPage = 10;
   const filteredIncidents = React.useMemo(() => {
     let res = MOCK_INCIDENTS;
+    
+    // 1. Filter by branch/device hierarchy:
+    res = res.filter(i => matchIncidentToPath(i.device, devicePath));
+
+    // 2. Filter by type if incidentFilterType is selected
+    if (incidentFilterType && incidentFilterType.length > 0 && incidentFilterType.length < 3) {
+      res = res.filter(i => incidentFilterType.includes(i.type));
+    }
+
+    // 2.5 Filter by voltage if incidentFilterVoltage is selected
+    if (incidentFilterVoltage && incidentFilterVoltage.length > 0 && incidentFilterVoltage.length < 5) {
+      res = res.filter(i => incidentFilterVoltage.includes(i.voltage));
+    }
+
+    // 3. Filter by status if incidentFilterStatus is selected
+    if (incidentFilterStatus && incidentFilterStatus.length > 0 && incidentFilterStatus.length < 4) {
+      res = res.filter(i => incidentFilterStatus.includes(i.status));
+    }
+
+    // 3.5. Date range filter
+    if (incidentFromDate) {
+      const fromTime = new Date(incidentFromDate + "T00:00:00").getTime();
+      res = res.filter(i => {
+        const itemDateStr = i.time.split(' ')[0];
+        const itemTime = new Date(itemDateStr + "T00:00:00").getTime();
+        return itemTime >= fromTime;
+      });
+    }
+    if (incidentToDate) {
+      const toTime = new Date(incidentToDate + "T23:59:59").getTime();
+      res = res.filter(i => {
+        const itemDateStr = i.time.split(' ')[0];
+        const itemTime = new Date(itemDateStr + "T00:00:00").getTime();
+        return itemTime <= toTime;
+      });
+    }
+
+    // 4. Search Filter
     if (incidentSearch) {
       res = res.filter(i => 
         i.device.toLowerCase().includes(incidentSearch.toLowerCase()) ||
@@ -90,7 +278,7 @@ export const IncidentModule = ({
       );
     }
     return res;
-  }, [incidentSearch]);
+  }, [incidentSearch, devicePath, incidentFilterType, incidentFilterVoltage, incidentFilterStatus, incidentFromDate, incidentToDate, matchIncidentToPath]);
 
   const totalPages = Math.ceil(filteredIncidents.length / itemsPerPage) || 1;
   const startIndex = (currentPage - 1) * itemsPerPage;
@@ -98,11 +286,38 @@ export const IncidentModule = ({
     return filteredIncidents.slice(startIndex, startIndex + itemsPerPage);
   }, [filteredIncidents, startIndex]);
 
-  const inc = filteredIncidents.find(i => i.id === selectedIncidentId) || filteredIncidents[0];
+  const voltageVal = (incidentFilterVoltage.length === 0 || incidentFilterVoltage.length >= 5) ? "Tất cả" : incidentFilterVoltage[0];
+  const onChangeVoltage = (val: string) => {
+    if (val === "Tất cả") {
+      setIncidentFilterVoltage(['500kV', '220kV', '110kV', '35kV', '22kV']);
+    } else {
+      setIncidentFilterVoltage([val]);
+    }
+  };
+
+  const typeVal = (incidentFilterType.length === 0 || incidentFilterType.length >= 3) ? "Tất cả" : incidentFilterType[0];
+  const onChangeType = (val: string) => {
+    if (val === "Tất cả") {
+      setIncidentFilterType(['TBA', 'Dz', 'CN']);
+    } else {
+      setIncidentFilterType([val]);
+    }
+  };
+
+  const statusVal = (incidentFilterStatus.length === 0 || incidentFilterStatus.length >= 4) ? "Tất cả" : incidentFilterStatus[0];
+  const onChangeStatus = (val: string) => {
+    if (val === "Tất cả") {
+      setIncidentFilterStatus(['Mới', 'Đang xử lý', 'Đang tồn tại', 'Xử lý xong']);
+    } else {
+      setIncidentFilterStatus([val]);
+    }
+  };
+
+  const inc = filteredIncidents.find(i => i.id === selectedIncidentId) || filteredIncidents[0] || MOCK_INCIDENTS[0];
 
   React.useEffect(() => {
     setCurrentPage(1);
-  }, [incidentSearch, devicePath]);
+  }, [incidentSearch, devicePath, incidentFilterType, incidentFilterVoltage, incidentFilterStatus, incidentFromDate, incidentToDate]);
 
   return (
     <div className="flex-1 flex flex-col overflow-hidden bg-white">
@@ -118,8 +333,8 @@ export const IncidentModule = ({
             </button>
             <div className="flex flex-col">
               <h2 className="text-[12pt] font-semibold flex items-center gap-2 leading-[1.5]">
-                <span className="text-[#555555]">Sự cố</span>
-                <span className="font-bold text-[#164399] tracking-tight">- Danh sách sự cố của {lastInstance}</span>
+                <span className="text-[#555555]">Danh sách sự cố của</span>
+                <span className="font-bold text-blue-600 tracking-tight">{lastDeviceName}</span>
               </h2>
             </div>
           </div>
@@ -143,47 +358,86 @@ export const IncidentModule = ({
 
         {/* Filter Bar */}
         {showIncidentFilter && (
-          <div className="mt-4 p-4 bg-gray-50 rounded-2xl border border-gray-100 flex flex-wrap items-center gap-x-8 gap-y-[10px] animate-in slide-in-from-top-2 duration-200">
-            <div className="flex items-center gap-4">
-               <div className="flex flex-col gap-1">
-                  <label className="text-[9pt] font-bold text-gray-400 uppercase">Loại TB</label>
-                  <div className="flex items-center gap-1 bg-white p-1 rounded-[20px] border border-gray-200">
-                    {['TBA', 'Dz', 'CN'].map(t => (
-                      <button 
-                        key={t}
-                        onClick={() => setIncidentFilterType(prev => prev.includes(t) ? prev.filter(x => x !== t) : [...prev, t])}
-                        className={`px-3 py-1 text-[10pt] rounded-[20px] transition-all whitespace-nowrap ${incidentFilterType.includes(t) ? 'bg-[#ECF3FE] text-[#164399] font-bold' : 'text-gray-500 hover:bg-gray-50'}`}
-                      >
-                        {t}
-                      </button>
-                    ))}
-                  </div>
-               </div>
-               
-               <div className="flex flex-col gap-1">
-                  <label className="text-[9pt] font-bold text-gray-400 uppercase">Trạng thái</label>
-                  <div className="flex items-center gap-1 bg-white p-1 rounded-[20px] border border-gray-200">
-                    {['Mới', 'Đang xử lý', 'Đang tồn tại', 'Xử lý xong'].map(s => (
-                      <button 
-                        key={s}
-                        onClick={() => setIncidentFilterStatus(prev => prev.includes(s) ? prev.filter(x => x !== s) : [...prev, s])}
-                        className={`px-3 py-1 text-[10pt] rounded-[20px] transition-all whitespace-nowrap ${incidentFilterStatus.includes(s) ? 'bg-[#ECF3FE] text-[#164399] font-bold' : 'text-gray-500 hover:bg-gray-50'}`}
-                      >
-                        {s}
-                      </button>
-                    ))}
-                  </div>
-               </div>
+          <div className="mt-4 p-3.5 bg-gray-50 rounded-2xl border border-gray-100 flex flex-row items-end gap-3 w-full animate-in slide-in-from-top-2 duration-200">
+            {/* Cấp điện áp */}
+            <div className="flex flex-col gap-1 w-[120px]">
+              <label className="text-[9pt] font-bold text-gray-400 uppercase">Cấp điện áp</label>
+              <select
+                value={voltageVal}
+                onChange={(e) => onChangeVoltage(e.target.value)}
+                className="px-2.5 py-1.5 bg-white border border-gray-200 rounded-lg text-[10pt] font-semibold text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500/20 cursor-pointer h-9 w-full"
+              >
+                <option value="Tất cả">Tất cả</option>
+                <option value="500kV">500kV</option>
+                <option value="220kV">220kV</option>
+                <option value="110kV">110kV</option>
+                <option value="35kV">35kV</option>
+                <option value="22kV">22kV</option>
+              </select>
             </div>
 
-            <div className="flex flex-col gap-1 flex-1 min-w-[200px]">
+            {/* Loại thiết bị */}
+            <div className="flex flex-col gap-1 w-[140px]">
+               <label className="text-[9pt] font-bold text-gray-400 uppercase">Loại thiết bị</label>
+               <select
+                 value={typeVal}
+                 onChange={(e) => onChangeType(e.target.value)}
+                 className="px-2.5 py-1.5 bg-white border border-gray-200 rounded-lg text-[10pt] font-semibold text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500/20 cursor-pointer h-9 w-full"
+               >
+                 <option value="Tất cả">Tất cả</option>
+                 <option value="TBA">Trạm Biến Áp</option>
+                 <option value="Dz">Đường Dây</option>
+                 <option value="CN">Chi Nhánh</option>
+               </select>
+            </div>
+
+            {/* Trạng thái */}
+            <div className="flex flex-col gap-1 w-[140px]">
+               <label className="text-[9pt] font-bold text-gray-400 uppercase">Trạng thái</label>
+               <select
+                 value={statusVal}
+                 onChange={(e) => onChangeStatus(e.target.value)}
+                 className="px-2.5 py-1.5 bg-white border border-gray-200 rounded-lg text-[10pt] font-semibold text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500/20 cursor-pointer h-9 w-full"
+               >
+                 <option value="Tất cả">Tất cả</option>
+                 <option value="Mới">Mới tạo</option>
+                 <option value="Đang xử lý">Đang xử lý</option>
+                 <option value="Đang tồn tại">Đang tồn tại</option>
+                 <option value="Xử lý xong">Xử lý xong</option>
+               </select>
+            </div>
+
+            {/* Từ ngày */}
+            <div className="flex flex-col gap-1 w-[130px]">
+               <label className="text-[9pt] font-bold text-gray-400 uppercase">Từ ngày</label>
+               <input 
+                 type="date"
+                 value={incidentFromDate}
+                 onChange={(e) => setIncidentFromDate(e.target.value)}
+                 className="px-2.5 py-1.5 bg-white border border-gray-200 rounded-lg text-[10pt] font-semibold text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500/20 h-9 w-full"
+               />
+            </div>
+
+            {/* Đến ngày */}
+            <div className="flex flex-col gap-1 w-[130px]">
+               <label className="text-[9pt] font-bold text-gray-400 uppercase">Đến ngày</label>
+               <input 
+                 type="date"
+                 value={incidentToDate}
+                 onChange={(e) => setIncidentToDate(e.target.value)}
+                 className="px-2.5 py-1.5 bg-white border border-gray-200 rounded-lg text-[10pt] font-semibold text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500/20 h-9 w-full"
+               />
+            </div>
+
+            {/* Tìm kiếm nhanh */}
+            <div className="flex flex-col gap-1 flex-1">
                <label className="text-[9pt] font-bold text-gray-400 uppercase">Tìm kiếm nhanh</label>
                <div className="relative">
-                 <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                 <Search className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400" />
                  <input 
                    type="text"
-                   placeholder="Tìm tên thiết bị, diễn biến, mã sự cố..."
-                   className="pl-9 pr-4 py-2 bg-white border border-gray-200 rounded-[10px] text-[10pt] font-semibold focus:outline-none focus:ring-2 focus:ring-blue-500/20 w-full transition-all"
+                   placeholder="Tìm tên TB, diễn biến..."
+                   className="pl-8 pr-3 py-1.5 bg-white border border-gray-200 rounded-lg text-[10pt] font-semibold focus:outline-none focus:ring-2 focus:ring-blue-500/20 w-full transition-all h-9"
                    value={incidentSearch}
                    onChange={(e) => setIncidentSearch(e.target.value)}
                  />
@@ -196,8 +450,8 @@ export const IncidentModule = ({
       {/* Main Content */}
       <div className="flex-1 flex overflow-hidden">
         {/* Left: Incident List */}
-        <div className="w-1/2 flex flex-col border-r border-slate-100 bg-[#f8fafc] overflow-hidden px-3.5 py-0">
-          <div className="flex-1 overflow-y-auto custom-scrollbar pl-1 pr-1.5 space-y-3 pt-4 pb-4">
+        <div className="w-1/2 flex flex-col border-r border-slate-100 bg-[#f8fafc] overflow-hidden px-5 py-0">
+          <div className="flex-1 overflow-y-auto custom-scrollbar pl-1 pr-2 space-y-4 pt-4 pb-4">
             {paginatedIncidents.map((item) => {
               const isSelected = selectedIncidentId === item.id;
               const dateParts = item.time.split(' ');
@@ -208,10 +462,10 @@ export const IncidentModule = ({
                 <div 
                   key={item.id}
                   onClick={() => setSelectedIncidentId(item.id)}
-                  className={`p-4 rounded-2xl border transition-all cursor-pointer group relative overflow-hidden ${
+                  className={`p-4 rounded-2xl border transition-all cursor-pointer group relative overflow-hidden select-none ${
                     isSelected 
-                      ? 'bg-blue-50/50 border-blue-200 shadow-sm' 
-                      : 'bg-white border-gray-100 hover:border-blue-100/60 shadow-sm'
+                      ? 'bg-blue-50/50 border-blue-600 shadow-md ring-1 ring-blue-600/30' 
+                      : 'bg-white border-gray-200 hover:border-blue-500/80 hover:shadow-md hover:ring-1 hover:ring-blue-500/20'
                   }`}
                 >
                   {isSelected && (
@@ -220,42 +474,29 @@ export const IncidentModule = ({
                   
                   <div className="flex justify-between items-start mb-2">
                     <div className="flex items-center gap-2">
-                       <span className="text-[9pt] font-black tracking-wider font-mono text-red-600 px-2 py-0.5 rounded border border-red-100 bg-red-50">SC-00{item.id}</span>
-                       <span className="text-[10pt] font-black text-blue-600">• {day}/{month}/{year} {time}</span>
+                       <span className={`text-[9pt] tracking-wider font-mono px-2 py-0.5 rounded border transition-all ${
+                         isSelected 
+                           ? 'text-red-600 border-red-100 bg-red-50 font-black' 
+                           : 'text-gray-400 border-gray-100 bg-gray-50/50 group-hover:text-red-600 group-hover:border-red-100 group-hover:bg-red-50 font-semibold'
+                       }`}>SC-00{item.id}</span>
+                       <span className={`text-[10pt] transition-all ${
+                         isSelected 
+                           ? 'text-blue-600 font-black' 
+                           : 'text-gray-400 font-semibold group-hover:text-blue-600'
+                       }`}>• {day}/{month}/{year} {time}</span>
                     </div>
-                    {(() => {
-                      if (item.status === 'Xử lý xong') {
-                        return (
-                          <span className="text-gray-700 inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[7.5pt] font-black uppercase tracking-wider bg-emerald-50 text-emerald-700 border border-emerald-200/60 shadow-xs">
-                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-                            {item.status}
-                          </span>
-                        );
-                      } else if (item.status === 'Đang xử lý') {
-                        return (
-                          <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[7.5pt] font-black uppercase tracking-wider bg-amber-50 text-gray-700 border border-amber-200/60 shadow-xs animate-pulse">
-                            <span className="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
-                            {item.status}
-                          </span>
-                        );
-                      } else {
-                        return (
-                          <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[7.5pt] font-black uppercase tracking-wider bg-rose-50 text-gray-700 border border-rose-200/60 shadow-xs">
-                            <span className="w-1.5 h-1.5 rounded-full bg-red-500"></span>
-                            Mới tạo
-                          </span>
-                        );
-                      }
-                    })()}
+                    {getIncidentStatusBadge(item.status)}
                   </div>
                   
-                  <h3 className={`text-[11pt] font-black mb-2 line-clamp-1 leading-tight transition-colors transition-colors uppercase tracking-tight ${
+                  <h3 className={`text-[11pt] font-black mb-2 line-clamp-1 leading-tight transition-colors uppercase tracking-tight ${
                     isSelected ? 'text-[#164399]' : 'text-[#164399] group-hover:text-blue-800'
                   }`}>
                     {item.device}
                   </h3>
                   
-                  <p className="text-[10pt] text-gray-500 mb-3 line-clamp-2 leading-relaxed">
+                  <p className={`text-[10pt] mb-3 line-clamp-2 leading-relaxed transition-all ${
+                    isSelected ? 'text-black font-normal' : 'text-gray-500 font-normal'
+                  }`}>
                     {item.description}
                   </p>
                   
@@ -272,8 +513,8 @@ export const IncidentModule = ({
           </div>
           {/* Custom Pagination Panel styled exactly like the Device list paging */}
           {totalPages > 1 && (
-            <div className="py-4 border-t border-gray-200 flex items-center justify-between container-paging shrink-0 bg-white px-6">
-              <span className="text-[8.5pt] font-black text-gray-700 uppercase tracking-wider">
+            <div className="py-2 border-t border-gray-200 flex items-center justify-between container-paging shrink-0 bg-white px-6">
+              <span className="text-[8.5pt] font-semibold text-gray-400 uppercase tracking-wider">
                 Xem {startIndex + 1} - {Math.min(startIndex + itemsPerPage, filteredIncidents.length)} / {filteredIncidents.length} sự cố
               </span>
               <div className="flex items-center gap-1">
@@ -340,31 +581,30 @@ export const IncidentModule = ({
                 {incidentDetailTab === 'detail' && (
                   <div className="grid grid-cols-1 gap-8 animate-in fade-in duration-500">
                     <div className="flex items-center justify-between border-b border-gray-100 pb-5 mb-2">
-                       <div className="space-y-1">
-                          <p className="text-[10pt] font-black text-gray-700 uppercase tracking-widest font-mono">SC-00{inc.id}</p>
-                          <h3 className="text-[14pt] font-bold text-gray-700 leading-tight uppercase tracking-tight">{inc.device}</h3>
-                          <div className="flex items-center gap-2 pt-1">
-                             <Calendar className="w-3.5 h-3.5 text-gray-400" />
-                             <span className="text-[10pt] font-bold text-gray-500 uppercase">{inc.time}</span>
-                             <span className="w-1 h-1 rounded-full bg-gray-300 mx-1"></span>
-                             <span className={`text-[10pt] font-black uppercase ${
-                                inc.status === 'Xử lý xong' ? 'text-green-600' : 'text-red-600'
-                             }`}>{inc.status}</span>
+                       <div className="space-y-1 w-full">
+                          <div className="flex items-center gap-3">
+                             <span className="text-[10pt] font-black tracking-wider font-mono text-red-600 px-2 py-0.5 rounded border border-red-100 bg-red-50">SC-00{inc.id}</span>
+                             <span className="text-[10pt] font-black text-blue-600 font-mono flex items-center gap-1">
+                               <Calendar className="w-3.5 h-3.5 text-blue-600" />
+                               {inc.time}
+                             </span>
+                             {getIncidentStatusBadge(inc.status)}
+                          </div>
+                          <h3 className="text-[14pt] font-extrabold text-slate-800 leading-tight uppercase tracking-tight pt-1.5">{inc.device}</h3>
+                          <div className="text-[9.5pt] text-gray-400 font-bold leading-normal mt-1 flex items-center gap-1.5">
+                             <span className="text-gray-400 font-normal">Vị trí:</span>
+                             <span className="text-gray-500 font-bold">{devicePath.filter((_, idx) => idx % 2 === 0 && _ !== "Tất cả").join(' / ')}</span>
                           </div>
                        </div>
                        <button 
                          onClick={() => setDetailForm({ type: 'incident', mode: 'view', data: inc })}
-                         className="px-4 py-2 text-[12pt] font-bold text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-full transition-colors flex items-center gap-2 shadow-sm border border-blue-100"
+                         className="px-4 py-2 text-[12pt] font-bold text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-full transition-colors flex items-center gap-2 shadow-sm border border-blue-100 shrink-0 self-start mt-1"
                        >
                          <Eye className="w-4 h-4" /> Xem
                        </button>
                     </div>
 
                     <div className="space-y-4">
-                      <h4 className="text-[12pt] font-bold text-gray-700 uppercase tracking-widest flex items-center gap-2">
-                        <FileText className="w-3.5 h-3.5" />
-                        Mô tả sự cố
-                      </h4>
                       
   <div className="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm space-y-4">
     <div className="grid grid-cols-2 gap-4 pb-4 border-b border-gray-100">
@@ -379,13 +619,13 @@ export const IncidentModule = ({
     </div>
                         <div>
                           <DesignTooltip id="lbl_dien_bien">
-                            <p className="text-[12pt] text-gray-700 mb-1 font-black uppercase tracking-tight">Diễn biến chi tiết</p>
+                            <p className="text-[12pt] text-gray-400 mb-1 font-extrabold uppercase tracking-tight">Diễn biến chi tiết</p>
                           </DesignTooltip>
-                          <p className="text-[12pt] text-gray-700 leading-relaxed font-normal">{inc.description}</p>
+                          <p className="text-[12pt] text-black leading-relaxed font-normal">{inc.description}</p>
                         </div>
                         <div className="pt-4 border-t border-gray-100 bg-transparent p-0 rounded-none">
                           <DesignTooltip id="lbl_nguyen_nhan">
-                            <p className="text-[12pt] text-gray-700 mb-1 font-black uppercase tracking-tight">Nguyên nhân xác định</p>
+                            <p className="text-[12pt] text-gray-400 mb-1 font-extrabold uppercase tracking-tight">Nguyên nhân xác định</p>
                           </DesignTooltip>
                           <p className="text-[12pt] text-purple-700 leading-relaxed font-normal">"{inc.cause}"</p>
                         </div>
@@ -394,7 +634,7 @@ export const IncidentModule = ({
 
                     <div className="space-y-4">
                       <div className="flex items-center justify-between">
-                        <h4 className="text-[12pt] font-bold text-gray-700 uppercase tracking-widest flex items-center gap-2">
+                        <h4 className="text-[12pt] font-bold text-gray-400 uppercase tracking-widest flex items-center gap-2">
                           <Camera className="w-3.5 h-3.5" />
                           Hình ảnh hiện trường
                         </h4>
@@ -438,7 +678,7 @@ export const IncidentModule = ({
 
                       <div className="space-y-4">
                         <div className="flex items-center justify-between gap-4">
-                          <h4 className="text-[12pt] font-bold text-gray-700 uppercase tracking-widest flex items-center gap-2 whitespace-nowrap">
+                          <h4 className="text-[12pt] font-bold text-gray-400 uppercase tracking-widest flex items-center gap-2 whitespace-nowrap">
                             <Share2 className="w-3.5 h-3.5" />
                             Tài liệu đính kèm
                           </h4>
@@ -468,32 +708,9 @@ export const IncidentModule = ({
                     <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm space-y-6">
                       <div className="flex items-center justify-between">
                         <DesignTooltip id="title_thong_tin_giam_tru">
-                          <h4 className="text-[12pt] font-bold text-gray-700 uppercase tracking-widest">Thông tin giảm trừ sự cố</h4>
+                          <h4 className="text-[12pt] font-bold text-gray-400 uppercase tracking-widest">Thông tin giảm trừ sự cố</h4>
                         </DesignTooltip>
-                        {(() => {
-                          if (inc.reduction.status === 'Đã duyệt') {
-                            return (
-                              <span className="text-gray-700 inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[8.5pt] font-black uppercase tracking-wider bg-emerald-50 text-emerald-700 border border-emerald-200/60 shadow-xs">
-                                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-                                {inc.reduction.status}
-                              </span>
-                            );
-                          } else if (inc.reduction.status === 'Chờ duyệt') {
-                            return (
-                              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[8.5pt] font-black uppercase tracking-wider bg-amber-50 text-gray-700 border border-amber-200/60 shadow-xs animate-pulse">
-                                <span className="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
-                                {inc.reduction.status}
-                              </span>
-                            );
-                          } else {
-                            return (
-                              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[8.5pt] font-black uppercase tracking-wider bg-gray-50 text-gray-700 border border-gray-200/60 shadow-xs">
-                                <span className="w-1.5 h-1.5 rounded-full bg-gray-400"></span>
-                                {inc.reduction.status}
-                              </span>
-                            );
-                          }
-                        })()}
+                        {getReductionStatusBadge(inc.reduction.status)}
                       </div>
                       
                       <div className="space-y-4">
@@ -524,7 +741,7 @@ export const IncidentModule = ({
                         
                         <div className="flex justify-start items-center gap-6 w-full">
                           <DesignTooltip id="btn_dang_ky_giam_tru">
-                            <button className="px-4 py-2 bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-700 transition-all shadow-md cursor-pointer whitespace-nowrap flex items-center justify-center gap-2">Đăng ký</button>
+                            <button className="flex items-center gap-1.5 px-3 py-1.5 bg-[#164399] text-white rounded-lg text-[10pt] font-semibold hover:bg-blue-800 transition-all shadow-sm whitespace-nowrap cursor-pointer">Đăng ký</button>
                           </DesignTooltip>
                           <span className="text-[10pt] text-gray-400 font-medium italic whitespace-nowrap">Đăng ký mới nhất: 08/04/2026 15:30</span>
                         </div>
@@ -532,16 +749,36 @@ export const IncidentModule = ({
                     </div>
 
                     <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm space-y-4">
+                      {/* Hidden standard file picker input */}
+                      <input 
+                        type="file" 
+                        id="giam-tru-upload" 
+                        className="hidden" 
+                        onChange={(e) => {
+                          const files = e.target.files;
+                          if (files && files.length > 0 && inc) {
+                            const file = files[0];
+                            const newAttachment = { name: file.name, size: (file.size / (1024 * 1024)).toFixed(1) + ' MB' };
+                            if (!inc.attachments) inc.attachments = [];
+                            inc.attachments.push(newAttachment);
+                            // Simple alert or status update simulation
+                            console.log("Attached custom file picker document:", file.name);
+                            // Force brief React state trigger to render updated attachments list
+                            setIncidentDetailTab('detail');
+                            setTimeout(() => setIncidentDetailTab('reduction'), 20);
+                          }
+                        }}
+                      />
                       <div className="flex items-center justify-between gap-4">
                         <DesignTooltip id="title_tai_lieu_dinh_kem">
-                          <h4 className="text-[12pt] font-bold text-gray-700 uppercase tracking-widest whitespace-nowrap">Tài liệu đính kèm</h4>
+                          <h4 className="text-[12pt] font-bold text-gray-400 uppercase tracking-widest whitespace-nowrap">Tài liệu đính kèm</h4>
                         </DesignTooltip>
                         <div className="flex gap-2">
                           <DesignTooltip id="btn_thu_vien_tai_lieu">
-                            <button onClick={(e) => { e.stopPropagation(); document.getElementById('giam-tru-upload') && document.getElementById('giam-tru-upload').click(); }} className="px-3 py-1.5 flex items-center gap-2 rounded-lg text-[9pt] font-black uppercase text-gray-500 border border-gray-200 hover:bg-gray-50 transition-colors bg-white shadow-sm cursor-pointer"><Archive className="w-4 h-4 text-gray-400" /> Từ Thư viện</button>
+                            <button onClick={(e) => { e.stopPropagation(); setIsLibraryOpen(true); }} className="px-3 py-1.5 flex items-center gap-2 rounded-lg text-[9pt] font-black uppercase text-gray-500 border border-gray-200 hover:bg-gray-50 transition-colors bg-white shadow-sm cursor-pointer"><Archive className="w-4 h-4 text-gray-400" /> Từ Thư viện</button>
                           </DesignTooltip>
                           <DesignTooltip id="btn_tai_len_tai_lieu">
-                            <button onClick={(e) => { e.stopPropagation(); document.getElementById('giam-tru-upload') && document.getElementById('giam-tru-upload').click(); }} className="px-3 py-1.5 flex items-center gap-2 rounded-lg text-[9pt] font-black uppercase text-blue-600 border border-blue-200 hover:bg-blue-50 transition-colors bg-blue-50/50 shadow-sm cursor-pointer"><Upload className="w-4 h-4 text-blue-500" /> Tải lên</button>
+                            <button onClick={(e) => { e.stopPropagation(); const el = document.getElementById('giam-tru-upload'); el && el.click(); }} className="px-3 py-1.5 flex items-center gap-2 rounded-lg text-[9pt] font-black uppercase text-blue-600 border border-blue-200 hover:bg-blue-50 transition-colors bg-blue-50/50 shadow-sm cursor-pointer"><Upload className="w-4 h-4 text-blue-500" /> Tải lên</button>
                           </DesignTooltip>
                         </div>
                       </div>
@@ -583,36 +820,40 @@ export const IncidentModule = ({
 
                     <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm space-y-4">
                       <DesignTooltip id="title_trao_doi_thao_luan">
-                        <h4 className="text-[12pt] font-bold text-gray-700 uppercase tracking-widest flex items-center gap-2">
+                        <h4 className="text-[12pt] font-bold text-gray-400 uppercase tracking-widest flex items-center gap-2">
                           <MessageSquare className="w-4 h-4 text-blue-500" />
                           Trao đổi & Thảo luận
                         </h4>
                       </DesignTooltip>
-                      <div className="space-y-4">
-                        <div className="flex gap-3">
-                          <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center shrink-0">
-                            <span className="text-blue-700 font-bold text-[12pt]">NV</span>
-                          </div>
-                          <div className="flex-1 bg-gray-50 p-3 rounded-xl rounded-tl-none border border-gray-100">
-                            <div className="flex justify-between items-center mb-1">
-                              <span className="text-[12pt] font-bold text-gray-700">Nguyễn Văn A</span>
-                              <span className="text-[10pt] text-gray-400">08/04/2026 10:30</span>
-                            </div>
-                            <p className="text-[12pt] text-gray-600">Đã bổ sung biên bản xác nhận của bên thứ 3.</p>
-                          </div>
-                        </div>
-                        <div className="flex gap-3">
-                          <div className="w-8 h-8 rounded-full bg-orange-100 flex items-center justify-center shrink-0">
-                            <span className="text-orange-700 font-bold text-[12pt]">QL</span>
-                          </div>
-                          <div className="flex-1 bg-gray-50 p-3 rounded-xl rounded-tl-none border border-gray-100">
-                            <div className="flex justify-between items-center mb-1">
-                              <span className="text-[12pt] font-bold text-gray-700">Trần Quản Lý</span>
-                              <span className="text-[10pt] text-gray-400">08/04/2026 14:15</span>
-                            </div>
-                            <p className="text-[12pt] text-gray-600">Biên bản hợp lệ, đã duyệt giảm trừ.</p>
-                          </div>
-                        </div>
+                      <div className="space-y-4 max-h-[300px] overflow-y-auto custom-scrollbar pr-1">
+                        {(incComments[inc.id] || []).length > 0 ? (
+                          (incComments[inc.id] || []).map((cmt, idx) => {
+                            const initials = cmt.author.split(' ').map(n => n[0]).filter(Boolean).slice(-2).join('').toUpperCase() || 'TB';
+                            const isMe = cmt.isMe;
+                            return (
+                              <div key={idx} className={`flex gap-3 ${isMe ? 'flex-row-reverse' : ''}`}>
+                                <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 font-bold text-[10pt] ${
+                                  isMe ? 'bg-blue-600 text-white' : 'bg-orange-100 text-orange-700'
+                                }`}>
+                                  {initials}
+                                </div>
+                                <div className={`flex-1 p-3 rounded-xl border ${
+                                  isMe 
+                                    ? 'bg-blue-50/50 border-blue-100 rounded-tr-none' 
+                                    : 'bg-gray-50 border-gray-100 rounded-tl-none'
+                                }`}>
+                                  <div className="flex justify-between items-center mb-1">
+                                    <span className="text-[12pt] font-bold text-gray-700">{cmt.author}</span>
+                                    <span className="text-[10pt] text-gray-400">{cmt.time}</span>
+                                  </div>
+                                  <p className="text-[12pt] text-gray-600">{cmt.text}</p>
+                                </div>
+                              </div>
+                            );
+                          })
+                        ) : (
+                          <div className="text-center py-6 text-gray-400 text-[11pt] italic font-medium">Chưa có Thảo luận nào. Nhập ý kiến thảo luận ở ô dưới đây và nhấn Gửi.</div>
+                        )}
                       </div>
                       <div className="mt-4 flex gap-4 items-start">
                         <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center shrink-0 border-2 border-white shadow-sm overflow-hidden">
@@ -622,10 +863,21 @@ export const IncidentModule = ({
                           <textarea 
                             placeholder="Nhập ý kiến trao đổi..." 
                             className="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-[12pt] focus:outline-none focus:ring-2 focus:ring-blue-500/20 min-h-[100px]"
+                            value={newCommentText}
+                            onChange={(e) => setNewCommentText(e.target.value)}
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter' && !e.shiftKey) {
+                                e.preventDefault();
+                                handleSendComment(inc.id);
+                              }
+                            }}
                           ></textarea>
                           <div className="flex justify-end">
                             <DesignTooltip id="btn_gui_trao_doi">
-                              <button className="p-1 px-3 hover:bg-slate-100 rounded-lg cursor-pointer">
+                              <button 
+                                onClick={() => handleSendComment(inc.id)}
+                                className="px-3 py-1.5 flex items-center gap-2 rounded-lg text-[9pt] font-black uppercase text-blue-600 border border-blue-200 hover:bg-blue-50 transition-all bg-blue-50/50 shadow-sm cursor-pointer font-sans"
+                              >
                                 Gửi
                               </button>
                             </DesignTooltip>
@@ -638,7 +890,7 @@ export const IncidentModule = ({
 
                 {incidentDetailTab === 'tracking' && (
                   <div className="space-y-6">
-                    <h4 className="text-[12pt] font-bold text-gray-700 uppercase tracking-widest flex items-center gap-2">
+                    <h4 className="text-[12pt] font-bold text-gray-400 uppercase tracking-widest flex items-center gap-2">
                       <History className="w-3.5 h-3.5" />
                       DIỄN BIẾN SỰ CỐ
                     </h4>
@@ -691,6 +943,13 @@ export const IncidentModule = ({
           )}
         </div>
       </div>
+
+      <DocumentLibraryModal 
+        isOpen={isLibraryOpen}
+        onClose={() => setIsLibraryOpen(false)}
+        selectedIds={selectedLibraryIds}
+        onToggleDoc={(doc) => handleToggleDoc(doc, inc)}
+      />
     </div>
   );
 };

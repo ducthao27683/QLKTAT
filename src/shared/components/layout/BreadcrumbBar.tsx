@@ -52,7 +52,7 @@ export const BreadcrumbBar = ({
     <div ref={containerRef} className={`flex items-center justify-between px-4 min-h-[48px] py-1 bg-white border-b border-gray-200 shrink-0 z-40 shadow-sm relative w-full ${(isEditing || isLocked) ? 'pointer-events-none opacity-50' : ''}`}>
       <div className="flex items-center gap-1 flex-wrap flex-1">
           <button 
-            className="p-1.5 hover:bg-blue-50 rounded text-blue-600 transition-colors shrink-0 mr-2"
+            className="p-1.5 hover:bg-blue-50 rounded-[10px] text-blue-600 transition-colors shrink-0 mr-2"
             onClick={() => {
               setTempDevicePath(devicePath);
               setShowDeviceTreePopup(true);
@@ -103,7 +103,7 @@ export const BreadcrumbBar = ({
                     setDevicePath(newPath);
                     setDeviceFormCurrentPage(1);
                     setActiveBreadcrumbDropdown(null);
-                    if (detailForm && detailForm.mode !== 'view') setDetailForm(null);
+                    setDetailForm(null);
                   },
                   dropdownId: `item-${i}`
                 });
@@ -118,7 +118,7 @@ export const BreadcrumbBar = ({
                   )}
                   <div className="relative group shrink min-w-0 max-w-[200px] lg:max-w-[300px]">
                     <button 
-                      className={`px-2 py-1 hover:bg-blue-50 hover:text-blue-600 rounded transition-colors flex items-center gap-1.5 w-full text-[12pt] ${activeBreadcrumbDropdown === item.dropdownId ? 'bg-blue-50 text-blue-600 font-medium' : 'text-gray-700 font-medium'}`}
+                      className={`px-2 py-1 hover:bg-blue-50 hover:text-blue-600 rounded-[10px] transition-colors flex items-center gap-1.5 w-full text-[12pt] ${activeBreadcrumbDropdown === item.dropdownId ? 'bg-blue-50 text-blue-600 font-medium' : 'text-gray-700 font-medium'}`}
                       title={item.fullLabel}
                       onClick={() => {
                         setActiveBreadcrumbDropdown(activeBreadcrumbDropdown === item.dropdownId ? null : item.dropdownId);
@@ -151,7 +151,7 @@ export const BreadcrumbBar = ({
                               onClick={() => {
                                 item.onSelect(opt);
                                 setBreadcrumbSearch('');
-                                if (detailForm && detailForm.mode !== 'view') setDetailForm(null);
+                                setDetailForm(null);
                               }}
                             >
                               <span className="truncate pr-2">{opt}</span>
@@ -171,41 +171,52 @@ export const BreadcrumbBar = ({
         {/* Action Bar */}
         <div className="flex items-center gap-2 shrink-0 pl-4 border-l border-gray-200 ml-4">
           <button 
-            className="flex items-center gap-1.5 px-3 py-1.5 text-[12pt] font-medium text-pink-700 hover:bg-pink-50 rounded-[20%] transition-all duration-300 group bg-transparent"
-            onClick={() => setActiveSubMenu('Danh sách thiết bị')}
+            className="flex items-center gap-1.5 px-3 py-1.5 text-[12pt] font-medium text-pink-700 hover:bg-pink-50 rounded-[10px] transition-all duration-300 group bg-transparent"
+            onClick={() => {
+              setActiveSubMenu('Danh sách thiết bị');
+              setDetailForm(null);
+            }}
           >
             <Eye className="w-4 h-4 text-pink-600 group-hover:scale-110 transition-transform" />
             Xem
           </button>
           <button 
-            className="flex items-center gap-1.5 px-3 py-1.5 text-[12pt] font-medium text-green-700 hover:bg-green-50 rounded-[20%] transition-all duration-300 group bg-transparent"
-            onClick={() => setActiveSubMenu('Giám sát thông số')}
+            className="flex items-center gap-1.5 px-3 py-1.5 text-[12pt] font-medium text-green-700 hover:bg-green-50 rounded-[10px] transition-all duration-300 group bg-transparent"
+            onClick={() => {
+              setActiveSubMenu('Giám sát thông số');
+              setDetailForm(null);
+            }}
           >
             <Activity className="w-4 h-4 text-green-600 group-hover:scale-110 transition-transform" />
             Thông số
           </button>
           <button 
-            className="flex items-center gap-1.5 px-3 py-1.5 text-[12pt] font-medium text-red-700 hover:bg-red-50 rounded-[20%] transition-all duration-300 group bg-transparent"
-            onClick={() => setActiveSubMenu('Danh sách sự cố')}
+            className="flex items-center gap-1.5 px-3 py-1.5 text-[12pt] font-medium text-red-700 hover:bg-red-50 rounded-[10px] transition-all duration-300 group bg-transparent"
+            onClick={() => {
+              setActiveSubMenu('Danh sách sự cố');
+              setDetailForm(null);
+            }}
           >
             <AlertTriangle className="w-4 h-4 text-red-600 group-hover:scale-110 transition-transform" />
             Sự cố
           </button>
           <button 
-            className="flex items-center gap-1.5 px-3 py-1.5 text-[12pt] font-medium text-sky-700 hover:bg-sky-50 rounded-[20%] transition-all duration-300 group bg-transparent"
+            className="flex items-center gap-1.5 px-3 py-1.5 text-[12pt] font-medium text-sky-700 hover:bg-sky-50 rounded-[10px] transition-all duration-300 group bg-transparent"
             onClick={() => {
               setActiveSubMenu('Sửa chữa theo CBM/RCM');
               if (setActiveMenu) setActiveMenu('scbd');
+              setDetailForm(null);
             }}
           >
             <Wrench className="w-4 h-4 text-sky-600 group-hover:scale-110 transition-transform" />
             SCBD
           </button>
           <button 
-            className="flex items-center gap-1.5 px-3 py-1.5 text-[12pt] font-medium text-violet-700 hover:bg-violet-50 rounded-[20%] transition-all duration-300 group bg-transparent"
+            className="flex items-center gap-1.5 px-3 py-1.5 text-[12pt] font-medium text-violet-700 hover:bg-violet-50 rounded-[10px] transition-all duration-300 group bg-transparent"
             onClick={() => {
               setActiveSubMenu('Thiết lập thiết bị');
               if (setActiveMenu) setActiveMenu('thi-nghiem');
+              setDetailForm(null);
             }}
           >
             <FlaskConical className="w-4 h-4 text-violet-600 group-hover:scale-110 transition-transform" />

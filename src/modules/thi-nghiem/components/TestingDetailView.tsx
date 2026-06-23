@@ -321,13 +321,17 @@ export const TestingDetailView = ({
                             {detailForm.data?.code || (activeSubMenu === 'Yêu cầu thí nghiệm' ? 'YC' : 'KH') + '-TN-2026-XXX'}
                           </span>
                           
-                          {/* Single Plan Status Badge: Chưa xác nhận / Đã xác nhận */}
+                          {/* Single Plan Status Badge: Nháp, Chờ duyệt, Đã duyệt, Từ chối */}
                           <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[8pt] font-black uppercase tracking-widest leading-none border ${
                             detailForm.data?.status === 'Đã duyệt'
-                              ? 'bg-emerald-50 text-emerald-600 border-emerald-100 shadow-3xs'
-                              : 'bg-amber-50 text-amber-600 border-amber-100 shadow-3xs'
+                              ? 'bg-green-50 text-green-600 border-green-300 shadow-3xs'
+                              : detailForm.data?.status === 'Từ chối'
+                              ? 'bg-rose-50 text-rose-600 border-rose-100 shadow-3xs'
+                              : detailForm.data?.status === 'Chờ duyệt'
+                              ? 'bg-blue-50 text-blue-600 border-blue-100 shadow-3xs'
+                              : 'bg-slate-55 bg-amber-55 text-amber-600 border-amber-100 shadow-3xs'
                           }`}>
-                            {detailForm.data?.status === 'Đã duyệt' ? 'ĐÃ XÁC NHẬN' : 'CHƯA XÁC NHẬN'}
+                            {detailForm.data?.status === 'Đã duyệt' ? 'Đã duyệt' : (detailForm.data?.status || 'Nháp')}
                           </span>
                         </div>
                         
@@ -340,9 +344,77 @@ export const TestingDetailView = ({
                           className={`w-full text-[14pt] font-black rounded-xl transition-all text-[#164399] leading-tight ${
                             detailForm.mode === 'view' 
                               ? 'bg-transparent border-transparent px-0 py-0.5 focus:outline-none' 
-                              : 'bg-slate-50 border border-slate-200 px-4 py-2.5 focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-50/50 outline-none'
+                              : 'bg-slate-55 border border-slate-200 px-4 py-2.5 focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-50/50 outline-none'
                           }`}
                         />
+
+                        {/* Status Select for Add/Edit Mode */}
+                        {detailForm.mode !== 'view' && (
+                          <div className="grid md:grid-cols-2 gap-4 mt-2">
+                            <div className="space-y-1 text-left">
+                              <label className="text-[8.5pt] font-black text-[#164399] uppercase tracking-widest ml-1 font-sans">Trạng thái phiếu</label>
+                              <select
+                                value={detailForm.data?.status || 'Nháp'}
+                                onChange={(e) => {
+                                  setDetailForm({
+                                    ...detailForm,
+                                    validationError: false,
+                                    data: {
+                                      ...detailForm.data,
+                                      status: e.target.value
+                                    }
+                                  });
+                                }}
+                                className="w-full px-4 py-2 text-[10pt] font-bold rounded-lg bg-white border border-gray-200 focus:border-blue-400 focus:ring-4 focus:ring-blue-50 shadow-sm transition-all text-gray-700 outline-none"
+                              >
+                                <option value="Nháp">Nháp</option>
+                                <option value="Chờ duyệt">Chờ duyệt</option>
+                                <option value="Đã duyệt">Đã duyệt</option>
+                                <option value="Từ chối">Từ chối</option>
+                              </select>
+                            </div>
+
+                            {/* Lý do từ chối shown when Từ chối and input is modifiable */}
+                            {detailForm.data?.status === 'Từ chối' && (
+                              <div className="space-y-1 text-left">
+                                <label className="text-[8.5pt] font-black text-red-600 uppercase tracking-widest ml-1 font-sans flex items-center gap-1">
+                                  Lý do từ chối <span className="text-red-500 font-bold">*</span>
+                                </label>
+                                <input
+                                  type="text"
+                                  placeholder="Nhập lý do từ chối..."
+                                  value={detailForm.data?.rejectReason || ''}
+                                  onChange={(e) => {
+                                    setDetailForm({
+                                      ...detailForm,
+                                      validationError: false,
+                                      data: {
+                                        ...detailForm.data,
+                                        rejectReason: e.target.value
+                                      }
+                                    });
+                                  }}
+                                  className={`w-full px-4 py-2 text-[10pt] font-medium rounded-lg bg-white border outline-none transition-all ${
+                                    detailForm.validationError && !detailForm.data?.rejectReason?.trim()
+                                      ? 'border-red-500 focus:ring-4 focus:ring-red-100 bg-red-50/20'
+                                      : 'border-slate-200 focus:border-blue-300 focus:ring-4 focus:ring-blue-50'
+                                  }`}
+                                />
+                                {detailForm.validationError && !detailForm.data?.rejectReason?.trim() && (
+                                  <p className="text-[8pt] text-red-500 font-bold ml-1 mt-0.5">Vui lòng nhập lý do từ chối!</p>
+                                )}
+                              </div>
+                            )}
+                          </div>
+                        )}
+
+                        {/* Rejected Reason shown and styled beautifully in View mode */}
+                        {detailForm.mode === 'view' && detailForm.data?.status === 'Từ chối' && (
+                          <div className="mt-2 p-4 bg-red-50/60 border border-red-100 text-red-700 rounded-2xl text-left">
+                            <p className="text-[8.5pt] font-black text-red-650 uppercase tracking-wider mb-1 font-sans">Lý do từ chối</p>
+                            <p className="text-[10pt] font-medium leading-relaxed">{detailForm.data?.rejectReason || 'Không có lý do chi tiết.'}</p>
+                          </div>
+                        )}
                         
                         {/* Compact space-divider */}
                         <div className="border-t border-slate-100/60 my-2 select-none"></div>
@@ -558,7 +630,7 @@ export const TestingDetailView = ({
                                               {detailForm.mode !== 'view' && (
                                                 <div className="flex items-center shrink-0 ml-2" onClick={(e) => { e.stopPropagation(); handleDeleteDoc(doc.id || doc.name); }}>
                                                   <button className="p-1.5 flex items-center justify-center bg-red-50 text-red-600 hover:bg-red-100 hover:text-red-700 transition-colors rounded-[20%] border-none cursor-pointer">
-<Trash2 className="w-4 h-4" />
+<Trash2 className="w-4 h-4 text-red-600" />
 </button>
                                                 </div>
                                               )}
@@ -597,10 +669,10 @@ export const TestingDetailView = ({
                                           </div>
                                           {detailForm.mode !== 'view' && (
                                             <div 
-                                              className="absolute top-1.5 right-1.5 p-1 bg-red-50 text-white rounded-xl opacity-0 group-hover:opacity-100 cursor-pointer transition-opacity shadow"
+                                              className="absolute top-1.5 right-1.5 p-1.5 bg-red-50 text-red-650 hover:bg-red-100 rounded-xl opacity-0 group-hover:opacity-100 cursor-pointer transition-all shadow"
                                               onClick={(e) => { e.stopPropagation(); }}
                                             >
-                                              <Trash2 className="w-3.5 h-3.5" />
+                                              <Trash2 className="w-3.5 h-3.5 text-red-600" />
                                             </div>
                                           )}
                                        </div>
@@ -629,13 +701,8 @@ export const TestingDetailView = ({
                         <div className="space-y-4 bg-white p-6 rounded-2xl border border-gray-100 shadow-sm text-left">
                         <div className="flex items-center gap-3 border-b border-gray-100 pb-4">
                            <div className="flex flex-col gap-1">
-                              <span className="bg-slate-100 text-slate-600 font-mono font-bold text-[10pt] uppercase px-2.5 py-1.5 rounded-lg border border-slate-200 block w-fit shadow-xs select-none">
+                              <span className="bg-amber-50 text-amber-800 font-mono font-bold text-[10pt] uppercase px-2.5 py-1.5 rounded-lg border border-amber-200 block w-fit shadow-xs select-none">
                                 {detailForm.data?.voltage || getDeviceVoltage(detailForm.data)}
-                              </span>
-                           </div>
-                           <div className="flex flex-col gap-1">
-                              <span className="bg-red-50 text-red-600 font-mono font-bold text-[10pt] uppercase px-2.5 py-1.5 rounded-lg border border-red-100 block w-fit shadow-xs">
-                                {detailForm.data?.code || 'PD-MBA-001'}
                               </span>
                            </div>
                            <div className="flex flex-col gap-1">
@@ -658,6 +725,11 @@ export const TestingDetailView = ({
                                    <span className="font-bold">{normalizeType(detailForm.data?.type) || 'Máy biến áp'}</span>
                                  )}
                               </div>
+                           </div>
+                           <div className="flex flex-col gap-1">
+                              <span className="bg-red-50 text-red-600 font-mono font-bold text-[10pt] uppercase px-2.5 py-1.5 rounded-lg border border-red-100 block w-fit shadow-xs">
+                                {detailForm.data?.code || 'PD-MBA-001'}
+                              </span>
                            </div>
                         </div>
 
@@ -709,12 +781,14 @@ export const TestingDetailView = ({
                             </div>
                           )}
                         </div>
-                      </div>
-                      
-                      {/* Left Column Part 2: Documents and Images */}
-                          {/* DOCUMENTS SECTION */}
-                          <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm space-y-4 text-left">
-                             <div className="flex items-center justify-between border-b border-gray-100 pb-3">
+                        
+                        {/* Section Separator */}
+                        <div className="border-t border-gray-100 my-2 hidden"></div>
+                        
+                        {/* Left Column Part 2: Documents and Images */}
+                        {/* DOCUMENTS SECTION */}
+                        <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm space-y-4 text-left">
+                             <div className="flex items-center justify-between pb-1">
                                 <h4 className="text-[10pt] font-black text-gray-700 uppercase tracking-wider flex items-center gap-2 pl-1 font-sans">
                                   <FileText className="w-5 h-5 text-red-500" /> TÀI LIỆU KIỂM TRA
                                 </h4>
@@ -738,7 +812,7 @@ export const TestingDetailView = ({
                                      {detailForm.mode !== 'view' && (
                                        <div className="flex items-center shrink-0 ml-2" onClick={(e) => { e.stopPropagation(); handleDeleteDoc(doc.id || doc.name); }}>
                                          <button className="p-1.5 flex items-center justify-center bg-red-50 text-red-600 hover:bg-red-100 hover:text-red-700 transition-colors rounded-[20%] border-none cursor-pointer">
-<Trash2 className="w-4 h-4" />
+<Trash2 className="w-4 h-4 text-red-600" />
 </button>
                                        </div>
                                      )}
@@ -750,9 +824,12 @@ export const TestingDetailView = ({
                               </div>
                            </div>
 
+                          {/* Section Separator */}
+                          <div className="border-t border-gray-100 my-2 hidden"></div>
+
                           {/* IMAGES SECTION */}
                           <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm space-y-4 text-left">
-                             <div className="flex items-center justify-between border-b border-gray-100 pb-3">
+                             <div className="flex items-center justify-between pb-1">
                                 <h4 className="text-[10pt] font-black text-gray-700 uppercase tracking-wider flex items-center gap-2 pl-1 font-sans">
                                   <Camera className="w-5 h-5 text-orange-500" /> HÌNH ẢNH KIỂM TRA
                                 </h4>
@@ -776,10 +853,10 @@ export const TestingDetailView = ({
                                         </div>
                                         {detailForm.mode !== 'view' && (
                                           <div 
-                                            className="absolute top-1.5 right-1.5 p-1 bg-red-50 text-white rounded-xl opacity-0 group-hover:opacity-100 cursor-pointer transition-opacity shadow"
+                                            className="absolute top-1.5 right-1.5 p-1.5 bg-red-50 text-red-650 hover:bg-red-100 rounded-xl opacity-0 group-hover:opacity-100 cursor-pointer transition-all shadow"
                                             onClick={(e) => { e.stopPropagation(); }}
                                           >
-                                            <Trash2 className="w-3.5 h-3.5" />
+                                            <Trash2 className="w-3.5 h-3.5 text-red-600" />
                                           </div>
                                         )}
                                      </div>
@@ -793,12 +870,12 @@ export const TestingDetailView = ({
                              </div>
                           </div>
                       </div>
+                    </div>
 
                       {/* Right Column: Configuration (40%) */}
-                      <div className="space-y-6 lg:col-span-2">
+                      <div className="lg:col-span-2 bg-white rounded-2xl border border-gray-100 shadow-sm text-left h-fit flex flex-col">
                   {/* Selector for enabled forms in Column 2 */}
-                  <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm space-y-3 relative text-left">
-                     
+                  <div className="p-6 space-y-4 relative text-left">
                      <div className="flex gap-3 flex-wrap">
                        {['Thí nghiệm', 'Kiểm định', 'Hiệu chuẩn'].map(formName => {
                          const enabledList = detailForm.data?.enabledForms || ['Thí nghiệm', 'Kiểm định'];
@@ -874,40 +951,40 @@ export const TestingDetailView = ({
                     const statusInfo = computeTestingStatus(formConfig.nextTest || addMonthsToDate(formConfig.lastTest || '2024-05-15', formConfig.interval || '24 tháng'));
 
                     return (
-                      <div key={formName} className="p-6 bg-slate-50/50 rounded-2xl border border-gray-100 space-y-4 shadow-sm text-left relative animate-in fade-in duration-300">
-                        <div className="flex items-center justify-between border-b border-gray-100 pb-3">
-                          <h4 className="text-[10.5pt] font-black text-gray-700 uppercase tracking-wider flex items-center gap-2">
+                      <div key={formName} className="p-6 border-t border-gray-100 space-y-5 text-left relative animate-in fade-in duration-300">
+                        <div className="flex items-center justify-between pb-1">
+                          <h4 className="text-[10.5pt] font-black text-gray-700 uppercase tracking-wider flex items-center gap-2 font-sans">
                             <Settings className="w-4.5 h-4.5 text-[#164399]" /> Cấu hình {formName} ĐỊNH KỲ
                           </h4>
                         </div>
 
-                        <div className="grid grid-cols-2 md:grid-cols-3 gap-5 text-left">
-                          <div className="space-y-1">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 text-left">
+                          <div className="space-y-1.5">
                             <label className="text-[8.5pt] font-black text-gray-400 uppercase tracking-widest ml-1 font-sans">NGÀY GẦN NHẤT</label>
                             <input 
                               type="date" 
                               value={formConfig.lastTest || '2024-05-15'} 
                               onChange={(e) => updateFormConfig('lastTest', e.target.value)}
                               disabled={detailForm.mode === 'view'}
-                              className={`w-full px-3 py-1.5 text-[10pt] font-bold rounded-lg bg-white ${
+                              className={`w-full px-3 py-2 text-[10pt] font-bold rounded-lg bg-white ${
                                 detailForm.mode === 'view' 
-                                  ? 'border-transparent shadow-none pointer-events-none appearance-none font-black' 
-                                  : 'border border-gray-200 focus:border-blue-400 focus:ring-4 focus:ring-blue-50 shadow-sm font-black'
-                              } disabled:bg-white text-gray-700 transition-all`} 
+                                  ? 'border border-gray-100 shadow-none pointer-events-none appearance-none font-black text-gray-600' 
+                                  : 'border border-gray-200 focus:border-blue-400 focus:ring-4 focus:ring-blue-50 shadow-sm font-black text-gray-800'
+                              } transition-all`} 
                             />
                           </div>
 
-                          <div className="space-y-1">
+                          <div className="space-y-1.5">
                             <label className="text-[8.5pt] font-black text-gray-400 uppercase tracking-widest ml-1 font-sans">Chu kỳ định kỳ</label>
                             <select 
                               disabled={detailForm.mode === 'view'}
                               value={formConfig.interval}
                               onChange={(e) => updateFormConfig('interval', e.target.value)}
-                              className={`w-full px-3 py-1.5 text-[10pt] font-bold rounded-lg bg-white ${
+                              className={`w-full px-3 py-2 text-[10pt] font-bold rounded-lg bg-white ${
                                 detailForm.mode === 'view' 
-                                  ? 'border-transparent shadow-none pointer-events-none appearance-none font-black' 
-                                  : 'border border-gray-200 focus:border-blue-400 focus:ring-4 focus:ring-blue-50 shadow-sm font-black'
-                              } disabled:bg-white transition-all`}
+                                  ? 'border border-gray-100 shadow-none pointer-events-none appearance-none font-black text-gray-600' 
+                                  : 'border border-gray-200 focus:border-blue-400 focus:ring-4 focus:ring-blue-50 shadow-sm font-black text-gray-800'
+                              } transition-all`}
                             >
                               <option value="12 tháng">12 tháng</option>
                               <option value="18 tháng">18 tháng</option>
@@ -918,28 +995,25 @@ export const TestingDetailView = ({
                             </select>
                           </div>
 
-                          
+                          <div className="space-y-1.5">
+                            <label className="text-[8.5pt] font-black text-gray-400 uppercase tracking-widest ml-1 font-sans">Ngày tiếp theo</label>
+                            <input 
+                              type="date" 
+                              value={formConfig.nextTest || addMonthsToDate(formConfig.lastTest || '2024-05-15', formConfig.interval || '24 tháng')} 
+                              onChange={(e) => updateFormConfig('nextTest', e.target.value)}
+                              disabled={detailForm.mode === 'view'}
+                              className={`w-full px-3 py-2 text-[10pt] font-bold rounded-lg bg-white ${
+                                detailForm.mode === 'view' 
+                                  ? 'border border-gray-100 shadow-none pointer-events-none appearance-none font-black text-blue-600' 
+                                  : 'border border-gray-200 focus:border-blue-400 focus:ring-4 focus:ring-blue-50 shadow-sm font-black text-blue-600'
+                              } transition-all`} 
+                            />
+                          </div>
 
-                          <div className="space-y-1 mt-4 col-span-full flex gap-4 h-[60px] max-w-[66%]">
-                            <div className="flex-1 space-y-1">
-                              <label className="text-[8.5pt] font-black text-gray-400 uppercase tracking-widest ml-1 font-sans">Ngày tiếp theo</label>
-                              <input 
-                                type="date" 
-                                value={formConfig.nextTest || addMonthsToDate(formConfig.lastTest || '2024-05-15', formConfig.interval || '24 tháng')} 
-                                onChange={(e) => updateFormConfig('nextTest', e.target.value)}
-                                disabled={detailForm.mode === 'view'}
-                                className={`w-full px-3 py-1.5 text-[10pt] font-bold rounded-lg bg-white ${
-                                  detailForm.mode === 'view' 
-                                    ? 'border-transparent shadow-none pointer-events-none appearance-none font-black' 
-                                    : 'border border-gray-200 focus:border-blue-400 focus:ring-4 focus:ring-blue-50 shadow-sm font-black'
-                                } disabled:bg-white text-gray-700 transition-all`} 
-                              />
-                            </div>
-                            <div className="flex-1 space-y-1">
-                              <label className="text-[8.5pt] font-black text-gray-400 uppercase tracking-widest ml-1 font-sans">Trạng thái hạn</label>
-                              <div className={`w-full px-3 py-1 text-[9pt] rounded-full border flex items-center justify-center font-black h-[34px] shadow-sm select-none ${statusInfo.colorClass}`}>
-                                {statusInfo.label}
-                              </div>
+                          <div className="space-y-1.5">
+                            <label className="text-[8.5pt] font-black text-gray-400 uppercase tracking-widest ml-1 font-sans">Trạng thái hạn</label>
+                            <div className={`w-full px-3 py-1.5 text-[9.5pt] rounded-lg border flex items-center justify-center font-black h-[38px] shadow-sm select-none ${statusInfo.colorClass}`}>
+                              {statusInfo.label}
                             </div>
                           </div>
                         </div>
@@ -981,10 +1055,10 @@ export const TestingDetailView = ({
                                 </div>
                                 {detailForm.mode !== 'view' && (
                                   <div 
-                                    className="absolute top-1.5 right-1.5 p-1 bg-red-50 text-white rounded-xl opacity-0 group-hover:opacity-100 cursor-pointer transition-opacity shadow"
+                                    className="absolute top-1.5 right-1.5 p-1.5 bg-red-50 text-red-650 hover:bg-red-100 hover:text-red-755 transition-all rounded-xl opacity-0 group-hover:opacity-100 cursor-pointer transition-opacity shadow"
                                     onClick={(e) => { e.stopPropagation(); }}
                                   >
-                                    <Trash2 className="w-3.5 h-3.5" />
+                                    <Trash2 className="w-3.5 h-3.5 text-red-600" />
                                   </div>
                                 )}
                              </div>
@@ -1038,7 +1112,7 @@ export const TestingDetailView = ({
                              {detailForm.mode !== 'view' && (
                                <div className="flex items-center shrink-0 ml-2" onClick={(e) => { e.stopPropagation(); handleDeleteDoc(doc.id || doc.name); }}>
                                  <button className="p-1.5 flex items-center justify-center bg-red-50 text-red-600 hover:bg-red-100 hover:text-red-700 transition-colors rounded-[20%] border-none cursor-pointer">
-<Trash2 className="w-4 h-4" />
+<Trash2 className="w-4 h-4 text-red-600" />
 </button>
                                </div>
                              )}
@@ -1313,22 +1387,22 @@ export const TestingDetailView = ({
                                   let cnStyle = 'bg-amber-50/50 text-amber-500/80 border-amber-100/40 font-normal';
 
                                   if (isApproved) {
-                                    cnText = 'ĐVĐK DUYỆT';
-                                    cnStyle = 'bg-emerald-50/50 text-emerald-500/80 border-emerald-100/40 font-bold';
+                                    cnText = 'ĐVĐK ĐÃ DUYỆT';
+                                    cnStyle = 'bg-green-50/50 text-green-600 border border-green-300/40 font-bold';
                                   } else if (isRejected) {
                                     cnText = 'KHÔNG DUYỆT';
                                     cnStyle = 'bg-red-50/50 text-red-500/80 border-red-100/40 font-bold';
                                   } else if (isPendingApproval) {
-                                    cnText = 'ĐVĐK DUYỆT';
-                                    cnStyle = 'bg-emerald-50/50 text-emerald-500/80 border-emerald-100/40 font-bold';
+                                    cnText = 'ĐVĐK ĐÃ DUYỆT';
+                                    cnStyle = 'bg-green-50/50 text-green-600 border border-green-300/40 font-bold';
                                   }
 
                                   let ctText = 'ĐVTN CHỜ DUYỆT';
                                   let ctStyle = 'bg-amber-100/25 text-amber-500/80 border-amber-100/30 font-normal';
 
                                   if (isApproved) {
-                                    ctText = 'ĐVTN DUYỆT';
-                                    ctStyle = 'bg-emerald-100/25 text-emerald-500/80 border-emerald-100/30 font-bold';
+                                    ctText = 'ĐVTN ĐÃ DUYỆT';
+                                    ctStyle = 'bg-green-50/55 text-green-650 border border-green-300/35 font-bold';
                                   } else if (isRejected) {
                                     ctText = 'KHÔNG DUYỆT';
                                     ctStyle = 'bg-red-100/25 text-red-500/80 border-red-100/30 font-bold';
@@ -1487,7 +1561,7 @@ export const TestingDetailView = ({
                                       <td className="py-3 px-2 text-center">
                                         <div className="flex justify-center flex-col gap-1 items-center">
                                           {hasBranch ? (
-                                            <div className={`text-[7.5pt] uppercase font-black tracking-widest px-1.5 py-0.5 rounded-full inline-block ${cnText.includes('KHÔNG') || cnText.includes('không') ? 'bg-red-50 text-red-600 border border-red-100' : cnText.includes('CHỜ') || cnText.includes('chờ') ? 'bg-amber-50 text-amber-600 border border-amber-100' : 'bg-emerald-50 text-emerald-600 border border-emerald-100'}`}>
+                                            <div className={`text-[7.5pt] uppercase font-black tracking-widest px-1.5 py-0.5 rounded-full inline-block ${cnText.includes('KHÔNG') || cnText.includes('không') ? 'bg-red-50 text-red-600 border border-red-100' : cnText.includes('CHỜ') || cnText.includes('chờ') ? 'bg-amber-50 text-amber-600 border border-amber-100' : 'bg-green-50 text-green-600 border border-green-300'}`}>
                                               {cnText}
                                             </div>
                                           ) : <span className="text-gray-300">-</span>}
@@ -1495,7 +1569,7 @@ export const TestingDetailView = ({
                                       </td>
                                       <td className="py-3 px-2 text-center">
                                         <div className="flex justify-center flex-col gap-1 items-center">
-                                          <div className={`text-[7.5pt] uppercase font-black tracking-widest px-1.5 py-0.5 rounded-full inline-block ${ctText.includes('KHÔNG') || ctText.includes('không') ? 'bg-red-50 text-red-600 border border-red-100' : ctText.includes('CHỜ') || ctText.includes('chờ') ? 'bg-amber-50 text-amber-600 border border-amber-100' : 'bg-emerald-50 text-emerald-600 border border-emerald-100'}`}>
+                                          <div className={`text-[7.5pt] uppercase font-black tracking-widest px-1.5 py-0.5 rounded-full inline-block ${ctText.includes('KHÔNG') || ctText.includes('không') ? 'bg-red-50 text-red-600 border border-red-100' : ctText.includes('CHỜ') || ctText.includes('chờ') ? 'bg-amber-50 text-amber-600 border border-amber-100' : 'bg-green-50 text-green-600 border border-green-300'}`}>
                                             {ctText}
                                           </div>
                                         </div>
@@ -1567,10 +1641,10 @@ export const TestingDetailView = ({
                                                   });
                                                   setSelectedDeviceIndices(selectedDeviceIndices.filter(prevIdx => prevIdx !== dev.originalIndex));
                                                 }}
-                                                className="p-1 hover:bg-rose-50 text-gray-400 hover:text-rose-600 rounded cursor-pointer transition-colors"
+                                                className="p-1 bg-red-50 hover:bg-red-100 text-red-600 hover:text-red-700 rounded border border-red-100 cursor-pointer transition-colors"
                                                 title="Xóa"
                                               >
-                                                <Trash2 className="w-4 h-4" />
+                                                <Trash2 className="w-4 h-4 text-red-600" />
                                               </button>
                                             </>
                                           )}
@@ -1586,7 +1660,7 @@ export const TestingDetailView = ({
 
                           {/* Pagination Footer */}
                           {totalDetailPages > 1 && (
-                            <div className="flex items-center justify-between border-t border-gray-200 pt-4 px-6 pb-4 bg-white mt-auto shrink-0">
+                            <div className="flex items-center justify-between border-t border-gray-200 pt-2 px-6 pb-2 bg-white mt-auto shrink-0">
                               <span className="text-[9pt] font-semibold text-gray-400">
                                 Hiển thị {startIdxDetail + 1} - {Math.min(startIdxDetail + 20, filteredDevices.length)} của {filteredDevices.length} thiết bị
                               </span>
@@ -1826,10 +1900,10 @@ export const TestingDetailView = ({
                                 </div>
                                 {detailForm.mode !== 'view' && (
                                   <div 
-                                    className="absolute top-1.5 right-1.5 p-1 bg-red-50 text-white rounded-xl opacity-0 group-hover:opacity-100 cursor-pointer transition-opacity shadow"
+                                    className="absolute top-1.5 right-1.5 p-1.5 bg-red-50 text-red-650 hover:bg-red-100 rounded-xl opacity-0 group-hover:opacity-100 cursor-pointer transition-opacity shadow"
                                     onClick={(e) => { e.stopPropagation(); }}
                                   >
-                                    <Trash2 className="w-3.5 h-3.5" />
+                                    <Trash2 className="w-3.5 h-3.5 text-red-600" />
                                   </div>
                                 )}
                              </div>
@@ -1883,7 +1957,7 @@ export const TestingDetailView = ({
                             {detailForm.mode !== 'view' && (
                               <div className="flex items-center shrink-0 ml-2" onClick={(e) => { e.stopPropagation(); handleDeleteDoc(doc.id || doc.name); }}>
                                 <button className="p-1.5 flex items-center justify-center bg-red-50 text-red-600 hover:bg-red-100 hover:text-red-700 transition-colors rounded-[20%] border-none cursor-pointer">
-<Trash2 className="w-4 h-4" />
+<Trash2 className="w-4 h-4 text-red-600" />
 </button>
                               </div>
                             )}
@@ -1936,12 +2010,17 @@ export const TestingDetailView = ({
               <div className="lg:col-span-2 space-y-6 animate-in fade-in duration-300 max-w-4xl mx-auto w-full text-left">
                 <div className="bg-white p-8 rounded-3xl border border-gray-100 shadow-sm space-y-6">
                   <div className="flex items-center justify-between border-b border-gray-100 pb-4 flex-wrap gap-2">
-                    <h3 className="text-[12pt] font-black text-gray-700 uppercase tracking-wider flex items-center gap-2">
-                      <History className="w-5 h-5 text-blue-600" /> Lịch sử thực hiện thí nghiệm & kiểm định
+                    <h3 className="text-[12pt] font-black text-gray-400 uppercase tracking-wider flex items-center gap-2">
+                      <History className="w-5 h-5 text-gray-400" /> Lịch sử thực hiện thí nghiệm & kiểm định
                     </h3>
-                    <span className="text-[8.5pt] font-black px-3 py-1 rounded-full border bg-blue-50 text-blue-750 border-blue-200 font-mono uppercase">
-                      {detailForm.data?.code || 'PD-MBA-001'}
-                    </span>
+                    <div className="flex items-center gap-2">
+                      <span className="text-[11pt] font-black text-[#164399]">
+                        {detailForm.data?.device || 'Máy biến áp T1'}
+                      </span>
+                      <span className="text-[8.5pt] font-black px-3 py-1 rounded-full border bg-red-50 text-red-600 border-red-100 font-mono uppercase">
+                        {detailForm.data?.code || 'PD-MBA-001'}
+                      </span>
+                    </div>
                   </div>
 
                   <div className="relative pl-8 border-l-2 border-slate-100 space-y-8 ml-4 pt-2">
@@ -1970,7 +2049,7 @@ export const TestingDetailView = ({
                           
                           <div className="flex items-center justify-between gap-4 pt-3 border-t border-gray-100/70 text-[9pt] flex-wrap">
                             <div className="flex items-center gap-1">
-                              <span className="text-gray-700 font-bold uppercase tracking-tight">Nhân viên:</span>
+                              <span className="text-gray-400 font-bold uppercase tracking-tight">Phụ trách:</span>
                               <span className="text-gray-700 font-black">{item.operator}</span>
                             </div>
                             <div className="flex items-center gap-1 p-1 px-3 bg-emerald-50 text-emerald-800 border-emerald-200 border rounded-xl font-mono font-black text-[8.5pt]">

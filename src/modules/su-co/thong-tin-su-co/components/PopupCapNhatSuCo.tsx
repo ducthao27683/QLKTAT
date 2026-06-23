@@ -47,24 +47,6 @@ export const IncidentDetailForm = ({
                 </select>
               )}
             </div>
-            <div className="space-y-1">
-              <label className="text-[10pt] font-bold text-gray-500 uppercase">Diễn biến sự cố</label>
-              <textarea 
-                rows={4}
-                defaultValue={detailForm.data?.description || ""} 
-                readOnly={isView}
-                className={`w-full px-3 py-2 text-[12pt] rounded-lg transition-all ${isView ? 'bg-transparent border-transparent focus:outline-none resize-none' : 'bg-white border border-gray-200 focus:border-blue-500 focus:ring-1 focus:ring-blue-500'}`}
-              />
-            </div>
-            <div className="space-y-1">
-              <label className="text-[10pt] font-bold text-gray-500 uppercase">Nguyên nhân</label>
-              <textarea 
-                rows={3}
-                defaultValue={detailForm.data?.cause || ""} 
-                readOnly={isView}
-                className={`w-full px-3 py-2 text-[12pt] text-purple-600 rounded-lg transition-all ${isView ? 'bg-transparent border-transparent focus:outline-none resize-none' : 'bg-white border border-gray-200 focus:border-blue-500 focus:ring-1 focus:ring-blue-500'}`}
-              />
-            </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-1">
                 <label className="text-[10pt] font-bold text-gray-500 uppercase">Thời điểm</label>
@@ -88,6 +70,24 @@ export const IncidentDetailForm = ({
                   <option>Chờ duyệt</option>
                 </select>
               </div>
+            </div>
+            <div className="space-y-1">
+              <label className="text-[10pt] font-bold text-gray-500 uppercase">Diễn biến sự cố</label>
+              <textarea 
+                rows={4}
+                defaultValue={detailForm.data?.description || ""} 
+                readOnly={isView}
+                className={`w-full px-3 py-2 text-[12pt] rounded-lg transition-all ${isView ? 'bg-transparent border-transparent focus:outline-none resize-none' : 'bg-white border border-gray-200 focus:border-blue-500 focus:ring-1 focus:ring-blue-500'}`}
+              />
+            </div>
+            <div className="space-y-1">
+              <label className="text-[10pt] font-bold text-gray-500 uppercase">Nguyên nhân</label>
+              <textarea 
+                rows={3}
+                defaultValue={detailForm.data?.cause || ""} 
+                readOnly={isView}
+                className={`w-full px-3 py-2 text-[12pt] text-purple-600 rounded-lg transition-all ${isView ? 'bg-transparent border-transparent focus:outline-none resize-none' : 'bg-white border border-gray-200 focus:border-blue-500 focus:ring-1 focus:ring-blue-500'}`}
+              />
             </div>
           </div>
         </div>

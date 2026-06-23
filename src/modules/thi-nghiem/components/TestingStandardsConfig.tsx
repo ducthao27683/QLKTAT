@@ -160,7 +160,7 @@ export const TestingStandardsConfig: React.FC<TestingStandardsConfigProps> = ({
             <div className="flex items-center justify-between p-4 border-b border-gray-100 bg-slate-50/50 flex-wrap gap-2 shrink-0">
               <h3 className="text-[11pt] font-black flex items-center gap-2 flex-wrap">
                 <CheckCircle2 className="w-5 h-5 text-[#164399]" />
-                <span className="text-gray-700 uppercase tracking-wider">{formName}:</span>
+                <span className="text-[#164399] uppercase tracking-wider">{formName}:</span>
                 <span className="text-gray-700 uppercase tracking-wider">Danh sách hạng mục kiểm tra</span>
               </h3>
               <span className="text-[8.5pt] font-black text-gray-500 bg-white uppercase px-3 py-1 rounded-full border border-gray-200 shadow-xs">
@@ -169,18 +169,18 @@ export const TestingStandardsConfig: React.FC<TestingStandardsConfigProps> = ({
             </div>
 
             {/* Split Content: 2 Columns */}
-            <div className="flex flex-col md:flex-row h-full min-h-[400px]">
+            <div className="flex flex-col md:flex-row h-auto">
               
               {/* Left Column: Danh sách hạng mục */}
               <div className="w-full md:w-5/12 border-r border-gray-100 flex flex-col bg-slate-50/20">
-                <div className="p-3 bg-[#eaf0fa]/50 border-b border-gray-200">
+                <div className="p-3 bg-white border-b border-gray-200">
                   <h4 className="text-[9pt] font-black text-gray-700 uppercase tracking-wider flex items-center gap-2">
                     <ListOrdered className="w-4 h-4" /> Danh sách hạng mục
                   </h4>
                 </div>
                 <div className="flex-1 overflow-y-auto">
                   <table className="w-full text-left border-collapse">
-                    <thead className="bg-[#f0f4fa] sticky top-0 z-10 text-slate-500 font-bold text-[8pt] uppercase tracking-wider">
+                    <thead className="bg-[#f0f4fa] sticky top-0 z-10 text-slate-500 font-bold text-[8pt] uppercase tracking-wider border-b border-gray-200">
                       <tr>
                         <th className="px-3 py-3 w-10 text-center">Sử dụng</th>
                         <th className="px-3 py-3 w-10 text-center">STT</th>
@@ -221,11 +221,7 @@ export const TestingStandardsConfig: React.FC<TestingStandardsConfigProps> = ({
                               </div>
                             </td>
                             <td className="px-2 py-3 text-center text-[7.5pt]">
-                              <span className={`px-1.5 py-0.5 rounded border font-bold ${
-                                item.unit !== 'mΩ' && item.unit !== 'μΩ' && item.unit !== 'μA'
-                                  ? 'bg-orange-50 text-orange-700 border-orange-100'
-                                  : 'bg-green-50 text-green-700 border-green-100'
-                              }`}>
+                              <span className="px-1.5 py-0.5 rounded border font-bold bg-gray-50 text-gray-600 border-gray-200">
                                 {item.unit !== 'mΩ' && item.unit !== 'μΩ' && item.unit !== 'μA' ? 'Đạt/K.Đạt' : 'Nhập Text'}
                               </span>
                             </td>
@@ -245,8 +241,8 @@ export const TestingStandardsConfig: React.FC<TestingStandardsConfigProps> = ({
               {/* Right Column: Bảng Thông số chi tiết */}
               <div className="w-full md:w-7/12 flex flex-col bg-white hidden md:flex">
                 <div className="p-3 bg-white border-b border-gray-100 flex items-center justify-between">
-                  <h4 className="text-[9pt] font-black text-gray-700 uppercase tracking-wider flex items-center gap-2">
-                    <FileText className="w-4 h-4 text-slate-400" /> Thông số chi tiết 
+                  <h4 className="text-[9pt] font-black text-[#164399] uppercase tracking-wider flex items-center gap-2">
+                    <FileText className="w-4 h-4 text-[#164399]" /> Thông số chi tiết 
                     {activeItem && <span className="lowercase text-slate-500 font-medium">({activeItem.name})</span>}
                   </h4>
                 </div>
@@ -254,7 +250,7 @@ export const TestingStandardsConfig: React.FC<TestingStandardsConfigProps> = ({
                 <div className="flex-1 p-0 overflow-y-auto">
                   {activeItem ? (
                     <table className="w-full text-left border-collapse">
-                      <thead className="bg-slate-50 sticky top-0 z-10 text-slate-500 font-bold text-[8pt] uppercase tracking-wider shadow-sm">
+                      <thead className="bg-slate-50 sticky top-0 z-10 text-slate-500 font-bold text-[8pt] uppercase tracking-wider border-b border-gray-200">
                         <tr>
                           <th className="px-3 py-3 w-16 text-center" title="Sử dụng tham số này">Sử dụng</th>
                           <th className="px-3 py-3 w-12 text-center">STT</th>

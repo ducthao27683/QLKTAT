@@ -624,12 +624,12 @@ export const YeuCauThiNghiemScreen = ({
                         {(() => {
                           const isConfirmed = plan.status === 'Đã duyệt' || plan.status === 'Đã xác nhận' || plan.status === 'Đang thực hiện';
                           return (
-                            <span className={`inline-flex items-center px-4 py-1.5 rounded-full text-[8.5pt] font-black uppercase tracking-wider leading-normal ${
+                            <span className={`inline-flex items-center px-4 py-1.5 rounded-full text-[8.5pt] font-black uppercase tracking-wider leading-normal border ${
                               isConfirmed 
-                                ? 'bg-emerald-50 text-emerald-700' 
-                                : 'bg-amber-50 text-amber-600'
+                                ? 'bg-orange-50 text-orange-600 border-orange-205' 
+                                : 'bg-amber-50 text-amber-600 border-amber-200/85'
                             }`}>
-                              {isConfirmed ? 'Đã xác nhận' : 'Chưa xác nhận'}
+                              {isConfirmed ? 'Xác nhận' : 'Chờ duyệt'}
                             </span>
                           );
                         })()}
@@ -870,8 +870,8 @@ export const YeuCauThiNghiemScreen = ({
                                         let dvdkText = 'ĐVĐK CHỜ DUYỆT';
                                         let dvdkStyle = 'bg-amber-50 text-amber-600 border border-amber-100 font-normal';
                                         if (dvdk === 'ĐVĐK Duyệt' || dvdk.toUpperCase().includes('DUYỆT')) {
-                                          dvdkText = 'ĐVĐK DUYỆT';
-                                          dvdkStyle = 'bg-emerald-50 text-emerald-600 border border-emerald-100 font-bold';
+                                          dvdkText = 'ĐVĐK ĐÃ DUYỆT';
+                                          dvdkStyle = 'bg-green-50 text-green-600 border border-green-300 font-bold';
                                         } else if (dvdk === 'ĐVĐK Không Duyệt' || dvdk.toUpperCase().includes('KHÔNG')) {
                                           dvdkText = 'KHÔNG DUYỆT';
                                           dvdkStyle = 'bg-red-50 text-red-600 border border-red-100 font-bold';
@@ -880,8 +880,8 @@ export const YeuCauThiNghiemScreen = ({
                                         let dvtnText = 'ĐVTN CHỜ DUYỆT';
                                         let dvtnStyle = 'bg-amber-50 text-amber-600 border border-amber-100 font-normal';
                                         if (dvtn === 'ĐVTN Duyệt' || dvtn.toUpperCase().includes('DUYỆT')) {
-                                          dvtnText = 'ĐVTN DUYỆT';
-                                          dvtnStyle = 'bg-emerald-50 text-emerald-600 border border-emerald-100 font-bold';
+                                          dvtnText = 'ĐVTN ĐÃ DUYỆT';
+                                          dvtnStyle = 'bg-green-50 text-green-600 border border-green-300 font-bold';
                                         } else if (dvtn === 'ĐVTN Không Duyệt' || dvtn.toUpperCase().includes('KHÔNG')) {
                                           dvtnText = 'KHÔNG DUYỆT';
                                           dvtnStyle = 'bg-red-50 text-red-600 border border-red-100 font-bold';
@@ -915,8 +915,8 @@ export const YeuCauThiNghiemScreen = ({
 
           {/* Pagination Controls */}
           {totalPages > 1 && (
-            <div className="py-4 border-t border-gray-200 flex items-center justify-between container-paging shrink-0 bg-white px-6">
-              <span className="text-[8.5pt] font-black text-gray-700 uppercase tracking-wider">
+            <div className="py-2 border-t border-gray-200 flex items-center justify-between container-paging shrink-0 bg-white px-6">
+              <span className="text-[8.5pt] font-semibold text-gray-400 uppercase tracking-wider">
                 Xem {startIndex + 1} - {Math.min(startIndex + itemsPerPage, totalCount)} / {totalCount} {viewType === 'phieu' ? 'phiếu' : 'thiết bị'}
               </span>
               <div className="flex items-center gap-1">
@@ -1033,10 +1033,10 @@ export const YeuCauThiNghiemScreen = ({
                                             return (
                                                <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[8pt] font-black uppercase tracking-widest border leading-none mt-1 ${
                                                   isConfirmed 
-                                                    ? 'bg-emerald-50 text-emerald-600 border-emerald-100 shadow-3xs' 
+                                                    ? 'bg-orange-50 text-orange-600 border-orange-200 shadow-3xs' 
                                                     : 'bg-amber-50 text-amber-600 border-amber-100 shadow-3xs'
                                                }`}>
-                                                  {isConfirmed ? 'ĐÃ XÁC NHẬN' : 'CHƯA XÁC NHẬN'}
+                                                  {isConfirmed ? 'XÁC NHẬN' : 'CHỜ DUYỆT'}
                                                </span>
                                             );
                                          })()}
@@ -1330,8 +1330,8 @@ export const YeuCauThiNghiemScreen = ({
                                         let dvdkText = 'ĐVĐK CHỜ DUYỆT';
                                         let dvdkStyle = 'bg-amber-50 text-amber-600 border border-amber-100 font-normal';
                                         if (rawDvdk === 'ĐVĐK Duyệt' || rawDvdk.toUpperCase().includes('DUYỆT')) {
-                                          dvdkText = 'ĐVĐK DUYỆT';
-                                          dvdkStyle = 'bg-emerald-50 text-emerald-600 border border-emerald-100 font-bold';
+                                          dvdkText = 'ĐVĐK ĐÃ DUYỆT';
+                                          dvdkStyle = 'bg-green-50 text-green-600 border border-green-300 font-bold';
                                         } else if (rawDvdk === 'ĐVĐK Không Duyệt' || rawDvdk.toUpperCase().includes('KHÔNG')) {
                                           dvdkText = 'KHÔNG DUYỆT';
                                           dvdkStyle = 'bg-red-50 text-red-600 border border-red-100 font-bold';
@@ -1340,8 +1340,8 @@ export const YeuCauThiNghiemScreen = ({
                                         let dvtnText = 'ĐVTN CHỜ DUYỆT';
                                         let dvtnStyle = 'bg-amber-50 text-amber-600 border border-amber-100 font-normal';
                                         if (rawDvtn === 'ĐVTN Duyệt' || rawDvtn.toUpperCase().includes('DUYỆT')) {
-                                          dvtnText = 'ĐVTN DUYỆT';
-                                          dvtnStyle = 'bg-emerald-50 text-emerald-600 border border-emerald-100 font-bold';
+                                          dvtnText = 'ĐVTN ĐÃ DUYỆT';
+                                          dvtnStyle = 'bg-green-50 text-green-600 border border-green-300 font-bold';
                                         } else if (rawDvtn === 'ĐVTN Không Duyệt' || rawDvtn.toUpperCase().includes('KHÔNG')) {
                                           dvtnText = 'KHÔNG DUYỆT';
                                           dvtnStyle = 'bg-red-50 text-red-600 border border-red-100 font-bold';

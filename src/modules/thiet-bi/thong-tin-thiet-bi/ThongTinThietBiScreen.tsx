@@ -439,10 +439,12 @@ export const DeviceModule = ({
             >
               <ArrowLeft className="w-5 h-5 text-gray-500" />
             </button>
-            <h2 className="text-[12pt] font-medium flex items-center gap-1.5 leading-[1.5] text-[#164399]">
-              <span className="w-1.5 h-1.5 rounded-full bg-blue-600 mr-1 shrink-0 animate-pulse"></span>
-              <span>Danh sách thiết bị của - {getRealDeviceName(devicePath)}</span>
-            </h2>
+            <div className="flex flex-col text-left">
+              <h2 id="device_list_header_title" className="text-[12pt] font-semibold flex items-center gap-2 leading-[1.5]">
+                <span className="text-[#555555]">Danh sách thiết bị</span>
+                <span className="font-bold text-[#164399]">- {getRealDeviceName(devicePath)}</span>
+              </h2>
+            </div>
           </div>
           
           <div className="flex items-center gap-2">
@@ -684,23 +686,23 @@ export const DeviceModule = ({
               return (
                 <div className="mt-4 pt-4 border-t border-slate-200/55 bg-gray-50/50 -mx-6 px-6 pb-2 shrink-0 select-none animate-in slide-in-from-bottom duration-500">
                   <div className="grid grid-cols-5 gap-1.5 text-center">
-                     <div className="bg-blue-50/60 border border-blue-200/60 rounded-xl p-1.5 flex flex-col justify-center shadow-xs">
+                     <div className="bg-blue-50/60 border border-blue-200/60 rounded-[10px] p-1.5 flex flex-col justify-center shadow-xs">
                         <span className="text-[7pt] font-black uppercase text-blue-800 tracking-tighter leading-none mb-1">Tổng số</span>
                         <span className="text-[12pt] font-mono font-black text-[#164399] leading-none">{total}</span>
                      </div>
-                     <div className="bg-emerald-50/60 border border-emerald-200/60 rounded-xl p-1.5 flex flex-col justify-center shadow-xs">
+                     <div className="bg-emerald-50/60 border border-emerald-200/60 rounded-[10px] p-1.5 flex flex-col justify-center shadow-xs">
                         <span className="text-[7pt] font-black uppercase text-emerald-800 tracking-tighter leading-none mb-1">Vận hành</span>
                         <span className="text-[11.5pt] font-mono font-black text-emerald-700 leading-none">{active}</span>
                      </div>
-                     <div className="bg-amber-50/60 border border-amber-200/60 rounded-xl p-1.5 flex flex-col justify-center shadow-xs">
+                     <div className="bg-amber-50/60 border border-amber-200/60 rounded-[10px] p-1.5 flex flex-col justify-center shadow-xs">
                         <span className="text-[7pt] font-black uppercase text-amber-800 tracking-tighter leading-none mb-1">Dự phòng</span>
                         <span className="text-[11.5pt] font-mono font-black text-amber-700 leading-none">{reserve}</span>
                      </div>
-                     <div className="bg-purple-50/60 border border-purple-200/60 rounded-xl p-1.5 flex flex-col justify-center shadow-xs">
+                     <div className="bg-purple-50/60 border border-purple-200/60 rounded-[10px] p-1.5 flex flex-col justify-center shadow-xs">
                         <span className="text-[7pt] font-black uppercase text-purple-700 tracking-tighter leading-none mb-1">Sửa chữa</span>
                         <span className="text-[11.5pt] font-mono font-black text-purple-700 leading-none">{repair}</span>
                      </div>
-                     <div className="bg-gray-50/60 border border-slate-200 rounded-lg p-1.5 flex flex-col justify-center shadow-xs">
+                     <div className="bg-gray-50/60 border border-slate-200 rounded-[10px] p-1.5 flex flex-col justify-center shadow-xs">
                         <span className="text-[7pt] font-black uppercase text-gray-500 tracking-tighter leading-none mb-1">Khóa</span>
                         <span className="text-[11.5pt] font-mono font-black text-gray-500 leading-none">{cover}</span>
                      </div>
@@ -739,15 +741,15 @@ export const DeviceModule = ({
                     <div className="flex-1 space-y-3">
                        {/* Row 1: Code, Type and Status shapes placed closely together with auto-width, no titles */}
                        <div className="flex flex-wrap items-center gap-2">
-                          <span className="bg-amber-100/50 text-amber-700 font-black text-[9pt] uppercase px-3 py-1.5 rounded-md border border-amber-100 block w-auto shadow-sm select-none">
+                          <span className="bg-amber-100/50 text-amber-700 font-black text-[9pt] uppercase px-3 py-1.5 rounded-[10px] border border-amber-100 block w-auto shadow-sm select-none">
                              {getDeviceVoltage(effectiveDevice)}
                           </span>
 
-                          <div className="bg-blue-100/50 text-[#164399] font-black text-[9pt] uppercase px-3 py-1.5 rounded-md border border-blue-100 flex items-center gap-1.5 w-auto shadow-sm select-none">
+                          <div className="bg-blue-100/50 text-[#164399] font-black text-[9pt] uppercase px-3 py-1.5 rounded-[10px] border border-blue-100 flex items-center gap-1.5 w-auto shadow-sm select-none">
                              {normalizeType(getDetailedType(effectiveDevice))}
                           </div>
 
-                          <span className="bg-red-50 text-[#cb1c1c] font-mono font-black text-[9pt] uppercase px-3 py-1.5 rounded-md border border-red-100 block w-auto shadow-sm select-none">
+                          <span className="bg-red-50 text-[#cb1c1c] font-mono font-black text-[9pt] uppercase px-3 py-1.5 rounded-[10px] border border-red-100 block w-auto shadow-sm select-none">
                              {(() => {
                                 const idxInPage = filteredChildren.indexOf(effectiveDevice);
                                 const devIndex = idxInPage >= 0 ? idxInPage : 0;
@@ -817,7 +819,7 @@ export const DeviceModule = ({
                       <div className="grid grid-cols-2 gap-x-10 gap-y-1">
                          {details.specs.filter((s:any) => s.label !== 'Mã thiết bị' && s.label !== 'Tên thiết bị' && s.label !== 'Vị trí' && s.label !== 'Loại thiết bị' && s.label !== 'Trạng thái').map((spec: any, i: number) => (
                            <div key={i} className="flex items-center justify-between py-3 border-b border-gray-200 hover:bg-white/40 transition-colors group px-0">
-                              <span className="text-[10pt] font-black text-gray-700 uppercase tracking-tight">{spec.label}</span>
+                              <span className="text-[10pt] font-black text-gray-400 uppercase tracking-wider">{spec.label}</span>
                               <span className="text-[11pt] font-black text-[#164399] tracking-tight">{spec.value}</span>
                            </div>
                          ))}

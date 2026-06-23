@@ -90,7 +90,7 @@ export const Sidebar = ({
                                     setActiveSubMenu('Thiết lập hạng mục');
                                     setIsMenuOpen(false);
                                   }}
-                                  className={`w-full text-left py-1.5 px-3 rounded-l-md transition-all duration-200 block text-[9pt] ${
+                                  className={`w-full text-left py-1.5 px-3 rounded-l-md transition-all duration-200 block text-[10.5pt] ${
                                     activeSubMenu === 'Thiết lập hạng mục'
                                       ? 'text-blue-600 font-bold bg-blue-100/45 border-r-2 border-blue-600'
                                       : 'text-gray-500 hover:text-blue-600 hover:bg-[#eaeef6]/40 font-medium'
@@ -103,7 +103,7 @@ export const Sidebar = ({
                                     setActiveSubMenu('Thiết lập thiết bị');
                                     setIsMenuOpen(false);
                                   }}
-                                  className={`w-full text-left py-1.5 px-3 rounded-l-md transition-all duration-200 block text-[9pt] ${
+                                  className={`w-full text-left py-1.5 px-3 rounded-l-md transition-all duration-200 block text-[10.5pt] ${
                                     activeSubMenu === 'Thiết lập thiết bị' || activeSubMenu === 'Thiết lập thí nghiệm'
                                       ? 'text-blue-600 font-bold bg-blue-100/45 border-r-2 border-blue-600'
                                       : 'text-gray-500 hover:text-blue-600 hover:bg-[#eaeef6]/40 font-medium'
@@ -172,7 +172,7 @@ export const Sidebar = ({
                   setActiveMenu('thiet-bi');
                   setActiveSubMenu('Sơ đồ thiết bị');
                 }}
-                className="w-full text-left text-slate-650 hover:bg-white hover:text-blue-600 py-1 px-2.5 rounded-lg transition-all truncate text-[8.2pt] font-semibold block"
+                className="w-full text-left text-gray-500 hover:bg-white hover:text-blue-600 py-1 px-2.5 rounded-lg transition-all truncate text-[8.2pt] font-normal block"
               >
                 Sơ đồ thiết bị
               </button>
@@ -181,7 +181,7 @@ export const Sidebar = ({
                   setActiveMenu('su-co');
                   setActiveSubMenu('Danh sách sự cố');
                 }}
-                className="w-full text-left text-slate-650 hover:bg-white hover:text-blue-600 py-1 px-2.5 rounded-lg transition-all truncate text-[8.2pt] font-semibold block"
+                className="w-full text-left text-gray-500 hover:bg-white hover:text-blue-600 py-1 px-2.5 rounded-lg transition-all truncate text-[8.2pt] font-normal block"
               >
                 Danh sách sự cố
               </button>
@@ -190,7 +190,7 @@ export const Sidebar = ({
                   setActiveMenu('cong-viec');
                   setActiveSubMenu('Sổ vận hành');
                 }}
-                className="w-full text-left text-slate-650 hover:bg-white hover:text-blue-600 py-1 px-2.5 rounded-lg transition-all truncate text-[8.2pt] font-semibold block"
+                className="w-full text-left text-gray-500 hover:bg-white hover:text-blue-600 py-1 px-2.5 rounded-lg transition-all truncate text-[8.2pt] font-normal block"
               >
                 Sổ vận hành
               </button>
@@ -206,7 +206,7 @@ export const Sidebar = ({
                   setActiveMenu('bao-cao');
                   setActiveSubMenu('Báo cáo quản trị đơn vị');
                 }}
-                className="w-full text-left text-slate-650 hover:bg-white hover:text-blue-600 py-1 px-2.5 rounded-lg transition-all truncate text-[8.2pt] font-semibold block"
+                className="w-full text-left text-gray-500 hover:bg-white hover:text-blue-600 py-1 px-2.5 rounded-lg transition-all truncate text-[8.2pt] font-normal block"
               >
                 Báo cáo quản trị đơn vị
               </button>
@@ -215,7 +215,7 @@ export const Sidebar = ({
                   setActiveMenu('thong-so');
                   setActiveSubMenu('Giám sát thông số');
                 }}
-                className="w-full text-left text-slate-650 hover:bg-white hover:text-blue-600 py-1 px-2.5 rounded-lg transition-all truncate text-[8.2pt] font-semibold block"
+                className="w-full text-left text-gray-500 hover:bg-white hover:text-blue-600 py-1 px-2.5 rounded-lg transition-all truncate text-[8.2pt] font-normal block"
               >
                 Giám sát thông số
               </button>
@@ -224,7 +224,7 @@ export const Sidebar = ({
                   setActiveMenu('scbd');
                   setActiveSubMenu('Sửa chữa theo CBM/RCM');
                 }}
-                className="w-full text-left text-slate-650 hover:bg-white hover:text-blue-600 py-1 px-2.5 rounded-lg transition-all truncate text-[8.2pt] font-semibold block"
+                className="w-full text-left text-gray-500 hover:bg-white hover:text-blue-600 py-1 px-2.5 rounded-lg transition-all truncate text-[8.2pt] font-normal block"
               >
                 Thực hiện CBM
               </button>

@@ -3,7 +3,7 @@ import {
   Plus, Copy, Trash2, Edit, Search, Filter, CheckCircle2, Clock, X, Check, 
   Calendar, ArrowLeft, AlertCircle, Info, FileText, Eye, Cpu, Camera, Activity,
   Database, Save, RefreshCw, XCircle, ArrowRight, ListChecks, History, Zap, Settings, Star, ClipboardList,
-  Download, BookOpen, ChevronRight, ChevronLeft
+  Download, BookOpen, ChevronRight, ChevronLeft, ChevronDown
 } from 'lucide-react';
 import { capitalizeBusinessName } from '../../shared/utils';
 import { FileUploader } from '../../components/FileUploader';
@@ -33,27 +33,35 @@ const renderDeviceIcon = (itemType: string) => {
 const getStatusBadge = (status: string) => {
   switch (status) {
     case 'Đã duyệt':
+    case 'Duyệt':
       return (
-        <span className="text-gray-700 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[7.5pt] font-black uppercase tracking-wider bg-emerald-50 text-emerald-700 border border-emerald-200/60 shadow-xs">
-          Đã duyệt
-        </span>
+        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[7.5pt] font-black uppercase tracking-wider bg-green-50 text-green-600 border border-green-200/80 shadow-xs">Đã duyệt</span>
       );
     case 'Không duyệt':
+    case 'Từ chối':
       return (
-        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[7.5pt] font-black uppercase tracking-wider bg-rose-50 text-gray-700 border border-rose-200/60 shadow-xs">
+        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[7.5pt] font-black uppercase tracking-wider bg-red-50 text-red-600 border border-red-200/60 shadow-xs">
           Không duyệt
         </span>
       );
     case 'Đăng ký':
+    case 'Đã đăng ký':
     case 'Chờ duyệt':
       return (
-        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[7.5pt] font-black uppercase tracking-wider bg-amber-50 text-gray-700 border border-amber-200/80 shadow-xs animate-pulse">
+        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[7.5pt] font-black uppercase tracking-wider bg-amber-50 text-amber-600 border border-amber-200/80 shadow-xs">
           Đăng ký
+        </span>
+      );
+    case 'Xác nhận':
+    case 'Đã xác nhận':
+      return (
+        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[7.5pt] font-black uppercase tracking-wider bg-orange-50 text-orange-600 border border-orange-200 shadow-xs">
+          Xác nhận
         </span>
       );
     default:
       return (
-        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[7.5pt] font-black uppercase tracking-wider bg-gray-50 text-gray-700 border border-gray-200/60 shadow-xs">
+        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[7.5pt] font-black uppercase tracking-wider bg-slate-50 text-slate-550 border border-slate-200/60 shadow-xs">
           Dự thảo
         </span>
       );
@@ -172,6 +180,18 @@ const getTicketUpdaterName = (ticket: any) => {
   return 'Lê Đắc Thắng';
 };
 
+const parseApprover = (approverStr?: string) => {
+  if (!approverStr) return { name: 'Chưa cập nhật', title: '' };
+  const match = approverStr.match(/([^(]+)\s*\(([^)]+)\)/);
+  if (match) {
+    return {
+      name: match[1].trim(),
+      title: match[2].trim()
+    };
+  }
+  return { name: approverStr, title: '' };
+};
+
 export const ThietBiDuPhongScreen = ({ 
   setActiveSubMenu,
   devicePath,
@@ -203,11 +223,12 @@ export const ThietBiDuPhongScreen = ({
   // Nested filters and pagination inside 'devices' tab
   const [deviceVoltageFilter, setDeviceVoltageFilter] = useState<string>('Tất cả');
   const [deviceTypeFilter, setDeviceTypeFilter] = useState<string>('Tất cả');
+  const [deviceSearchKeyword, setDeviceSearchKeyword] = useState<string>('');
   const [deviceCurrentPage, setDeviceCurrentPage] = useState<number>(1);
 
   useEffect(() => {
     setDeviceCurrentPage(1);
-  }, [selectedTicketId, deviceVoltageFilter, deviceTypeFilter]);
+  }, [selectedTicketId, deviceVoltageFilter, deviceTypeFilter, deviceSearchKeyword]);
 
   // Form attachment states and Library modal state
   const [formDocs, setFormDocs] = useState<{name: string; size: string}[]>([]);
@@ -239,7 +260,8 @@ export const ThietBiDuPhongScreen = ({
   // Device inclusion sub-modal
   const [showDeviceModal, setShowDeviceModal] = useState(false);
   const [modalSearchKeyword, setModalSearchKeyword] = useState('');
-  const [modalTypeFilter, setModalTypeFilter] = useState('');
+  const [modalTypeFilter, setModalTypeFilter] = useState('Tất cả');
+  const [modalVoltageFilter, setModalVoltageFilter] = useState('Tất cả');
 
   // Floating notifications banner
   const [alert, setAlert] = useState<{ type: 'success' | 'info' | 'error', text: string } | null>(null);
@@ -490,13 +512,33 @@ export const ThietBiDuPhongScreen = ({
   };
 
   // Nested selection search filter catalog (filters out devices already selected to satisfy user requirement 4)
+  const getDeviceVoltage = (item: { code: string; name: string }) => {
+    if (item.code.includes('110') || item.name.includes('110kV')) return '110kV';
+    if (item.code.includes('22') || item.name.includes('22kV')) return '22kV';
+    if (item.code.includes('35') || item.name.includes('35kV')) return '35kV';
+    return '22kV';
+  };
+
+  const getDeviceTypesByVoltage = (voltage: string) => {
+    if (voltage === '110kV') {
+      return ['Tất cả', 'Máy biến áp', 'Máy cắt SF6', 'Dao cách ly', 'Biến điện áp TU', 'Biến dòng điện TI', 'Chống sét van', 'Cuộn kháng'];
+    } else if (voltage === '22kV') {
+      return ['Tất cả', 'Tủ Recloser', 'Cầu chì tự rơi'];
+    }
+    return ['Tất cả', 'Máy biến áp', 'Máy cắt SF6', 'Dao cách ly', 'Biến điện áp TU', 'Biến dòng điện TI', 'Chống sét van', 'Tủ Recloser', 'Cầu chì tự rơi', 'Cuộn kháng'];
+  };
+
   const filteredCatalogDevices = useMemo(() => {
     return DEVICE_CATALOG.filter(d => {
       if (formOverlay && formOverlay.data.items.some(it => it.id === d.id)) {
         return false;
       }
+      const v = getDeviceVoltage(d);
+      if (modalVoltageFilter !== 'Tất cả' && v !== modalVoltageFilter) {
+        return false;
+      }
       const deviceType = getDeviceType(d);
-      if (modalTypeFilter && deviceType !== modalTypeFilter) return false;
+      if (modalTypeFilter !== 'Tất cả' && deviceType !== modalTypeFilter) return false;
       
       if (modalSearchKeyword.trim() !== '') {
         const kw = modalSearchKeyword.toLowerCase();
@@ -504,7 +546,7 @@ export const ThietBiDuPhongScreen = ({
       }
       return true;
     });
-  }, [modalSearchKeyword, modalTypeFilter, formOverlay?.data.items]);
+  }, [modalSearchKeyword, modalVoltageFilter, modalTypeFilter, formOverlay?.data.items]);
 
   // Selection toggle checkbox
   const handleSelectModalDevice = (device: any, isSelected: boolean) => {
@@ -571,11 +613,16 @@ export const ThietBiDuPhongScreen = ({
 
   const getStatusBadgeColor = (status: string) => {
     switch (status) {
-      case 'Dự thảo': return 'bg-gray-100 text-gray-700 border-gray-200';
-      case 'Đăng ký': return 'bg-orange-100 text-orange-700 border-orange-200';
-      case 'Đã duyệt': return 'bg-emerald-100 text-emerald-700 border-emerald-200';
-      case 'Không duyệt': return 'bg-rose-100 text-red-700 border-rose-200';
-      default: return 'bg-slate-100 text-slate-700 border-slate-200';
+      case 'Dự thảo': return 'bg-slate-50 text-slate-500 border-slate-200';
+      case 'Đăng ký':
+      case 'Đã đăng ký':
+      case 'Chờ duyệt': return 'bg-amber-50 text-amber-600 border-amber-200/80';
+      case 'Đã duyệt':
+      case 'Duyệt': return 'bg-green-50 text-green-600 border border-green-200/80';
+      case 'Không duyệt': return 'bg-rose-50 text-rose-600 border-rose-200';
+      case 'Xác nhận':
+      case 'Đã xác nhận': return 'bg-orange-50 text-orange-600 border border-orange-200';
+      default: return 'bg-[#f8fafc] text-slate-500 border-slate-200';
     }
   };
 
@@ -647,19 +694,19 @@ export const ThietBiDuPhongScreen = ({
                       setFormOverlay({ ...formOverlay, mode: 'view' });
                     }
                   }}
-                  className="px-4 py-2 bg-white border border-gray-300 text-gray-605 rounded-full text-[10pt] font-bold hover:bg-gray-50 transition-all shadow-sm"
+                  className="px-4 py-2 bg-white border border-gray-300 text-gray-650 rounded-[10px] text-[10pt] font-bold hover:bg-gray-50 transition-all shadow-sm"
                 >
                   Hủy
                 </button>
                 <button 
                   onClick={() => handleSaveForm(false)}
-                  className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-600 border border-gray-200 rounded-lg text-[10pt] font-bold transition-all shadow-sm"
+                  className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-600 border border-gray-200 rounded-[10px] text-[10pt] font-bold transition-all shadow-sm"
                 >
                   Lưu nháp
                 </button>
                 <button 
                   onClick={() => handleSaveForm(true)}
-                  className="px-4 py-2 bg-[#164399] hover:bg-blue-800 text-white rounded-lg text-[10pt] font-bold transition-all flex items-center gap-2 shadow-sm"
+                  className="px-4 py-2 bg-[#164399] hover:bg-blue-800 text-white rounded-[10px] text-[10pt] font-bold transition-all flex items-center gap-2 shadow-sm"
                 >
                   <Check className="w-4 h-4 font-black" />
                   Đăng ký
@@ -671,9 +718,10 @@ export const ThietBiDuPhongScreen = ({
               <>
                 <button 
                   onClick={handleCopyCurrentTicket}
-                  className="px-3 py-2 bg-green-50 text-green-600 hover:bg-green-100 hover:text-green-700 rounded-[20%] text-[10pt] font-bold transition-all flex items-center gap-2 cursor-pointer border-none"
+                  className="p-2 bg-green-50 text-green-600 hover:bg-green-100 rounded-full transition-all flex items-center justify-center cursor-pointer border-none"
+                  title="Sao chép"
                 >
-<Copy className="w-4 h-4" /> Sao chép
+                  <Copy className="w-4.5 h-4.5" />
                 </button>
                 {(formOverlay.data.status === 'Dự thảo' || formOverlay.data.status === 'Không duyệt') && (
                   <button 
@@ -682,16 +730,15 @@ export const ThietBiDuPhongScreen = ({
                       mode: 'edit',
                       data: { ...formOverlay.data, status: 'Dự thảo' }
                     })}
-                    className="px-4 py-2 bg-[#164399] hover:bg-blue-800 text-white rounded-lg text-[10pt] font-bold transition-all flex items-center gap-2 shadow-sm"
+                    className="p-2 text-blue-600 hover:text-blue-700 transition-all flex items-center justify-center cursor-pointer border-none bg-transparent"
                   >
-                    <Edit className="w-4 h-4" />
-                    Sửa đổi đăng ký
+                    <Edit className="w-5 h-5" />
                   </button>
                 )}
                 {formOverlay.data.status === 'Đăng ký' && (
                   <button 
                     onClick={() => setFormOverlay({ ...formOverlay, mode: 'approve' })}
-                    className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-full text-[10pt] font-bold transition-all flex items-center gap-2 shadow-sm"
+                    className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-[10px] text-[10pt] font-bold transition-all flex items-center gap-2 shadow-sm"
                   >
                     <CheckCircle2 className="w-4 h-4" />
                     Phê duyệt cấp thiết bị
@@ -704,22 +751,22 @@ export const ThietBiDuPhongScreen = ({
               <>
                 <button 
                   onClick={() => setFormOverlay({ ...formOverlay, mode: 'view' })}
-                  className="px-4 py-2 bg-white border border-gray-300 text-gray-500 rounded-full text-[10pt] font-bold hover:bg-gray-50 transition-all shadow-sm"
+                  className="px-4 py-2 bg-white border border-gray-300 text-gray-500 rounded-[10px] text-[10pt] font-bold hover:bg-gray-50 transition-all shadow-sm"
                 >
                   Quay lại
                 </button>
                 <button 
                   onClick={() => handleProcessDecision('Không duyệt')}
-                  className="px-4 py-2 bg-rose-50 text-red-700 border border-rose-200 rounded-full text-[10pt] font-bold hover:bg-rose-100 transition-all font-sans"
+                  className="px-4 py-2 bg-rose-50 text-red-700 border border-rose-200 rounded-[10px] text-[10pt] font-bold hover:bg-rose-100 transition-all font-sans"
                 >
-                  Hủy không duyệt
+                  Không duyệt
                 </button>
                 <button 
                   onClick={() => handleProcessDecision('Đã duyệt')}
-                  className="px-4 py-2 bg-[#164399] hover:bg-blue-800 text-white rounded-lg text-[10pt] font-bold transition-all shadow-sm flex items-center gap-1.5"
+                  className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-[10px] text-[10pt] font-bold transition-all shadow-sm flex items-center gap-1.5"
                 >
                   <Check className="w-4 h-4 font-black" />
-                  Phê duyệt xong
+                  Duyệt
                 </button>
               </>
             )}
@@ -728,19 +775,23 @@ export const ThietBiDuPhongScreen = ({
 
         {/* Form Body - Split Grid Layout exactly matching Yêu cầu thí nghiệm */}
         <div className="flex-1 overflow-hidden flex flex-col bg-gray-50/30 text-left">
-          <div className="flex-1 flex flex-col lg:flex-row gap-8 max-w-7xl w-full mx-auto p-6 overflow-hidden items-stretch">
+          <div className="flex-1 flex flex-col lg:flex-row gap-5 w-full mx-auto p-4 overflow-hidden items-stretch lg:px-5 max-w-full">
             
-            {/* Column 1: Core Registration Info (Width 40% as requested) */}
-            <div className="w-full lg:w-[40%] flex flex-col overflow-hidden bg-white rounded-xl border border-gray-100 shadow-sm">
-              <div className="flex-1 overflow-y-auto custom-scrollbar p-8 space-y-8">
+            {/* Column 1: Core Registration Info (Width 42% as requested) */}
+            <div className="w-full lg:w-[42%] flex flex-col overflow-hidden bg-white rounded-xl border border-gray-100 shadow-sm">
+              <div className="flex-1 overflow-y-auto custom-scrollbar p-5 space-y-6">
                 
                 {/* Ticket code header styling */}
-                <div className="flex items-center justify-between border-b border-gray-100 pb-4">
+                <div className="flex items-center justify-between border-b border-gray-100 pb-4 flex-wrap gap-2">
                   <div className="flex items-center gap-2">
-                    <span className="text-gray-400 font-extrabold uppercase text-[9pt] tracking-widest">Mã phiếu đề xuất:</span>
-                    <span className="bg-red-50 text-red-700 rounded-lg px-3 py-1 font-mono font-black text-[14pt]">
+                    <span className="text-gray-400 font-extrabold uppercase text-[8.5pt] tracking-widest">Mã phiếu:</span>
+                    <span className="bg-red-50 text-red-700 rounded-lg px-2.5 py-1 font-mono font-bold text-[10pt]">
                       {formOverlay.data.id}
                     </span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-gray-400 font-extrabold uppercase text-[8.5pt] tracking-widest">Trạng thái duyệt:</span>
+                    {getStatusBadge(formOverlay.data.status)}
                   </div>
                 </div>
 
@@ -799,8 +850,59 @@ export const ThietBiDuPhongScreen = ({
                   </div>
                 </div>
 
+                {/* 5. Ý kiến phê duyệt (Đưa lên trước Ghi chú) */}
+                {(isApprove || formOverlay.data.approvalDate) && (
+                  <div className="space-y-4 pt-6 border-t border-gray-200">
+                    <h4 className="text-[10pt] font-black text-gray-700 flex items-center gap-2 pb-2 border-b border-indigo-100">
+                      <CheckCircle2 className="w-5 h-5 text-indigo-650" /> Ý kiến lãnh đạo duyệt
+                    </h4>
+                    
+                    {isApprove ? (
+                      <div className="space-y-2">
+                        <textarea 
+                          value={formOverlay.data.approvalComment || ''}
+                          onChange={(e) => setFormOverlay({
+                            ...formOverlay,
+                            data: { ...formOverlay.data, approvalComment: e.target.value }
+                          })}
+                          placeholder="Nhập thông tin chỉ đạo"
+                          rows={3}
+                          className="w-full p-3.5 rounded-[12px] text-[11pt] font-medium bg-white border border-indigo-200 focus:border-indigo-400 focus:ring-4 focus:ring-indigo-50 shadow-inner outline-none leading-relaxed"
+                        />
+                      </div>
+                    ) : (() => {
+                      const appInfo = parseApprover(formOverlay.data.approver);
+                      return (
+                        <div className="space-y-4 text-left">
+                          <div className="grid grid-cols-2 gap-4 text-[10pt] text-gray-500 font-bold font-sans">
+                            <div>
+                              <span className="text-[8.5pt] text-gray-400 uppercase block">Cán bộ phê duyệt</span>
+                              <div className="flex flex-col">
+                                <span className="text-gray-800 font-bold">{appInfo.name}</span>
+                                {appInfo.title && (
+                                  <span className="text-[8.5pt] text-gray-405 font-normal mt-0.5 leading-snug">{appInfo.title}</span>
+                                )}
+                              </div>
+                            </div>
+                            <div>
+                              <span className="text-[8.5pt] text-gray-400 uppercase block">Thời gian phê duyệt</span>
+                              <span className="text-gray-800 font-black font-mono">{formOverlay.data.approvalDate}</span>
+                            </div>
+                          </div>
+                          <div className="pt-2">
+                            <span className="text-[8.5pt] text-gray-400 block uppercase font-sans">Nội dung chỉ đạo phê duyệt</span>
+                            <p className="text-[10.5pt] font-normal text-slate-700 leading-relaxed not-italic">
+                              {formOverlay.data.approvalComment || 'Đã duyệt trực tuyến qua PMIS.'}
+                            </p>
+                          </div>
+                        </div>
+                      );
+                    })()}
+                  </div>
+                )}
+
                 {/* 3. Cuối cùng là Nhập Ghi chú với Text màu đen và không in đậm */}
-                <div className="space-y-2">
+                <div className="space-y-2 pt-6 border-t border-gray-200">
                   <label className="text-[10pt] font-black text-gray-400 uppercase tracking-widest pl-1 block">Ghi chú</label>
                   {isEditOrAdd ? (
                     <textarea 
@@ -830,7 +932,7 @@ export const ThietBiDuPhongScreen = ({
                           setLibrarySearchKeyword('');
                           setShowLibraryModal(true);
                         }}
-                        className="px-3 py-1 bg-blue-50 text-blue-600 rounded-full font-black text-[8.5pt] hover:bg-blue-100 transition-all flex items-center gap-1 shadow-sm border-none cursor-pointer"
+                        className="px-3 py-1 bg-blue-50 text-blue-600 rounded-[10px] font-black text-[8.5pt] hover:bg-blue-100 transition-all flex items-center gap-1 shadow-sm border-none cursor-pointer"
                       >
                         <BookOpen className="w-3.5 h-3.5 text-blue-600" /> Từ Thư Viện
                       </button>
@@ -863,10 +965,10 @@ export const ThietBiDuPhongScreen = ({
                                 setFormDocs(prev => prev.filter((_, i) => i !== fIdx));
                                 triggerAlert('info', `Đã xóa tài liệu đính kèm: ${file.name}`);
                               }}
-                              className="p-1.5 text-gray-450 hover:text-red-650 hover:bg-white rounded-xl transition-colors cursor-pointer"
+                              className="p-1.5 text-red-500 hover:text-red-700 bg-red-50/50 hover:bg-red-100/50 border border-red-150 rounded-xl transition-colors cursor-pointer"
                               title="Xóa tài liệu"
                             >
-                              <Trash2 className="w-4 h-4" />
+                              <Trash2 className="w-4 h-4 text-red-600" />
                             </button>
                           )}
                         </div>
@@ -890,56 +992,12 @@ export const ThietBiDuPhongScreen = ({
                   </div>
                 </div>
 
-                {/* 5. Ý kiến phê duyệt (cho chung vào khung thông tin chung) */}
-                {(isApprove || formOverlay.data.approvalDate) && (
-                  <div className="space-y-4 pt-6 border-t border-gray-200">
-                    <h4 className="text-[10pt] font-black text-gray-700 flex items-center gap-2 pb-2 border-b border-indigo-100">
-                      <CheckCircle2 className="w-5 h-5 text-indigo-650" /> Ý kiến chỉ đạo của Ban lãnh đạo Công ty
-                    </h4>
-                    
-                    {isApprove ? (
-                      <div className="space-y-2">
-                        <label className="text-[8.5pt] font-black text-gray-400 uppercase tracking-widest ml-1 block">Nhận xét chi tiết từ cấp quản lý</label>
-                        <textarea 
-                          value={formOverlay.data.approvalComment || ''}
-                          onChange={(e) => setFormOverlay({
-                            ...formOverlay,
-                            data: { ...formOverlay.data, approvalComment: e.target.value }
-                          })}
-                          placeholder="Nhập thông tin chỉ đạo cấp sắm..."
-                          rows={3}
-                          className="w-full p-3.5 rounded-[12px] text-[11pt] font-medium bg-white border border-indigo-200 focus:border-indigo-400 focus:ring-4 focus:ring-indigo-50 shadow-inner outline-none leading-relaxed"
-                        />
-                      </div>
-                    ) : (
-                      <div className="space-y-4 text-left">
-                        <div className="grid grid-cols-2 gap-4 text-[10pt] text-gray-500 font-bold font-sans">
-                          <div>
-                            <span className="text-[8.5pt] text-gray-400 uppercase block">Cán bộ phê duyệt</span>
-                            <span className="text-gray-800 font-black">{formOverlay.data.approver}</span>
-                          </div>
-                          <div>
-                            <span className="text-[8.5pt] text-gray-400 uppercase block">Thời gian phê duyệt</span>
-                            <span className="text-gray-800 font-black font-mono">{formOverlay.data.approvalDate}</span>
-                          </div>
-                        </div>
-                        <div className="pt-2">
-                          <span className="text-[8.5pt] text-gray-400 block uppercase">Nội dung chỉ đạo phê duyệt</span>
-                          <p className="text-[10.5pt] font-semibold text-indigo-950 leading-relaxed italic">
-                            "{formOverlay.data.approvalComment || 'Đã duyệt trực tuyến qua PMIS.'}"
-                          </p>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                )}
-
               </div>
             </div>
 
-              {/* Column 2: Selected spare materials bento cards (Width 60%) */}
-              <div className="w-full lg:w-[60%] flex flex-col overflow-hidden bg-white rounded-xl border border-gray-100 shadow-sm">
-                <div className="flex-1 flex flex-col overflow-hidden p-8 space-y-6">
+              {/* Column 2: Selected spare materials bento cards (Width 58%) */}
+              <div className="w-full lg:w-[58%] flex flex-col overflow-hidden bg-white rounded-xl border border-gray-100 shadow-sm">
+                <div className="flex-1 flex flex-col overflow-hidden p-5 space-y-5">
                   <div className="flex items-center justify-between">
                     <h4 className="text-[10pt] font-black text-gray-700 uppercase tracking-widest flex items-center gap-2">
                       <Database className="w-5 h-5 text-[#164399]" /> DANH SÁCH THIẾT BỊ ĐĂNG KÝ ({(formOverlay.data.items || []).length})
@@ -950,7 +1008,7 @@ export const ThietBiDuPhongScreen = ({
                           setModalSearchKeyword('');
                           setShowDeviceModal(true);
                         }}
-                        className="px-4 py-1.5 bg-blue-50 text-blue-600 rounded-full font-black text-[9pt] hover:bg-blue-100 transition-all flex items-center gap-1 shadow-sm border-none"
+                        className="px-4 py-1.5 bg-blue-50 text-blue-600 rounded-[10px] font-black text-[9pt] hover:bg-blue-100 transition-all flex items-center gap-1 shadow-sm border-none cursor-pointer"
                       >
                         <Plus className="w-4 h-4" /> THÊM
                       </button>
@@ -977,23 +1035,23 @@ export const ThietBiDuPhongScreen = ({
                       </thead>
                       <tbody className="divide-y divide-gray-100 font-bold text-slate-700">
                         {(formOverlay.data.items || []).map((it, idx) => (
-                          <tr key={it.id || idx} className="hover:bg-slate-50/40 transition-colors">
+                          <tr key={it.id || idx} className="group hover:bg-slate-50/50 transition-all">
                             {/* STT */}
                             <td className="py-3 px-3 text-center text-gray-400 font-mono text-[9pt]">{idx + 1}</td>
 
                             {/* Thông tin thiết bị */}
                             <td className="py-2.5 px-3">
                               <div className="flex flex-col text-left">
-                                <div className="flex items-center gap-2 mb-0.5 flex-wrap">
-                                  <span className="text-gray-700 font-mono font-extrabold text-[8.5pt] uppercase tracking-wider">
-                                    PMIS-{it.code}
-                                  </span>
-                                  <span className="text-gray-300">|</span>
-                                  <span className="text-[7.5pt] text-gray-400 font-bold uppercase">
-                                    {getDeviceType(it)}
-                                  </span>
+                                {/* Cấp điện áp, Loại thiết bị, Mã thiết bị (Màu xám nhạt và cỡ chữ nhỏ) */}
+                                <div className="flex items-center gap-1.5 text-[8.5pt] text-gray-400 font-normal">
+                                  <span>{getDeviceVoltage(it)}</span>
+                                  <span className="text-gray-300">•</span>
+                                  <span>{getDeviceType(it)}</span>
+                                  <span className="text-gray-300">•</span>
+                                  <span className="font-mono">{it.code}</span>
                                 </div>
-                                <span className="text-[10pt] font-semibold text-slate-800 leading-snug block">
+                                {/* Tên thiết bị màu Xám đậm, khi lướt chuột thì màu xanh Blue cơ bản */}
+                                <span className="text-[10pt] font-medium text-slate-700 leading-snug mt-1 transition-all duration-155 group-hover:font-extrabold group-hover:text-blue-500 block">
                                   {it.name}
                                 </span>
                               </div>
@@ -1101,10 +1159,10 @@ export const ThietBiDuPhongScreen = ({
                               <td className="py-2 px-3 text-center">
                                 <button 
                                   onClick={() => handleRemoveDeviceFromForm(it.id)}
-                                  className="p-1 px-1.5 hover:bg-red-50 text-slate-400 hover:text-red-700 transition-colors rounded-full border border-transparent hover:border-red-100"
+                                  className="p-1 px-1.5 hover:bg-red-50 text-red-650 hover:text-red-750 bg-red-50/50 hover:bg-red-100/50 border border-red-100 transition-colors rounded-full cursor-pointer"
                                   title="Loại bỏ thiết bị"
                                 >
-                                  <Trash2 className="w-4 h-4" />
+                                  <Trash2 className="w-4 h-4 text-red-600" />
                                 </button>
                               </td>
                             )}
@@ -1121,10 +1179,6 @@ export const ThietBiDuPhongScreen = ({
                   )}
                 </div>
               </div>
-              
-
-
-
 
             </div>
 
@@ -1139,14 +1193,14 @@ export const ThietBiDuPhongScreen = ({
               {/* Header section with active unit/branch breadcrumbs */}
               <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between bg-blue-50/30">
                 <div className="flex items-center gap-3">
-                  <div className="p-2 bg-[#164399] text-white rounded-lg">
+                  <div className="p-2 bg-[#164399] text-white rounded-lg animate-none shrink-0">
                     <Plus className="w-5 h-5 font-black" />
                   </div>
-                  <div>
-                    <h3 className="text-[14pt] font-black text-gray-700">Chọn THIẾT BỊ</h3>
+                  <div className="text-left">
+                    <h3 className="text-[14pt] font-black text-gray-700 leading-tight">Chọn THIẾT BỊ</h3>
                   </div>
                 </div>
-                <button onClick={() => setShowDeviceModal(false)} className="p-2 hover:bg-gray-100 rounded-xl transition-colors">
+                <button onClick={() => setShowDeviceModal(false)} className="p-2 hover:bg-gray-100 rounded-xl transition-colors cursor-pointer">
                   <X className="w-6 h-6 text-gray-400" />
                 </button>
               </div>
@@ -1155,42 +1209,57 @@ export const ThietBiDuPhongScreen = ({
               <div className="flex-1 flex overflow-hidden min-h-0 bg-white">
                 
                 {/* Left Column: available to select (65%) */}
-                <div className="flex-1 flex flex-col border-r border-gray-100">
+                <div className="flex-1 flex flex-col ">
                   <div className="px-6 py-4 bg-gray-50 border-b border-gray-100 flex flex-col gap-3">
-                    <div className="flex gap-4">
-                      {/* Search box queries */}
-                      <div className="flex-1">
-                        <label className="text-[9pt] font-black text-gray-400 uppercase tracking-widest block mb-1">Tìm kiếm thiết bị sắm sẵn</label>
-                        <div className="relative">
-                          <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-                          <input 
-                            type="text" 
-                            placeholder="Mã VTTB, tên thiết bị định mức quản lý..." 
-                            value={modalSearchKeyword}
-                            onChange={(e) => setModalSearchKeyword(e.target.value)}
-                            className="w-full pl-9 pr-4 py-2 bg-white border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-[10pt] outline-none transition-all font-bold"
-                          />
+                    <div className="flex items-center gap-3">
+                      {/* Shortened Voltage Filter Dropdown */}
+                      <div className="w-[140px] relative text-left shrink-0">
+                        <select
+                          value={modalVoltageFilter}
+                          onChange={(e) => {
+                            setModalVoltageFilter(e.target.value);
+                            setModalTypeFilter('Tất cả');
+                          }}
+                          className="w-full bg-white border border-gray-200 text-[10pt] font-semibold text-gray-700 h-10 px-3 pr-8 rounded-[10px] shadow-sm focus:ring-1 focus:ring-blue-500/10 focus:border-[#164399] outline-none appearance-none cursor-pointer"
+                        >
+                          <option value="Tất cả">Cấp điện áp: Tất cả</option>
+                          <option value="110kV">110kV</option>
+                          <option value="35kV">35kV</option>
+                          <option value="22kV">22kV</option>
+                        </select>
+                        <div className="pointer-events-none absolute inset-y-0 right-2 w-6 flex items-center justify-center text-gray-400">
+                          <ChevronDown className="w-4 h-4" />
                         </div>
                       </div>
 
-                      {/* Pill tabs category switchers */}
-                      <div className="flex items-end bg-white border border-gray-200 rounded-[50px] p-1 shadow-sm shrink-0 h-[40px] mt-[20px]">
-                        {[
-                          { id: '', label: 'Tất cả' },
-                          { id: 'Máy biến áp', label: 'MBA' },
-                          { id: 'Máy cắt SF6', label: 'Máy cắt' },
-                          { id: 'Dao cách ly', label: 'DCL' },
-                          { id: 'Biến điện áp TU', label: 'TU/TI' },
-                          { id: 'Chống sét van', label: 'CSV' },
-                        ].map(tab => (
-                          <button 
-                            key={tab.id}
-                            onClick={() => setModalTypeFilter(tab.id)}
-                            className={`px-4 h-full rounded-[50px] text-[10pt] font-black transition-all ${modalTypeFilter === tab.id ? 'bg-[#164399] text-white' : 'text-gray-400 hover:bg-gray-100'}`}
-                          >
-                            {tab.label}
-                          </button>
-                        ))}
+                      {/* Device Type Filter Dropdown */}
+                      <div className="w-[180px] relative text-left shrink-0">
+                        <select
+                          value={modalTypeFilter}
+                          onChange={(e) => setModalTypeFilter(e.target.value)}
+                          className="w-full bg-white border border-gray-200 text-[10pt] font-semibold text-gray-700 h-10 px-3 pr-8 rounded-[10px] shadow-sm focus:ring-1 focus:ring-blue-500/10 focus:border-[#164399] outline-none appearance-none cursor-pointer"
+                        >
+                          {getDeviceTypesByVoltage(modalVoltageFilter).map((typeOpt) => (
+                            <option key={typeOpt} value={typeOpt}>
+                              {typeOpt === 'Tất cả' ? 'Loại thiết bị: Tất cả' : typeOpt}
+                            </option>
+                          ))}
+                        </select>
+                        <div className="pointer-events-none absolute inset-y-0 right-2 w-6 flex items-center justify-center text-gray-400">
+                          <ChevronDown className="w-4 h-4" />
+                        </div>
+                      </div>
+
+                      {/* Fast search keyword textbox taking rest of space */}
+                      <div className="flex-1 relative">
+                        <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+                        <input 
+                          type="text" 
+                          placeholder="Tìm nhanh theo mã VTTB, tên thiết bị..." 
+                          value={modalSearchKeyword}
+                          onChange={(e) => setModalSearchKeyword(e.target.value)}
+                          className="w-full pl-9 pr-4 py-2 h-10 bg-white border border-gray-200 rounded-[10px] text-[10pt] font-medium outline-none placeholder:text-gray-400 shadow-sm focus:ring-1 focus:ring-blue-500/15 focus:border-blue-600 transition-all"
+                        />
                       </div>
                     </div>
                   </div>
@@ -1198,10 +1267,10 @@ export const ThietBiDuPhongScreen = ({
                   {/* Left Available Table rows selection */}
                   <div className="flex-1 overflow-auto custom-scrollbar">
                     <table className="w-full text-left border-collapse">
-                      <thead className="bg-[#ecf2fa] text-[#164399] text-[9pt] font-black uppercase sticky top-0 z-10 border-b border-[#164399]/10">
+                      <thead className="bg-[#ecf2fa] text-[#164399] text-[9pt] font-black uppercase tracking-wider sticky top-0 z-10 border-b border-[#164399]/10">
                         <tr>
-                          <th className="px-4 py-3 w-20 text-center bg-[#ecf2fa] select-none">
-                            <label className="flex items-center justify-center gap-1.5 cursor-pointer">
+                          <th className="px-6 py-3 w-16 text-center bg-[#ecf2fa] select-none">
+                            <label className="flex items-center justify-center cursor-pointer">
                               <input 
                                 type="checkbox" 
                                 className="rounded text-[#164399] focus:ring-[#164399] cursor-pointer" 
@@ -1221,10 +1290,10 @@ export const ThietBiDuPhongScreen = ({
                           return (
                             <tr 
                               key={device.id}
-                              className={`transition-all cursor-pointer ${
+                              className={`group transition-all cursor-pointer ${
                                 isChecked 
-                                  ? 'bg-blue-50 border-l-4 border-l-[#164399]/85 text-[#164399] font-bold shadow-xs' 
-                                  : 'hover:bg-blue-50/60 border-l-4 border-l-transparent'
+                                  ? 'bg-blue-50/70 border-l-4 border-l-[#164399]/85 text-[#164399] font-bold shadow-xs' 
+                                  : 'hover:bg-slate-50/50 border-l-4 border-l-transparent'
                               }`}
                               onClick={() => handleSelectModalDevice(device, !isChecked)}
                             >
@@ -1236,16 +1305,22 @@ export const ThietBiDuPhongScreen = ({
                                   onChange={() => {}} 
                                 />
                               </td>
-                              <td className="px-4 py-4">
-                                 <div className="flex items-center gap-2 mb-1">
-                                    {renderDeviceIcon(getDeviceType(device))}
-                                    <span className="text-[10pt] font-bold text-red-600 font-mono">PMIS-{device.code}</span>
-                                    <span className="text-gray-300">|</span>
-                                    <span className="text-[10pt] font-normal text-gray-700 uppercase tracking-tighter">{getDeviceType(device)}</span>
+                              <td className="px-4 py-3 text-left animate-none">
+                                 {/* 8pt gray layout for code and types metadata */}
+                                 <div className="flex flex-wrap items-center gap-1.5 text-[8pt] text-gray-400 font-medium select-none">
+                                    <span>{getDeviceVoltage(device)}</span>
+                                    <span className="text-gray-355 font-normal select-none">•</span>
+                                    <span>{getDeviceType(device)}</span>
+                                    <span className="text-gray-355 font-normal select-none">•</span>
+                                    <span className="font-mono text-gray-405">PMIS-{device.code}</span>
                                  </div>
-                                 <p className="text-[11.5pt] font-bold text-[#164399]">{device.name}</p>
+                                 {/* Tên viết không in đậm 10pt, lướt chuột thì in đậm và Blue cơ bản */}
+                                 <p className="text-[10pt] font-normal text-slate-705 leading-snug mt-1 transition-all duration-150 group-hover:font-extrabold group-hover:text-blue-600">
+                                    {device.name}
+                                 </p>
                               </td>
-                              <td className="px-4 py-4 text-center font-mono font-black text-gray-655">
+                              {/* Cột SL Vận hành: khi lướt chuột thì tăng kích cỡ chữ 2pt và có màu Green */}
+                              <td className="px-4 py-3 text-center font-mono font-black text-[10pt] text-slate-500 group-hover:text-[12pt] group-hover:text-emerald-600 transition-all duration-150 select-none">
                                  {device.runningQty}
                               </td>
                             </tr>
@@ -1267,7 +1342,7 @@ export const ThietBiDuPhongScreen = ({
                            data: { ...formOverlay.data, items: [] }
                          });
                        }} 
-                       className="text-[10pt] font-bold text-red-500 hover:underline"
+                       className="text-[10pt] font-bold text-red-500 hover:underline cursor-pointer border-none bg-transparent"
                      >
                        Xóa tất cả
                      </button>
@@ -1275,23 +1350,28 @@ export const ThietBiDuPhongScreen = ({
 
                   <div className="flex-1 overflow-y-auto p-4 custom-scrollbar space-y-3">
                      {formOverlay.data.items.map(dev => (
-                       <div key={dev.id} className="p-3 bg-white rounded-lg border border-blue-100 shadow-sm flex items-center justify-between group animate-in slide-in-from-right-2">
+                       <div key={dev.id} className="p-3 bg-white rounded-lg border border-gray-150 shadow-sm flex items-center justify-between group transition-all duration-150 hover:border-blue-200 hover:bg-slate-50/50 animate-in slide-in-from-right-2">
                           <div className="flex items-center gap-3">
-                             {renderDeviceIcon(getDeviceType(dev))}
-                             <div className="flex flex-col">
-                                <div className="flex items-center gap-2 mb-0.5">
-                                   <span className="text-[9pt] font-bold text-red-600 font-mono">PMIS-{dev.code}</span>
-                                   <span className="text-gray-300 text-[8pt]">|</span>
-                                   <span className="text-[9pt] text-gray-700 font-normal uppercase tracking-tighter">{getDeviceType(dev)}</span>
+                             <div className="flex flex-col text-left">
+                                {/* Match Available design exactly: 8pt gray block metadata */}
+                                <div className="flex flex-wrap items-center gap-1.5 text-[8pt] text-gray-400 font-medium select-none">
+                                   <span>{getDeviceVoltage(dev)}</span>
+                                   <span className="text-gray-300 font-normal select-none">•</span>
+                                   <span>{getDeviceType(dev)}</span>
+                                   <span className="text-gray-300 font-normal select-none">•</span>
+                                   <span className="font-mono text-gray-444 font-semibold">PMIS-{dev.code}</span>
                                 </div>
-                                <p className="text-[11.5pt] font-bold text-[#164399] leading-tight whitespace-normal break-words">{dev.name}</p>
+                                {/* Match Available design exactly: 10pt normal name, bold blue on hover */}
+                                <p className="text-[10pt] font-normal text-slate-705 leading-snug mt-1 transition-all duration-150 group-hover:font-extrabold group-hover:text-blue-600 whitespace-normal break-words">
+                                  {dev.name}
+                                </p>
                              </div>
                           </div>
                           <button 
                             onClick={() => handleSelectModalDevice(dev, false)}
-                            className="p-1.5 text-gray-300 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all"
+                            className="p-1.5 text-red-500 hover:text-red-750 hover:bg-red-50 rounded-xl transition-all flex-none shrink-0 border-none bg-transparent cursor-pointer"
                           >
-                             <Trash2 className="w-4 h-4" />
+                             <Trash2 className="w-4 h-4 text-red-600" />
                           </button>
                        </div>
                      ))}
@@ -1331,6 +1411,200 @@ export const ThietBiDuPhongScreen = ({
           </div>
         )}
 
+        {/* Reusable SYSTEM REFERENCE LIBRARY POPUP IN DETAIL VIEW */}
+        <DocumentLibraryModal
+          isOpen={showLibraryModal}
+          onClose={() => setShowLibraryModal(false)}
+          selectedIds={formDocs.map(fd => fd.name)}
+          customDocumentsPool={[
+            { id: 'DP1', name: 'Quy_trinh_kiem_tra_van_hanh_may_bien_ap_evn.pdf', category: 'evn', type: 'Quy trình EVN', size: '2.4 MB', code: 'EVN-QT-01', desc: 'Quy trình phối hợp vận hành máy biến áp lực của EVN' },
+            { id: 'DP2', name: 'Huong_dan_bao_tri_may_cat_ABB_SF6_110kV.pdf', category: 'nsx', type: 'Sách HD NSX', size: '4.1 MB', code: 'ABB-SF6', desc: 'Sách hướng dẫn bảo dưỡng dòng máy cắt khí SF6 ABB' },
+            { id: 'DP3', name: 'Tieu_chuan_thiet_ke_va_lap_dat_luoi_dien_110kV.pdf', category: 'standard', type: 'Tiêu chuẩn', size: '5.2 MB', code: 'TCVN-110kV', desc: 'Tiêu chuẩn quốc gia về lắp đặt trạm phân phối cao áp' },
+            { id: 'DP4', name: 'Datasheet_va_catalogue_dao_cach_ly_SIEMENS.pdf', category: 'nsx', type: 'Bản vẽ & NSX', size: '1.8 MB', code: 'SIE-DCL', desc: 'Thông số kỹ thuật dòng dao cách ly Siemens chính hãng' },
+            { id: 'DP5', name: 'Quy_chuan_ky_thuan_quoc_gia_an_toan_dien.pdf', category: 'standard', type: 'Tiêu chuẩn', size: '3.6 MB', code: 'QCVN-2020', desc: 'Quy chuẩn an toàn quốc gia khi thao tác luồng điện lớn' },
+            { id: 'DP6', name: 'Bien_ban_kiem_dinh_chat_luong_dau_may_bien_ap.docx', category: 'template', type: 'Mẫu biên bản', size: '450 KB', code: 'BM-DK-DAU', desc: 'Mẫu văn bản thử nghiệm độ chịu lực và điện học của dầu' },
+            { id: 'DP7', name: 'Quy_trinh_xu_ly_su_co_luoi_truyen_tai_quoc_gia.pdf', category: 'evn', type: 'Quy trình EVN', size: '1.2 MB', code: 'EVN-SUTAI', desc: 'Quy chế khắc phục sự cố khẩn cấp trên hệ thống truyền tải' }
+          ]}
+          onToggleDoc={(doc) => {
+            const isAttached = formDocs.some(fd => fd.name === doc.name);
+            if (isAttached) {
+              setFormDocs(prev => prev.filter(fd => fd.name !== doc.name));
+              triggerAlert('info', `Đã gỡ tài liệu khỏi phiếu: ${doc.name}`);
+            } else {
+              setFormDocs(prev => [...prev, { name: doc.name, size: doc.size }]);
+              triggerAlert('success', `Đã đính kèm tài liệu: ${doc.name}`);
+            }
+          }}
+        />
+
+        {/* HIGH-FIDELITY DOCUMENT PREVIEW MODAL */}
+        {previewingFile && (
+          <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[99999] flex items-center justify-center p-4 animate-in fade-in duration-200 text-left">
+            <div className="relative w-full max-w-4xl h-[85vh] bg-slate-100 rounded-xl shadow-2xl flex flex-col overflow-hidden animate-in zoom-in-95 duration-150">
+              
+              {/* Modal Header */}
+              <div className="px-6 py-4 bg-white border-b border-gray-200 flex items-center justify-between gap-4 shrink-0">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-full bg-blue-50 text-[#164399] flex items-center justify-center shrink-0 border border-blue-100">
+                    <FileText className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <span className="text-[7.5pt] font-black text-gray-700 uppercase tracking-widest block">Chi tiết tài liệu hồ sơ</span>
+                    <span className="text-[11pt] font-black text-slate-800 tracking-tight block">{previewingFile.name} ({previewingFile.size})</span>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <button 
+                    onClick={() => handleDownloadFile(previewingFile.name)}
+                    className="px-4 py-2 bg-blue-600 text-white hover:bg-blue-700 transition-colors rounded-lg text-[8.5pt] font-bold flex items-center gap-1.5 shadow-sm border-none cursor-pointer"
+                  >
+                    <Download className="w-4 h-4" /> Tải về máy
+                  </button>
+                  <button 
+                    onClick={() => setPreviewingFile(null)}
+                    className="p-2 hover:bg-slate-150 text-slate-400 hover:text-slate-700 transition-colors rounded-xl border-none cursor-pointer bg-transparent"
+                    title="Đóng bản xem thử"
+                  >
+                    <X className="w-5 h-5" />
+                  </button>
+                </div>
+              </div>
+
+              {/* Document body viewport matching real content */}
+              <div className="flex-1 overflow-y-auto p-6 md:p-10 flex justify-center bg-slate-200">
+                {previewingFile.name.endsWith('.pdf') ? (
+                  /* PDF Canvas simulator mimicking EVN official stamp paper */
+                  <div className="w-full max-w-2xl bg-white p-8 md:p-12 rounded-2xl shadow-lg border border-slate-300 min-h-[900px] flex flex-col justify-between font-serif relative text-slate-850 select-none text-[11pt] leading-normal">
+                    <div className="space-y-6">
+                      {/* Header */}
+                      <div className="flex justify-between items-start text-center text-[10pt] font-bold font-sans">
+                        <div>
+                          <p className="uppercase tracking-tight text-gray-700 text-[8.5pt]">TỔNG CÔNG TY ĐIỆN LỰC MIỀN BẮC</p>
+                          <p className="uppercase tracking-tight text-gray-700 underline text-[9.5pt]">CÔNG TY ĐIỆN LỰC HƯNG YÊN</p>
+                          <p className="text-[8pt] text-gray-400 font-normal mt-1 italic">Số: 284/QĐ-PCHY-VT</p>
+                        </div>
+                        <div>
+                          <p className="uppercase tracking-tight text-gray-700 text-[8.5pt]">CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM</p>
+                          <p className="font-bold underline text-gray-800 text-[10.5pt]">Độc lập - Tự do - Hạnh phúc</p>
+                          <p className="text-[8.5pt] text-gray-400 font-normal mt-1 italic">Hưng Yên, ngày 18 tháng 02 năm 2026</p>
+                        </div>
+                      </div>
+
+                      {/* Stamp decoration */}
+                      <div className="absolute right-16 top-48 w-24 h-24 rounded-2xl border-4 border-red-600/35 flex items-center justify-center rotate-12 select-none pointer-events-none">
+                        <span className="text-red-600/40 font-bold uppercase text-[6pt] text-center tracking-tight leading-3 font-sans">
+                          PC HƯNG YÊN<br />★<br />ĐÃ KIỂM DUYỆT
+                        </span>
+                      </div>
+
+                      {/* Title */}
+                      <div className="text-center pt-8 space-y-2">
+                        <h2 className="text-[14pt] font-extrabold uppercase tracking-tight text-gray-700 font-sans">KẾ HOẠCH DỰ PHÒNG THIẾT BỊ KHẨN CẤP</h2>
+                        <p className="text-[10pt] text-gray-600 italic font-sans">(Phục vụ công tác cấp bão, chống sét và liên thông kho tài sản EVNNPC năm 2026)</p>
+                      </div>
+
+                      {/* Content section */}
+                      <div className="space-y-4 pt-4 text-justify font-sans text-gray-800 text-[9.5pt]">
+                        <p className="indent-8 font-semibold">Căn cứ Quyết định số 1492/QĐ-EVNNPC của Tổng công ty Điện lực Miền Bắc ban hành về quy chế quản lý vật tư dự trữ định mức sự cố lưới điện truyền tải và trung hạ thế khu vực.</p>
+                        <p className="indent-8">Xét đề xuất của Phòng Vật tư - Thiết bị Công ty Điện lực Hưng Yên và Ban Quản lý Xưởng 110kV nhằm đảm bảo vận hành liên tục hệ thống truyền tải, thay thế nhanh sắm mới lắp đặt chống sét van, cuộn kháng và máy cắt SF6 bị sự cố suy giảm cách điện.</p>
+                        
+                        <div className="p-4 bg-slate-50/50 rounded-2xl border border-dashed border-gray-200 mt-4 space-y-3 font-sans">
+                          <h4 className="font-bold text-gray-700 flex items-center gap-1.5"><CheckCircle2 className="w-4 h-4 text-[#164399]" /> MỤC TIÊU & CHỈ TIÊU KỸ THUẬT:</h4>
+                          <ul className="list-disc pl-5 space-y-1.5 text-gray-650 text-[9pt]">
+                            <li>Ưu tiên tối ưu hóa định mức luân chuyển tại chỗ cho năm chi nhánh Điện lực trực thuộc.</li>
+                            <li>Dự trữ khẩn cấp bù 15 tủ hạ thế, 4 bộ máy cắt dầu SF6, chống sét van 35kV thông số lắp đặt đồng bộ.</li>
+                            <li>Nghiêm cấm lãng phí phân bổ sai lệch nhu cầu của các Điện lực khu vực.</li>
+                          </ul>
+                        </div>
+
+                        <p className="indent-8">Lãnh đạo các đơn vị trực thuộc có trách nhiệm rà soát kiểm thử chất lượng trước khi nhận bàn giao kỹ thuật từ kho trung tâm...</p>
+                      </div>
+                    </div>
+
+                    {/* Signatures */}
+                    <div className="grid grid-cols-2 text-center text-[10pt] pt-12 font-sans font-medium text-gray-850">
+                      <div>
+                        <p className="font-bold text-gray-400 uppercase text-[8.5pt]">NƠI NHẬN</p>
+                        <ul className="text-left text-[8pt] text-gray-500 pl-8 list-none mt-2 space-y-1 italic">
+                          <li>- Như Điều 3;</li>
+                          <li>- EVNNPC (báo cáo);</li>
+                          <li>- Lưu hồ sơ VP, VT.</li>
+                        </ul>
+                      </div>
+                      <div className="flex flex-col items-center">
+                        <p className="font-bold uppercase tracking-wide">GIÁM ĐỐC CÔNG TY</p>
+                        <p className="text-[8pt] text-gray-400 italic mt-1">(Đã phê ký điện tử qua hệ thống PMIS eVN)</p>
+                        <div className="h-16"></div>
+                        <p className="font-bold text-[#164399] uppercase text-[10.5pt] tracking-tight">Nguyễn Danh Duyên</p>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  /* Excel spreadsheet viewport mockup styled with lines and cell inputs */
+                  <div className="w-full bg-white rounded-lg shadow-lg border border-slate-300 overflow-hidden flex flex-col font-mono text-[8pt] text-slate-800 animate-in zoom-in-95">
+                    <div className="bg-slate-100 border-b border-gray-200 p-2 text-slate-400 font-sans font-bold flex items-center gap-2">
+                      <span className="text-gray-700 bg-emerald-600 text-white rounded px-2.5 py-0.5 text-[7pt] uppercase tracking-wider font-extrabold flex items-center gap-1">Sheets Simulator</span>
+                      <span className="text-gray-300">|</span>
+                      <span className="text-slate-650 truncate max-w-xs">{previewingFile.name} (Bảng 1 - Phân tích định mức)</span>
+                    </div>
+                    
+                    {/* Grid layout Excel columns */}
+                    <div className="flex-1 overflow-auto max-h-[60vh]">
+                      <table className="w-full border-collapse">
+                        <thead>
+                          <tr className="bg-[#f0f4fa] text-[#164399] font-extrabold text-center border-b border-[#164399]/10 select-none">
+                            <th className="p-1 px-2 border-r border-gray-200 bg-[#f0f4fa] w-8"></th>
+                            <th className="p-1.5 border-r border-[#cbd5e1] text-left uppercase tracking-wider min-w-[120px]">Mã PMIS</th>
+                            <th className="p-1.5 border-r border-[#cbd5e1] text-left uppercase tracking-wider min-w-[280px]">Mô tả chi tiết hạng mục</th>
+                            <th className="p-1.5 border-r border-[#cbd5e1] uppercase tracking-wider w-24">SLVH (Bộ)</th>
+                            <th className="p-1.5 border-r border-[#cbd5e1] uppercase tracking-wider w-24">Định mức</th>
+                            <th className="p-1.5 border-r border-[#cbd5e1] uppercase tracking-wider w-24">Đề xuất cấp</th>
+                            <th className="p-1.5 uppercase tracking-wider w-28 bg-emerald-50/20 text-[#164399]">Trọng số ưu tiên</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-slate-200/60 text-[8.5pt]">
+                          {[
+                            { code: 'FCO-35kV', name: 'Cầu chì tự rơi FCO 35kV polymer chịu tải 100A', running: 12, norm: 15, proposed: 3, priority: 'Rất cao (Sự cố)' },
+                            { code: 'CSV-35kV', name: 'Chống sét van 35kV cấp khí bảo vệ lưới ngoài trời', running: 45, norm: 50, proposed: 5, priority: 'Cao' },
+                            { code: 'MC-SF6-110', name: 'Máy cắt dầu SF6 cách điện rắn thương hiệu Siemens', running: 4, norm: 4, proposed: 0, priority: 'Trung bình' },
+                            { code: 'MC-110-AL', name: 'Cuộn kháng san điện áp 110kV lõi dầu kín', running: 1, norm: 2, proposed: 1, priority: 'Cao (Nhập khẩu)' },
+                            { code: 'THT-250', name: 'Tủ hạ thế đo đếm ngoài trời đồng bộ áp-tô-mát 250A', running: 8, norm: 12, proposed: 4, priority: 'Trung bình' },
+                            { code: 'MBA-110-100', name: 'Máy biến áp phân phối Amorphous tiết kiệm điện 100kVA', running: 6, norm: 8, proposed: 2, priority: 'Khẩn cấp' }
+                          ].map((row, idx) => (
+                            <tr key={idx} className="hover:bg-slate-50 text-left">
+                              <td className="p-1 text-center bg-slate-50 text-gray-400 font-sans text-[7.5pt] select-none font-bold">{idx + 1}</td>
+                              <td className="p-2 font-semibold text-red-600">{row.code}</td>
+                              <td className="p-2 text-slate-800 font-sans font-semibold truncate max-w-sm" title={row.name}>{row.name}</td>
+                              <td className="p-2 text-center font-bold text-blue-600 bg-blue-50/5 font-mono">{row.running}</td>
+                              <td className="p-2 text-center font-mono text-gray-500">{row.norm}</td>
+                              <td className="p-2 text-center font-bold text-amber-700 bg-amber-50/10 font-mono">{row.proposed}</td>
+                              <td className="p-2 text-center text-emerald-800 font-extrabold bg-emerald-50/10 font-sans text-[8pt]">{row.priority}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                    <div className="bg-slate-50 p-2.5 border-t border-gray-200 text-gray-400 text-left font-sans text-[7.5pt] font-semibold">
+                      * Ghi chú: Dữ liệu phân tích tự động kéo trực từ cơ sở dữ liệu định mức sự cố lưới điện Hưng Yên.
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Modal Footer */}
+              <div className="px-6 py-4 bg-white border-t border-gray-200 flex items-center justify-end shrink-0">
+                <button 
+                  onClick={() => setPreviewingFile(null)}
+                  className="px-5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-full font-bold text-[9pt] uppercase tracking-wide cursor-pointer transition-colors border-none"
+                >
+                  Đóng
+                </button>
+              </div>
+
+            </div>
+          </div>
+        )}
+
       </div>
     );
   }
@@ -1359,22 +1633,24 @@ export const ThietBiDuPhongScreen = ({
             {/* Filter Toggle Button */}
             <button 
               onClick={() => setShowFilter(!showFilter)}
-              className={`p-2 rounded-xl border transition-all ${showFilter ? 'bg-blue-50 border-blue-200 text-[#164399] shadow-inner' : 'bg-white border-gray-200 text-gray-600 hover:bg-gray-50 shadow-sm'}`}
+              className={`h-10 w-10 flex items-center justify-center rounded-xl border transition-all cursor-pointer shrink-0 ${showFilter ? 'bg-blue-50 border-blue-200 text-[#164399] shadow-inner' : 'bg-white border-gray-200 text-gray-600 hover:bg-gray-50 shadow-sm'}`}
             >
               <Filter className="w-5 h-5" />
             </button>
 
             {/* Switch box formatted strictly with rounded-50% pill style containing "Tất cả" vs "Chờ duyệt" */}
-            <div className="flex bg-gray-200 p-0.5 rounded-[50px] shadow-inner w-fit font-bold select-none shrink-0">
+            <div className="flex bg-gray-100 border border-gray-200 rounded-full shadow-inner h-10 w-fit font-bold select-none shrink-0 items-center overflow-hidden">
               <button 
+                type="button"
                 onClick={() => setFilterStatus('Tất cả')}
-                className={`px-4 py-1.5 rounded-[50px] text-[8.5pt] font-black transition-all uppercase ${filterStatus === 'Tất cả' ? 'bg-white text-[#164399] shadow-sm' : 'text-gray-400 hover:text-gray-600'}`}
+                className={`h-full px-5 text-[8.5pt] font-black tracking-wider transition-all uppercase flex items-center justify-center cursor-pointer rounded-full ${filterStatus === 'Tất cả' ? 'bg-[#164399] text-white shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
               >
                 Tất cả
               </button>
               <button 
+                type="button"
                 onClick={() => setFilterStatus('Chờ duyệt')}
-                className={`px-4 py-1.5 rounded-[50px] text-[8.5pt] font-black transition-all uppercase ${filterStatus === 'Chờ duyệt' ? 'bg-white text-[#164399] shadow-sm' : 'text-gray-400 hover:text-gray-600'}`}
+                className={`h-full px-5 text-[8.5pt] font-black tracking-wider transition-all uppercase flex items-center justify-center cursor-pointer rounded-full ${filterStatus === 'Chờ duyệt' ? 'bg-orange-500 text-white shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
               >
                 Chờ duyệt
               </button>
@@ -1383,7 +1659,7 @@ export const ThietBiDuPhongScreen = ({
             {/* Standard aligned Add New button */}
             <button 
               onClick={() => handleOpenForm('add')}
-              className="flex items-center gap-2 px-4 py-2 bg-[#164399] text-white hover:bg-blue-800 rounded-lg font-bold transition-all shadow-sm text-[10pt] cursor-pointer"
+              className="flex items-center gap-2 px-4 py-2 bg-[#164399] text-white hover:bg-blue-800 rounded-[10px] font-bold transition-all shadow-sm text-[10pt] cursor-pointer"
             >
               <Plus className="w-4 h-4" /> Thêm
             </button>
@@ -1398,7 +1674,7 @@ export const ThietBiDuPhongScreen = ({
               <select 
                 value={filterUnit}
                 onChange={(e) => setFilterUnit(e.target.value)}
-                className="w-full bg-white border border-gray-200 rounded-[8px] px-3 py-1.5 outline-none font-normal text-[10pt] focus:border-sky-400 focus:ring-1 focus:ring-sky-100 cursor-pointer"
+                className="w-full bg-white border border-gray-200 rounded-[10px] px-3 py-1.5 outline-none font-normal text-[10pt] focus:border-sky-400 focus:ring-1 focus:ring-sky-100 cursor-pointer"
               >
                 <option value="Tất cả">Tất cả chi nhánh</option>
                 <option value="Điện lực Thành phố Hưng Yên">Điện lực Thành phố Hưng Yên</option>
@@ -1413,7 +1689,7 @@ export const ThietBiDuPhongScreen = ({
               <select 
                 value={filterRegistrationStatus}
                 onChange={(e) => setFilterRegistrationStatus(e.target.value)}
-                className="w-full bg-white border border-gray-200 rounded-[8px] px-3 py-1.5 outline-none font-normal text-[10pt] focus:border-sky-450 focus:ring-1 focus:ring-sky-100 cursor-pointer"
+                className="w-full bg-white border border-gray-200 rounded-[10px] px-3 py-1.5 outline-none font-normal text-[10pt] focus:border-sky-450 focus:ring-1 focus:ring-sky-100 cursor-pointer"
               >
                 <option value="Tất cả">Tất cả trạng thái</option>
                 <option value="Dự thảo">Dự thảo</option>
@@ -1428,7 +1704,7 @@ export const ThietBiDuPhongScreen = ({
                 type="date"
                 value={filterStartDate}
                 onChange={(e) => setFilterStartDate(e.target.value)}
-                className="w-full bg-white border border-gray-200 rounded-[8px] px-3 py-1.5 outline-none font-normal text-[10pt] focus:border-sky-400 focus:ring-1 focus:ring-sky-100" 
+                className="w-full bg-white border border-gray-200 rounded-[10px] px-3 py-1.5 outline-none font-normal text-[10pt] focus:border-sky-400 focus:ring-1 focus:ring-sky-100 cursor-pointer" 
               />
             </div>
             <div className="space-y-1">
@@ -1437,7 +1713,7 @@ export const ThietBiDuPhongScreen = ({
                 type="date"
                 value={filterEndDate}
                 onChange={(e) => setFilterEndDate(e.target.value)}
-                className="w-full bg-white border border-gray-200 rounded-[8px] px-3 py-1.5 outline-none font-normal text-[10pt] focus:border-sky-400 focus:ring-1 focus:ring-sky-100" 
+                className="w-full bg-white border border-gray-200 rounded-[10px] px-3 py-1.5 outline-none font-normal text-[10pt] focus:border-sky-400 focus:ring-1 focus:ring-sky-100 cursor-pointer" 
               />
             </div>
             <div className="space-y-1">
@@ -1449,7 +1725,7 @@ export const ThietBiDuPhongScreen = ({
                   placeholder="Mã phiếu, Ghi chú..." 
                   value={searchKeyword}
                   onChange={(e) => setSearchKeyword(e.target.value)}
-                  className="w-full pl-9 pr-4 py-1.5 bg-white border border-gray-200 rounded-[8px] outline-none font-normal text-[10pt] focus:border-sky-400 focus:ring-1 focus:ring-sky-100" 
+                  className="w-full pl-9 pr-4 py-1.5 bg-white border border-gray-200 rounded-[10px] outline-none font-normal text-[10pt] focus:border-sky-400 focus:ring-1 focus:ring-sky-100" 
                 />
               </div>
             </div>
@@ -1477,7 +1753,7 @@ export const ThietBiDuPhongScreen = ({
       <div className="flex-1 flex overflow-hidden">
         
         {/* LEFT COLUMN: Card List (Width 50%) */}
-        <div className="w-1/2 border-r border-gray-100 flex flex-col bg-gray-50/20 text-left">
+        <div className="w-1/2  flex flex-col bg-gray-50/20 text-left">
           <div className="flex-1 overflow-y-auto custom-scrollbar p-4 space-y-3">
             {filteredTickets.length > 0 ? (
               filteredTickets.map((ticket) => (
@@ -1496,9 +1772,19 @@ export const ThietBiDuPhongScreen = ({
                   )}
 
                   <div className="flex justify-between items-start mb-2 group-hover:translate-x-1 transition-transform">
-                    <div className="flex items-center gap-1.5">
-                      <span className="text-[9pt] font-black uppercase text-red-600 tracking-wider font-mono px-1.5 py-0.5 bg-red-50 rounded-full shadow-sm border border-red-100">{ticket.id}</span>
-                      <span className={`px-2 py-0.5 rounded-full text-[8pt] font-black uppercase tracking-widest border bg-blue-50 border-blue-100 text-[#164399]`}>
+                    <div className="flex items-center gap-1.5 flex-wrap">
+                      <span className={`text-[9pt] font-black uppercase tracking-wider font-mono px-2 py-0.5 rounded-[10px] transition-all border ${
+                        selectedTicketId === ticket.id
+                          ? 'bg-red-50 text-red-600 border-red-200/60 shadow-xs'
+                          : 'bg-transparent text-slate-400 border-gray-200/60 group-hover:text-slate-500 group-hover:border-slate-305'
+                      }`}>
+                        {ticket.id}
+                      </span>
+                      <span className={`text-[8.5pt] font-black uppercase tracking-widest px-2.5 py-0.5 rounded-[10px] transition-all border ${
+                        selectedTicketId === ticket.id
+                          ? 'bg-blue-50 text-blue-500 border-blue-200/60 shadow-xs'
+                          : 'bg-transparent text-slate-400 border-gray-200/60 group-hover:text-slate-500 group-hover:border-slate-305'
+                      }`}>
                         {ticket.requestingUnit}
                       </span>
                     </div>
@@ -1513,8 +1799,8 @@ export const ThietBiDuPhongScreen = ({
 
                   <div className="flex items-center justify-between text-[9pt] font-bold pt-3 border-t border-gray-50 mt-1">
                     <div className="flex items-center gap-3 text-gray-400">
-                      <div className="flex items-center gap-1 uppercase font-mono">
-                        <Calendar className="w-3.5 h-3.5" />
+                      <div className="flex items-center gap-1 uppercase font-mono text-[#8c5738] font-bold">
+                        <Calendar className="w-3.5 h-3.5 text-[#8c5738]" />
                         {ticket.requestDate}
                       </div>
                       <div className="flex items-center gap-1 text-[#164399] uppercase font-mono">
@@ -1557,8 +1843,8 @@ export const ThietBiDuPhongScreen = ({
           </div>
           
           {/* Aligned pagination indicators exactly matching left column */}
-          <div className="py-4 border-t border-gray-200 flex items-center justify-between container-paging shrink-0 bg-white px-6">
-            <span className="text-[8.5pt] font-black text-gray-700 uppercase tracking-wider">
+          <div className="py-2 border-t border-gray-200 flex items-center justify-between container-paging shrink-0 bg-white px-6">
+            <span className="text-[8.5pt] font-semibold text-gray-400 uppercase tracking-wider select-none">
               Xem 1 - {filteredTickets.length} / {filteredTickets.length} bản ghi
             </span>
             <div className="flex items-center gap-1">
@@ -1611,10 +1897,9 @@ export const ThietBiDuPhongScreen = ({
                   <div className="space-y-6 animate-in fade-in duration-300 text-left">
                     <div className="flex justify-between items-start border-b border-gray-100 pb-4 mb-4">
                       <div className="flex-1 pr-4">
-                        <div className="flex items-center gap-3 mb-1.5">
-                          <span className="text-[10pt] font-black text-red-600 font-mono tracking-wider bg-red-50 px-2 py-0.5 rounded-full border border-red-100 uppercase">{selectedTicket.id}</span>
-                          <span className="text-gray-300">|</span>
-                          <span className="text-[10pt] font-black text-gray-700 uppercase tracking-widest">{selectedTicket.requestingUnit}</span>
+                        <div className="flex items-center gap-2 mb-1.5 flex-wrap">
+                          <span className="text-[10pt] font-black text-red-600 font-mono tracking-wider bg-red-50 px-2.5 py-0.5 rounded-[10px] border border-red-200/60 uppercase">{selectedTicket.id}</span>
+                          <span className="text-[10pt] font-black text-blue-500 bg-blue-50 px-2.5 py-0.5 rounded-[10px] border border-blue-200/60 uppercase tracking-widest">{selectedTicket.requestingUnit}</span>
                         </div>
                       </div>
                       
@@ -1807,30 +2092,32 @@ export const ThietBiDuPhongScreen = ({
                   return (
                     <div className="flex-1 flex flex-col overflow-hidden bg-slate-50/50">
                       {/* Fixed Top filter controls */}
-                      <div className="p-4 bg-white border-b border-gray-100 flex gap-4 shrink-0 shadow-xs">
-                        <div className="relative text-left flex-1">
+                      <div className="p-4 bg-white border-b border-gray-100 flex items-center gap-3 shrink-0 shadow-xs">
+                        {/* Shortened Voltage Filter Dropdown */}
+                        <div className="relative text-left flex-none w-[130px]">
                           <select
                             value={deviceVoltageFilter}
                             onChange={(e) => setDeviceVoltageFilter(e.target.value)}
-                            className="w-full bg-white border border-gray-200 text-[10pt] font-extrabold text-gray-700 h-10 px-4 pr-10 rounded-xl shadow-sm focus:ring-2 focus:ring-blue-500/10 focus:border-blue-500 outline-none appearance-none cursor-pointer"
+                            className="w-full bg-white border border-gray-200 text-[10pt] font-extrabold text-gray-700 h-10 px-3 pr-8 rounded-[10px] shadow-sm focus:ring-2 focus:ring-blue-500/10 focus:border-blue-500 outline-none appearance-none cursor-pointer"
                           >
-                            <option value="Tất cả" className="font-bold">Cấp điện áp: Tất cả</option>
+                            <option value="Tất cả" className="font-bold">Điện áp: Tất cả</option>
                             {['110kV', '35kV', '22kV', '6kV', '<6kV'].map((vOpt) => (
                               <option key={vOpt} value={vOpt} className="font-bold">
                                 {vOpt}
                               </option>
                             ))}
                           </select>
-                          <div className="pointer-events-none absolute inset-y-0 right-4 flex items-center text-gray-400">
+                          <div className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-gray-400">
                             <ChevronRight className="w-4 h-4 rotate-90" />
                           </div>
                         </div>
 
-                        <div className="relative text-left flex-1">
+                        {/* Device Type Dropdown */}
+                        <div className="relative text-left flex-1 max-w-[200px]">
                           <select
                             value={deviceTypeFilter}
                             onChange={(e) => setDeviceTypeFilter(e.target.value)}
-                            className="w-full bg-white border border-gray-200 text-[10pt] font-extrabold text-gray-700 h-10 px-4 pr-10 rounded-xl shadow-sm focus:ring-2 focus:ring-blue-500/10 focus:border-blue-500 outline-none appearance-none cursor-pointer"
+                            className="w-full bg-white border border-gray-200 text-[10pt] font-extrabold text-gray-700 h-10 px-4 pr-10 rounded-[10px] shadow-sm focus:ring-2 focus:ring-blue-500/10 focus:border-blue-500 outline-none appearance-none cursor-pointer"
                           >
                             <option value="Tất cả" className="font-bold">Loại thiết bị: Tất cả</option>
                             {['Máy biến áp', 'Máy cắt', 'Dao cách ly', 'Biến dòng', 'Biến điện áp', 'Khác'].map((catOpt) => (
@@ -1843,51 +2130,69 @@ export const ThietBiDuPhongScreen = ({
                             <ChevronRight className="w-4 h-4 rotate-90" />
                           </div>
                         </div>
+
+                        {/* Quick Search Input with no title, flex-1 */}
+                        <div className="relative flex-1">
+                          <input
+                            type="text"
+                            value={deviceSearchKeyword}
+                            onChange={(e) => setDeviceSearchKeyword(e.target.value)}
+                            placeholder="Tìm kiếm nhanh thiết bị..."
+                            className="w-full bg-white border border-gray-200 text-[10pt] font-medium text-gray-700 h-10 pl-10 pr-4 rounded-[10px] shadow-sm focus:ring-2 focus:ring-blue-500/10 focus:border-blue-500 outline-none placeholder:text-gray-400"
+                          />
+                          <div className="absolute inset-y-0 left-3.5 flex items-center text-gray-400 pointer-events-none">
+                            <Search className="w-4 h-4" />
+                          </div>
+                        </div>
                       </div>
 
                       {/* Scrollable devices list */}
                       <div className="flex-1 overflow-y-auto p-4 space-y-3.5 custom-scrollbar">
                         {paginatedDevices.length > 0 ? (
-                          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden flex flex-col h-full relative">
+                          <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden flex flex-col h-full relative">
                             <div className="overflow-auto flex-1 custom-scrollbar">
                               <table className="w-full relative">
                                 <thead className="bg-[#f0f4fa] sticky top-0 z-10 text-[#164399] font-black text-[9pt] uppercase tracking-wider text-left border-b border-gray-200 shadow-xs">
                                   <tr>
-                                    <th className="py-3 px-4 text-center w-12 border-r border-[#164399]/10">STT</th>
-                                    <th className="py-3 px-4 border-r border-[#164399]/10">Thiết bị</th>
-                                    <th className="py-3 px-4 text-center border-r border-[#164399]/10">SL Vận hành</th>
-                                    <th className="py-3 px-4 text-center border-r border-[#164399]/10">SL Đề xuất</th>
-                                    {selectedTicket.status === 'Đã duyệt' && <th className="py-3 px-4 text-center border-r border-[#164399]/10">Duyệt cấp</th>}
+                                    <th className="py-3 px-4 text-center w-12 ">STT</th>
+                                    <th className="py-3 px-4 ">Thiết bị</th>
+                                    <th className="py-3 px-4 text-center ">SL Vận hành</th>
+                                    <th className="py-3 px-4 text-center ">SL Đề xuất</th>
+                                    {selectedTicket.status === 'Đã duyệt' && <th className="py-3 px-4 text-center ">Duyệt cấp</th>}
                                   </tr>
                                 </thead>
                                 <tbody className="divide-y divide-gray-100">
                                   {paginatedDevices.map((it, idx) => {
                                     const vTag = getItemVoltage(it);
                                     const cTag = getItemCategory(it);
+                                    const rawRunning = it.runningQty !== undefined ? it.runningQty : (it.normQty !== undefined ? it.normQty * 4 : 10);
+                                    const slVanHanh = Math.max(rawRunning, it.proposedQty || 0);
                                     return (
-                                      <tr key={idx} className="hover:bg-slate-50/70 transition-colors">
-                                        <td className="py-3 px-4 text-center text-gray-500 font-mono text-[9pt] border-r border-gray-100">{startIndex + idx + 1}</td>
-                                        <td className="py-3 px-4 flex flex-col gap-1 border-r border-gray-100">
-                                          <div className="flex flex-wrap items-center gap-2 text-[8.5pt]">
-                                            <span className="text-gray-700 font-mono font-black uppercase tracking-wider">{it.code}</span>
-                                            <span className="text-gray-300">•</span>
-                                            <span className="text-[#164399] font-black uppercase">{vTag}</span>
-                                            <span className="text-gray-300">•</span>
-                                            <span className="text-gray-700 font-bold uppercase">{cTag}</span>
+                                      <tr key={idx} className="hover:bg-slate-50/70 transition-all group">
+                                        <td className="py-3 px-4 text-center text-gray-400 font-mono text-[9pt]">{startIndex + idx + 1}</td>
+                                        <td className="py-3 px-4 flex flex-col gap-1 text-left">
+                                          <div className="flex flex-wrap items-center gap-1.5 text-[8pt] text-gray-400 font-medium select-none">
+                                            <span>{vTag}</span>
+                                            <span className="text-gray-300 font-normal select-none">•</span>
+                                            <span>{cTag}</span>
+                                            <span className="text-gray-300 font-normal select-none">•</span>
+                                            <span className="font-mono text-gray-400">PMIS-{it.code}</span>
                                           </div>
-                                          <span className="text-[10pt] text-gray-700 leading-tight">
+                                          {/* Dòng Tên thiết bị cỡ chữ 10pt, không in đậm. Lướt chuột qua thì nổi màu blue-600 và in đậm */}
+                                          <p className="text-[10pt] font-normal text-[#164399] leading-tight mt-1 transition-all duration-150 group-hover:text-blue-600 group-hover:font-extrabold whitespace-normal break-words">
                                             {it.name}
-                                          </span>
+                                          </p>
                                         </td>
-                                        <td className="py-3 px-4 text-center border-r border-gray-100">
-                                          <span className="font-mono font-black text-[#164399]">{it.runningQty}</span>
+                                        {/* Các ô Số lượng tăng cỡ chữ lên 2pt khi lướt chuột qua (from 10pt to 12pt) */}
+                                        <td className="py-3 px-4 text-center text-[10pt] font-bold text-gray-500 transition-all duration-150 group-hover:text-[12pt]">
+                                          {slVanHanh}
                                         </td>
-                                        <td className="py-3 px-4 text-center border-r border-gray-100">
-                                          <span className="font-mono font-black text-orange-600 bg-orange-50/80 px-2 py-0.5 rounded">{it.proposedQty}</span>
+                                        <td className="py-3 px-4 text-center text-[10pt] font-bold text-gray-900 transition-all duration-150 group-hover:text-[12pt]">
+                                          {it.proposedQty}
                                         </td>
                                         {selectedTicket.status === 'Đã duyệt' && (
-                                          <td className="py-3 px-4 text-center border-r border-gray-100">
-                                            <span className="font-mono font-black text-emerald-600 bg-emerald-50/80 px-2 py-0.5 rounded">{it.approvedQty !== undefined ? it.approvedQty : it.proposedQty}</span>
+                                          <td className="py-3 px-4 text-center text-[10pt] font-bold text-emerald-600 transition-all duration-150 group-hover:text-[12pt]">
+                                            {it.approvedQty || 0}
                                           </td>
                                         )}
                                       </tr>
@@ -1896,55 +2201,55 @@ export const ThietBiDuPhongScreen = ({
                                 </tbody>
                               </table>
                             </div>
+
+                            {/* Reduced height pagination bar */}
+                            <div className="p-2 bg-[#f4f7fc] border-t border-gray-150 flex items-center justify-between shrink-0 font-sans text-gray-600">
+                              <span className="text-[9.5pt] font-bold text-gray-500">
+                                Bản ghi: <span className="text-gray-500 font-black">{startIndex + 1}</span> - <span className="text-gray-500 font-black">{Math.min(startIndex + devicesPerPage, matchedItems.length)}</span> / <span className="text-gray-500 font-black">{matchedItems.length}</span>
+                              </span>
+                              <div className="flex items-center gap-2">
+                                <button
+                                  type="button"
+                                  disabled={currentDevicePage === 1}
+                                  onClick={() => setDeviceCurrentPage(Math.max(1, currentDevicePage - 1))}
+                                  className="p-1.5 rounded-xl hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed transition-all cursor-pointer text-gray-500 border-none bg-transparent"
+                                >
+                                  <ChevronLeft className="w-4 h-4" />
+                                </button>
+                                <div className="flex items-center gap-1 px-1">
+                                  {[...Array(totalDevicePages)].map((_, i) => {
+                                    const page = i + 1;
+                                    return (
+                                      <button 
+                                        key={page}
+                                        type="button"
+                                        onClick={() => setDeviceCurrentPage(page)}
+                                        className={`w-7 h-7 rounded-full text-[9pt] font-bold transition-all cursor-pointer border-none ${currentDevicePage === page ? 'bg-blue-100 text-[#164399]' : 'text-gray-500 hover:bg-gray-100'}`}
+                                      >
+                                        {page}
+                                      </button>
+                                    );
+                                  })}
+                                </div>
+                                <button 
+                                  type="button"
+                                  disabled={currentDevicePage === totalDevicePages}
+                                  onClick={() => setDeviceCurrentPage(Math.min(totalDevicePages, currentDevicePage + 1))}
+                                  className="p-1.5 rounded-xl hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed transition-all cursor-pointer text-gray-500 border-none bg-transparent"
+                                >
+                                  <ChevronRight className="w-4 h-4" />
+                                </button>
+                              </div>
+                            </div>
+
                           </div>
                         ) : (
-                          <div className="text-center py-10 text-gray-400 bg-slate-50/50 rounded-xl border border-dashed border-gray-200">
-                            <p className="text-[11pt] font-bold">Không tìm thấy thiết bị nào khớp điều kiện</p>
+                          <div className="flex-1 flex flex-col items-center justify-center text-gray-400 p-12 text-center">
+                            <ClipboardList className="w-12 h-12 mb-3 opacity-20" />
+                            <p className="text-[10pt] font-bold">Không tìm thấy thiết bị nào khớp với bộ lọc.</p>
                           </div>
                         )}
                       </div>
-
-                      {/* Aligned pagination indicators exactly matching left column */}
-                      {totalDevicePages > 1 && (
-                        <div className="py-4 border-t border-gray-200 flex items-center justify-between container-paging shrink-0 bg-white px-6">
-                          <span className="text-[8.5pt] font-black text-gray-700 uppercase tracking-wider">
-                            Xem {startIndex + 1} - {Math.min(startIndex + devicesPerPage, matchedItems.length)} / {matchedItems.length} thiết bị
-                          </span>
-                          <div className="flex items-center gap-1">
-                            <button 
-                              type="button"
-                              disabled={currentDevicePage === 1}
-                              onClick={() => setDeviceCurrentPage(Math.max(1, currentDevicePage - 1))}
-                              className="p-1.5 rounded-xl hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed transition-all cursor-pointer text-gray-500 border-none bg-transparent"
-                            >
-                              <ChevronLeft className="w-4 h-4" />
-                            </button>
-                            <div className="flex items-center gap-1 px-1">
-                              {[...Array(totalDevicePages)].map((_, i) => {
-                                const page = i + 1;
-                                return (
-                                  <button 
-                                    key={page}
-                                    type="button"
-                                    onClick={() => setDeviceCurrentPage(page)}
-                                    className={`w-7 h-7 rounded-full text-[9pt] font-bold transition-all cursor-pointer border-none ${currentDevicePage === page ? 'bg-blue-100 text-[#164399]' : 'text-gray-500 hover:bg-gray-100'}`}
-                                  >
-                                    {page}
-                                  </button>
-                                );
-                              })}
-                            </div>
-                            <button 
-                              type="button"
-                              disabled={currentDevicePage === totalDevicePages}
-                              onClick={() => setDeviceCurrentPage(Math.min(totalDevicePages, currentDevicePage + 1))}
-                              className="p-1.5 rounded-xl hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed transition-all cursor-pointer text-gray-500 border-none bg-transparent"
-                            >
-                              <ChevronRight className="w-4 h-4" />
-                            </button>
-                          </div>
-                        </div>
-                      )}
                     </div>
                   );
                 })()}
@@ -1982,45 +2287,49 @@ export const ThietBiDuPhongScreen = ({
                         }
                       ].map((step, sIdx) => {
                         const colors: Record<string, { bg: string, border: string, text: string, dot: string }> = {
-                          'Đã duyệt': { bg: 'bg-green-500/10', border: 'border-green-200', text: 'text-green-700', dot: 'bg-green-600' },
-                          'Từ chối': { bg: 'bg-red-500/10', border: 'border-red-200', text: 'text-red-700', dot: 'bg-red-500' },
-                          'Chờ duyệt': { bg: 'bg-amber-500/10', border: 'border-amber-200', text: 'text-amber-700', dot: 'bg-amber-500' },
-                          'Đăng ký': { bg: 'bg-blue-500/10', border: 'border-blue-200', text: 'text-blue-700', dot: 'bg-blue-600' },
-                          'Dự thảo': { bg: 'bg-slate-500/10', border: 'border-slate-200', text: 'text-slate-700', dot: 'bg-slate-500' }
+                          'Đã duyệt': { bg: 'bg-green-50', border: 'border-green-300', text: 'text-green-700', dot: 'bg-green-600' },
+                          'Từ chối': { bg: 'bg-rose-50', border: 'border-rose-200', text: 'text-rose-600', dot: 'bg-rose-500' },
+                          'Chờ duyệt': { bg: 'bg-amber-50', border: 'border-amber-200/80', text: 'text-amber-600', dot: 'bg-amber-500' },
+                          'Đăng ký': { bg: 'bg-amber-100/60', border: 'border-amber-200/80', text: 'text-amber-700', dot: 'bg-amber-600' },
+                          'Dự thảo': { bg: 'bg-slate-50', border: 'border-slate-200/60', text: 'text-slate-500', dot: 'bg-slate-500' }
                         };
                         const c = colors[step.status] || colors['Dự thảo'];
 
                         return (
                           <div key={sIdx} className="relative group text-left">
-                            {/* Timeline circular dot on the vertical line */}
+                            {/* circular dot */}
                             <div className="absolute -left-[41px] top-1.5 w-6 h-6 rounded-full bg-white border-2 border-slate-200 flex items-center justify-center group-hover:border-blue-500 transition-all z-10 shadow-sm">
                               <div className={`w-2 h-2 rounded-full ${c.dot} group-hover:scale-125 transition-transform`}></div>
                             </div>
 
-                            {/* Content Card with similar visual feel */}
+                            {/* card container */}
                             <div className="p-4 bg-white rounded-2xl border border-gray-200 hover:shadow-md hover:border-blue-300 hover:bg-slate-50/25 transition-all relative">
                               <div className="flex-1 min-w-0 space-y-1">
                                 <div className="flex items-center gap-2 flex-wrap pb-1">
-                                  <span className={`px-2 py-0.5 rounded text-[7.5pt] font-black uppercase tracking-wider border ${c.bg} ${c.border} ${c.text}`}>
+                                  {/* Status badge rounded 50 */}
+                                  <span className={`px-2.5 py-0.5 rounded-[50px] text-[7.5pt] font-black uppercase tracking-wider border ${c.bg} ${c.border} ${c.text}`}>
                                     {step.status}
                                   </span>
-                                  <span className="text-[9pt] text-gray-400 font-bold font-mono">{step.time}</span>
+                                  {/* Date Blue basic color */}
+                                  <span className="text-[9pt] text-blue-500 font-bold font-mono">{step.time}</span>
                                 </div>
-                                <p className="text-[11.5pt] text-slate-800 font-extrabold leading-snug tracking-tight">
+                                {/* Content not bold */}
+                                <p className="text-[10.5pt] text-slate-700 font-medium leading-relaxed">
                                   {step.action}
                                 </p>
-                                
+
                                 {sIdx === 0 && selectedTicket.approvalComment && (
-                                  <p className="mt-2 text-[9.5pt] bg-slate-50 p-2.5 rounded-xl border border-slate-100 leading-relaxed">
-                                    <span className="text-gray-500 font-medium font-sans">Ý kiến phê duyệt: </span>
-                                    <span className="text-[#164399] font-extrabold font-sans">"{selectedTicket.approvalComment}"</span>
+                                  <p className="mt-2 text-[9.5pt] bg-slate-50 p-2.5 rounded-xl border border-slate-100 leading-relaxed font-normal">
+                                    <span className="text-gray-500 font-medium">Ý kiến phê duyệt: </span>
+                                    <span className="text-[#164399]/90 font-medium">"{selectedTicket.approvalComment}"</span>
                                   </p>
                                 )}
 
                                 <div className="flex items-center justify-between gap-2 text-[8.5pt] mt-2 pt-2 border-t border-gray-100 flex-wrap">
                                   <div />
                                   <div className="flex items-center gap-1 text-right">
-                                    <span className="text-gray-700 font-bold uppercase tracking-tighter">Thực hiện:</span>
+                                    {/* Performed by key style light-gray */}
+                                    <span className="text-gray-400 font-semibold uppercase text-[8pt]">Thực hiện:</span>
                                     {(() => {
                                       const val = step.user || 'Hệ thống';
                                       const match = val.match(/^([^\(]+)(?:\((.+)\))?/);
@@ -2029,7 +2338,7 @@ export const ThietBiDuPhongScreen = ({
                                         const title = match[2] ? match[2].trim() : '';
                                         if (title) {
                                           return (
-                                            <span className="text-right">
+                                            <span className="text-right text-[8.5pt]">
                                               <span className="text-[#164399] font-black">{name}</span>{' '}
                                               <span className="text-gray-450 font-normal">({title})</span>
                                             </span>
@@ -2110,7 +2419,7 @@ export const ThietBiDuPhongScreen = ({
                       ...formOverlay,
                       data: { ...formOverlay.data, requestingUnit: e.target.value }
                     })}
-                    className="w-full text-[10pt] font-bold text-slate-700 bg-white border border-slate-200 rounded-lg py-2 px-3 focus:bg-white focus:ring-1 focus:ring-[#164399] transition-all outline-none disabled:bg-gray-50/70 disabled:text-gray-500"
+                    className="w-full text-[10pt] font-bold text-slate-700 bg-white border border-slate-200 rounded-[10px] py-2 px-3 focus:bg-white focus:ring-1 focus:ring-[#164399] transition-all outline-none disabled:bg-gray-50/70 disabled:text-gray-500"
                   >
                     <option value="Điện lực Thành phố Hưng Yên">Điện lực Thành phố Hưng Yên</option>
                     <option value="Điện lực Mỹ Hào">Điện lực Mỹ Hào</option>
@@ -2131,7 +2440,7 @@ export const ThietBiDuPhongScreen = ({
                       ...formOverlay,
                       data: { ...formOverlay.data, requestDate: e.target.value }
                     })}
-                    className="w-full text-[10pt] font-bold text-slate-700 bg-white border border-slate-200 rounded-lg py-2 px-3 focus:bg-white outline-none disabled:bg-gray-50/70 disabled:text-gray-500"
+                    className="w-full text-[10pt] font-bold text-slate-700 bg-white border border-slate-200 rounded-[10px] py-2 px-3 focus:bg-white outline-none disabled:bg-gray-50/70 disabled:text-gray-500"
                   />
                 </div>
               </div>
@@ -2181,8 +2490,7 @@ export const ThietBiDuPhongScreen = ({
                       <thead className="sticky top-0 z-10 shadow-sm bg-[#f0f4fa]">
                         <tr className="bg-[#ecf2fa] border-b border-[#164399]/10 text-[#164399] font-black uppercase tracking-wider text-[8pt]">
                           <th className="py-2.5 px-4 w-12 text-center bg-[#ecf2fa]">STT</th>
-                          <th className="py-2.5 px-3 bg-[#ecf2fa]">Mã thiết bị</th>
-                          <th className="py-2.5 px-3 bg-[#ecf2fa]">Tên thiết bị mong muốn</th>
+                          <th className="py-2.5 px-3 bg-[#ecf2fa]">Thông tin thiết bị</th>
                           <th className="py-2.5 px-3 text-center w-20 bg-[#ecf2fa]">SLVH</th>
                           <th className="py-2.5 px-3 text-center w-28 bg-[#ecf2fa]">SL Đề xuất</th>
                           <th className="py-2.5 px-3 text-center w-24 bg-[#ecf2fa]">SL Định mức</th>
@@ -2196,17 +2504,24 @@ export const ThietBiDuPhongScreen = ({
                       </thead>
                       <tbody className="divide-y divide-gray-100 font-bold text-slate-700">
                         {formOverlay.data.items.map((it, idx) => (
-                          <tr key={it.id} className="hover:bg-slate-55/20">
+                          <tr key={it.id} className="group hover:bg-slate-50/50 transition-colors">
                             <td className="py-3 px-4 text-center text-gray-400 font-mono">{idx + 1}</td>
                             <td className="py-3 px-3">
-                              <div className="flex flex-wrap items-center gap-1.5 text-left">
-                                <span className="bg-red-50 text-red-600 font-mono text-[7.5pt] px-2 py-0.5 rounded-full border border-red-100 uppercase">{it.code}</span>
-                                <span className="text-[7.5pt] text-gray-400 font-bold uppercase">
-                                  | {getDeviceType(it)}
-                                </span>
+                              <div className="flex flex-col text-left">
+                                {/* Cấp điện áp, Loại thiết bị, Mã thiết bị (Màu xám nhạt và cỡ chữ nhỏ) */}
+                                <div className="flex flex-wrap items-center gap-1.5 text-[8.5pt] text-gray-400 font-normal">
+                                  <span>{getDeviceVoltage(it)}</span>
+                                  <span className="text-gray-300">•</span>
+                                  <span>{getDeviceType(it)}</span>
+                                  <span className="text-gray-300">•</span>
+                                  <span className="font-mono">{it.code}</span>
+                                </div>
+                                {/* Tên thiết bị màu Xám đậm, khi lướt chuột lên dòng thì Tên thiết bị màu Blue cơ bản */}
+                                <p className="text-[10pt] font-medium text-slate-700 leading-snug mt-1 transition-all duration-150 group-hover:font-extrabold group-hover:text-blue-500">
+                                  {it.name}
+                                </p>
                               </div>
                             </td>
-                            <td className="py-3 px-3 text-slate-800 font-semibold">{it.name}</td>
                             
                             {/* SLVH */}
                             <td className="py-3 px-3 text-center bg-blue-50/30 text-gray-600 font-mono">{it.runningQty}</td>
@@ -2250,9 +2565,9 @@ export const ThietBiDuPhongScreen = ({
                               <td className="py-2 px-3 text-center">
                                 <button 
                                   onClick={() => handleRemoveDeviceFromForm(it.id)}
-                                  className="p-1 hover:bg-red-50 text-slate-400 hover:text-red-600 transition-colors rounded"
+                                  className="p-1 hover:bg-red-50 text-red-600 hover:text-red-700 bg-red-50/50 hover:bg-red-100/50 border border-red-100 transition-colors rounded"
                                 >
-                                  <Trash2 className="w-4 h-4" />
+                                  <Trash2 className="w-4 h-4 text-red-600" />
                                 </button>
                               </td>
                             )}
@@ -2348,15 +2663,15 @@ export const ThietBiDuPhongScreen = ({
                   <>
                     <button 
                       onClick={() => handleProcessDecision('Không duyệt')}
-                      className="px-5 py-2 bg-red-105 border border-red-200 text-red-700 hover:bg-red-205 rounded-full font-bold text-[10pt] transition-all"
+                      className="px-5 py-2 bg-red-100 border border-red-200 text-red-700 hover:bg-red-200 rounded-full font-bold text-[10pt] transition-all cursor-pointer"
                     >
-                      Không phê duyệt
+                      Không duyệt
                     </button>
                     <button 
                       onClick={() => handleProcessDecision('Đã duyệt')}
-                      className="px-5 py-2 bg-indigo-650 hover:bg-indigo-750 text-white rounded-full font-bold text-[10pt] transition-all shadow-md font-sans"
+                      className="px-5 py-2 bg-green-600 hover:bg-green-700 text-white rounded-full font-bold text-[10pt] transition-all shadow-md font-sans cursor-pointer"
                     >
-                      Duyệt quyết định cấp
+                      Duyệt
                     </button>
                   </>
                 )}
@@ -2388,6 +2703,45 @@ export const ThietBiDuPhongScreen = ({
 
             {/* Modal Input Search */}
             <div className="p-4 border-b border-gray-100 bg-white space-y-3 shrink-0">
+              {/* 2 selection filters: Voltage and Device Type based on Voltage */}
+              <div className="grid grid-cols-2 gap-3 pb-1">
+                <div className="relative text-left">
+                  <select
+                    value={modalVoltageFilter}
+                    onChange={(e) => {
+                      setModalVoltageFilter(e.target.value);
+                      setModalTypeFilter('Tất cả');
+                    }}
+                    className="w-full bg-white border border-slate-200 text-[9.5pt] font-semibold text-slate-700 h-10 px-3 pr-8 rounded-[10px] shadow-sm focus:ring-1 focus:ring-blue-500/10 focus:border-[#164399] outline-none appearance-none cursor-pointer"
+                  >
+                    <option value="Tất cả">Cấp điện áp: Tất cả</option>
+                    <option value="110kV">110kV</option>
+                    <option value="22kV">22kV</option>
+                  </select>
+                  <div className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-gray-400">
+                    <ChevronDown className="w-4 h-4" />
+                  </div>
+                </div>
+
+                <div className="relative text-left">
+                  <select
+                    value={modalTypeFilter}
+                    onChange={(e) => setModalTypeFilter(e.target.value)}
+                    className="w-full bg-white border border-slate-200 text-[9.5pt] font-semibold text-slate-700 h-10 px-3 pr-8 rounded-[10px] shadow-sm focus:ring-1 focus:ring-blue-500/10 focus:border-[#164399] outline-none appearance-none cursor-pointer"
+                  >
+                    {getDeviceTypesByVoltage(modalVoltageFilter).map((typeOpt) => (
+                      <option key={typeOpt} value={typeOpt}>
+                        {typeOpt === 'Tất cả' ? 'Loại thiết bị: Tất cả' : typeOpt}
+                      </option>
+                    ))}
+                  </select>
+                  <div className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-gray-400">
+                    <ChevronDown className="w-4 h-4" />
+                  </div>
+                </div>
+              </div>
+
+              {/* Fast keyword search */}
               <div className="relative">
                 <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                 <input 
@@ -2395,33 +2749,8 @@ export const ThietBiDuPhongScreen = ({
                   placeholder="Gõ tìm kiếm mã hoặc tên sản phẩm thiết bị..."
                   value={modalSearchKeyword}
                   onChange={(e) => setModalSearchKeyword(e.target.value)}
-                  className="w-full pl-9 pr-4 py-2 border border-slate-200 rounded-lg text-[9.5pt] outline-none bg-slate-50 focus:bg-white focus:ring-1 focus:ring-[#164399] transition-all"
+                  className="w-full pl-9 pr-4 py-2 border border-slate-200 rounded-[10px] text-[9.5pt] outline-none bg-slate-50 focus:bg-white focus:ring-1 focus:ring-[#164399] transition-all"
                 />
-              </div>
-
-              {/* Horizontal scrollable category tab filters */}
-              <div className="flex items-center gap-1.5 overflow-x-auto pb-1 no-scrollbar text-[8.5pt]">
-                {[
-                  { id: '', label: 'Tất cả' },
-                  { id: 'Máy biến áp', label: 'MBA' },
-                  { id: 'Máy cắt SF6', label: 'Máy cắt' },
-                  { id: 'Dao cách ly', label: 'DCL' },
-                  { id: 'Biến điện áp TU', label: 'TU/TI' },
-                  { id: 'Chống sét van', label: 'Chống sét' },
-                  { id: 'Khác', label: 'Khác' }
-                ].map(tab => (
-                  <button
-                    key={tab.id}
-                    onClick={() => setModalTypeFilter(tab.id)}
-                    className={`px-3 py-1 rounded-full border transition-all font-bold tracking-tight whitespace-nowrap ${
-                      modalTypeFilter === tab.id
-                        ? 'bg-[#164399]/10 border-[#164399] text-[#164399] shadow-sm font-black'
-                        : 'bg-gray-50 border-gray-200 text-gray-500 hover:bg-gray-100'
-                    }`}
-                  >
-                    {tab.label}
-                  </button>
-                ))}
               </div>
             </div>
 
@@ -2434,34 +2763,32 @@ export const ThietBiDuPhongScreen = ({
                     <div 
                       key={device.id}
                       onClick={() => handleSelectModalDevice(device, !isChecked)}
-                      className={`p-3 bg-white border rounded-lg hover:border-[#164399] cursor-pointer transition-all flex items-center justify-between gap-3 ${isChecked ? 'border-[#164399] bg-blue-50/20' : 'border-gray-200 shadow-sm'}`}
+                      className={`p-3.5 bg-white border rounded-[10px] hover:border-blue-300 hover:bg-slate-50/50 cursor-pointer transition-all flex items-center justify-between gap-3 group/devrow ${isChecked ? 'border-blue-600 bg-blue-50/20' : 'border-gray-200 shadow-sm'}`}
                     >
-                      <div className="flex items-center gap-3 min-w-0">
-                        {/* Icon loại bao trùm dòng Mã và Tên */}
-                        <div className={`w-11 h-11 rounded-lg border flex items-center justify-center shrink-0 ${isChecked ? 'bg-blue-50 text-[#164399] border-blue-200' : 'bg-slate-50 text-slate-500 border-slate-200'}`}>
-                          {getDeviceIcon(device.type)}
+                      <div className="flex-1 min-w-0 font-sans text-left">
+                        {/* Cấp điện áp, Loại thiết bị, Mã thiết bị (Màu xám nhạt và cỡ chữ nhỏ) */}
+                        <div className="flex flex-wrap items-center gap-1.5 text-[10pt] text-slate-400 font-semibold">
+                          <span>{getDeviceVoltage(device)}</span>
+                          <span className="text-slate-300 font-normal">•</span>
+                          <span>{getDeviceType(device)}</span>
+                          <span className="text-slate-300 font-normal">•</span>
+                          <span className="font-mono">PMIS-{device.code}</span>
                         </div>
-                        <div className="min-w-0 font-sans text-left">
-                          {/* Mã (Màu đỏ) | Loại (Màu Xám) */}
-                          <div className="flex items-center gap-2 text-[8.5pt] font-bold">
-                            <span className="text-red-700 font-mono font-bold uppercase">{device.code}</span>
-                            <span className="text-gray-300">|</span>
-                            <span className="text-gray-400 font-medium">{device.type}</span>
-                          </div>
-                          {/* Tên thiết bị (Màu xanh chính) */}
-                          <p className="text-[10.5pt] font-black text-[#164399] line-clamp-1 mt-0.5">{device.name}</p>
-                          {/* Định mức & SL Vận hành không có chữ 'bộ' */}
-                          <div className="flex items-center gap-3 text-[8pt] text-slate-400 mt-0.5 font-semibold">
-                            <span>Định mức: <strong className="text-slate-600 font-mono">{device.normQty}</strong></span>
-                            <span className="text-gray-300">•</span>
-                            <span>SL Vận hành: <strong className="text-slate-600 font-mono">{device.runningQty}</strong></span>
-                          </div>
+                        {/* Tên thiết bị màu Xám đậm, khi lướt chuột lên dòng thì Tên thiết bị màu Blue cơ bản */}
+                        <p className="text-[12pt] font-bold text-slate-700 leading-snug mt-1 transition-colors duration-150 group-hover/devrow:text-blue-600">
+                          {device.name}
+                        </p>
+                        {/* Định mức & SL Vận hành: SL Vận hành màu Blue cơ bản */}
+                        <div className="flex items-center gap-3 text-[8pt] text-slate-450 mt-1 font-semibold">
+                          <span>Định mức: <strong className="text-slate-600 font-mono">{device.normQty}</strong></span>
+                          <span className="text-gray-300">•</span>
+                          <span>SL Vận hành: <strong className="text-blue-600 font-mono font-bold">{device.runningQty}</strong></span>
                         </div>
                       </div>
 
                       {/* Pill style Checkbox */}
-                      <div className={`p-1.5 rounded-full border w-7 h-7 flex items-center justify-center shrink-0 ${isChecked ? 'bg-[#164399] border-[#164399] text-white' : 'bg-white border-slate-200 text-transparent'}`}>
-                        <Check className="w-3.5 h-3.5 font-black" />
+                      <div className={`p-1.5 rounded-full border w-6 h-6 flex items-center justify-center shrink-0 transition-colors ${isChecked ? 'bg-blue-600 border-blue-600 text-white' : 'bg-white border-slate-200 text-transparent group-hover/devrow:border-blue-300'}`}>
+                        <Check className="w-3 h-3 font-bold" />
                       </div>
                     </div>
                   );
@@ -2478,7 +2805,7 @@ export const ThietBiDuPhongScreen = ({
               <span>Đã thêm ({formOverlay.data.items.length}) loại</span>
               <button 
                 onClick={() => setShowDeviceModal(false)}
-                className="px-4 py-2 bg-[#164399] hover:bg-blue-800 text-white rounded-lg uppercase font-bold text-[8.5pt]"
+                className="px-4 py-2 bg-[#164399] hover:bg-blue-800 text-white rounded-[10px] uppercase font-bold text-[8.5pt]"
               >
                 Xác nhận xong
               </button>
@@ -2623,12 +2950,12 @@ export const ThietBiDuPhongScreen = ({
                           { code: 'MBA-110-100', name: 'Máy biến áp phân phối Amorphous tiết kiệm điện 100kVA', running: 6, norm: 8, proposed: 2, priority: 'Khẩn cấp' }
                         ].map((row, idx) => (
                           <tr key={idx} className="hover:bg-slate-50 text-left">
-                            <td className="p-1 text-center bg-slate-50 border-r border-gray-100 text-gray-400 font-sans text-[7.5pt] select-none font-bold">{idx + 1}</td>
-                            <td className="p-2 border-r border-gray-100 font-semibold text-red-600">{row.code}</td>
-                            <td className="p-2 border-r border-gray-100 text-slate-800 font-sans font-semibold truncate max-w-sm" title={row.name}>{row.name}</td>
-                            <td className="p-2 border-r border-gray-100 text-center font-bold text-blue-600 bg-blue-50/5 font-mono">{row.running}</td>
-                            <td className="p-2 border-r border-gray-100 text-center font-mono text-gray-500">{row.norm}</td>
-                            <td className="p-2 border-r border-gray-100 text-center font-bold text-amber-700 bg-amber-50/10 font-mono">{row.proposed}</td>
+                            <td className="p-1 text-center bg-slate-50  text-gray-400 font-sans text-[7.5pt] select-none font-bold">{idx + 1}</td>
+                            <td className="p-2  font-semibold text-red-600">{row.code}</td>
+                            <td className="p-2  text-slate-800 font-sans font-semibold truncate max-w-sm" title={row.name}>{row.name}</td>
+                            <td className="p-2  text-center font-bold text-blue-600 bg-blue-50/5 font-mono">{row.running}</td>
+                            <td className="p-2  text-center font-mono text-gray-500">{row.norm}</td>
+                            <td className="p-2  text-center font-bold text-amber-700 bg-amber-50/10 font-mono">{row.proposed}</td>
                             <td className="p-2 text-center text-emerald-800 font-extrabold bg-emerald-50/10 font-sans text-[8pt]">{row.priority}</td>
                           </tr>
                         ))}

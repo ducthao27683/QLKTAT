@@ -173,8 +173,8 @@ export const DeviceList = ({
         </div>
 
         {totalPages > 1 && (
-          <div className="py-4 border-t border-gray-200 flex items-center justify-between container-paging shrink-0 bg-white px-6">
-            <span className="text-[8.5pt] font-black text-gray-700 uppercase tracking-wider">
+          <div className="py-2 border-t border-gray-200 flex items-center justify-between container-paging shrink-0 bg-white px-6">
+            <span className="text-[8.5pt] font-semibold text-gray-400 uppercase tracking-wider">
               Xem {startIndex + 1} - {Math.min(startIndex + itemsPerPage, filteredChildren.length)} / {filteredChildren.length} thiết bị
             </span>
             <div className="flex items-center gap-1">

@@ -31,22 +31,22 @@ const getFullLocationPath = (cat: any) => {
   if (!cat) return "Công ty Điện lực Hưng Yên";
   const loc = cat.location || "";
   if (loc.includes("Phố Nối")) {
-    return "Công ty Điện lực Hưng Yên > Tổ thao tác lưu động Phố Nối > TBA 110kV Phố Nối";
+    return "Công ty Điện lực Hưng Yên > TBA 110kV Phố Nối";
   }
   if (loc.includes("Khoái Châu")) {
-    return "Công ty Điện lực Hưng Yên > Tổ thao tác lưu động Khoái Châu > TBA 110kV Khoái Châu";
+    return "Công ty Điện lực Hưng Yên > TBA 110kV Khoái Châu";
   }
   if (loc.includes("Mỹ Hào")) {
-    return "Công ty Điện lực Hưng Yên > Tổ thao tác lưu động Mỹ Hào > TBA 110kV Mỹ Hào";
+    return "Công ty Điện lực Hưng Yên > TBA 110kV Mỹ Hào";
   }
   if (loc.includes("Kim Động")) {
-    return "Công ty Điện lực Hưng Yên > Tổ thao tác lưu động Kim Động > TBA 110kV Kim Động";
+    return "Công ty Điện lực Hưng Yên > TBA 110kV Kim Động";
   }
   if (loc.includes("Văn Lâm")) {
-    return "Công ty Điện lực Hưng Yên > Tổ thao tác lưu động Văn Lâm > TBA 110kV Văn Lâm";
+    return "Công ty Điện lực Hưng Yên > TBA 110kV Văn Lâm";
   }
   if (loc.includes("Giai Phạm")) {
-    return "Công ty Điện lực Hưng Yên > Tổ thao tác lưu động Giai Phạm > TBA 110kV Giai Phạm";
+    return "Công ty Điện lực Hưng Yên > TBA 110kV Giai Phạm";
   }
   if (loc.includes("Thành phố Hưng Yên") || loc.includes("TP Hưng Yên")) {
     return "Công ty Điện lực Hưng Yên > Điện lực Thành phố Hưng Yên";
@@ -56,57 +56,89 @@ const getFullLocationPath = (cat: any) => {
 
 // Custom visual stylings mapping for each category card
 const getCatItemVisual = (type: string, isSelected: boolean) => {
-  const normType = normalizeType(type);
-  switch (normType) {
-    case 'Trạm':
-      return {
-        icon: <Building2 className={`w-5 h-5 ${isSelected ? 'text-[#164399]' : 'text-blue-500'}`} />,
-        bg: isSelected ? 'bg-blue-100/80' : 'bg-blue-50',
-        text: 'text-[#164399]'
-      };
-    case 'Đường dây':
-      return {
-        icon: <Network className={`w-5 h-5 ${isSelected ? 'text-teal-600' : 'text-teal-500'}`} />,
-        bg: isSelected ? 'bg-teal-100/80' : 'bg-teal-50',
-        text: 'text-teal-700'
-      };
-    case 'Máy cắt':
-      return {
-        icon: <Zap className={`w-5 h-5 ${isSelected ? 'text-amber-600' : 'text-amber-500'}`} />,
-        bg: isSelected ? 'bg-amber-100/80' : 'bg-amber-50',
-        text: 'text-amber-700'
-      };
-    case 'Máy biến áp':
-      return {
-        icon: <Box className={`w-5 h-5 ${isSelected ? 'text-red-600' : 'text-red-500'}`} />,
-        bg: isSelected ? 'bg-red-100/80' : 'bg-red-50',
-        text: 'text-red-700'
-      };
-    case 'Biến dòng':
-      return {
-        icon: <Activity className={`w-5 h-5 ${isSelected ? 'text-indigo-600' : 'text-indigo-500'}`} />,
-        bg: isSelected ? 'bg-indigo-100/80' : 'bg-indigo-50',
-        text: 'text-indigo-700'
-      };
-    case 'Biến điện áp':
-      return {
-        icon: <Binary className={`w-5 h-5 ${isSelected ? 'text-emerald-600' : 'text-emerald-500'}`} />,
-        bg: isSelected ? 'bg-emerald-100/80' : 'bg-emerald-50',
-        text: 'text-emerald-700'
-      };
-    case 'Chống sét van':
-      return {
-        icon: <Shield className={`w-5 h-5 ${isSelected ? 'text-purple-600' : 'text-purple-500'}`} />,
-        bg: isSelected ? 'bg-purple-100/80' : 'bg-purple-50',
-        text: 'text-purple-700'
-      };
-    default:
-      return {
-        icon: <Database className={`w-5 h-5 ${isSelected ? 'text-gray-650' : 'text-gray-500'}`} />,
-        bg: isSelected ? 'bg-gray-200/50' : 'bg-gray-50',
-        text: 'text-gray-700'
-      };
+  const t = normalizeType(type);
+  if (t === 'Trạm') {
+    return {
+      icon: <Building2 className="w-5 h-5 shrink-0" />,
+      bg: isSelected ? 'bg-blue-600 text-white shadow-md' : 'bg-blue-50 text-blue-600 border border-blue-100 hover:bg-blue-100/50',
+    };
   }
+  if (t === 'Đường dây') {
+    return {
+      icon: <Network className="w-5 h-5 shrink-0" />,
+      bg: isSelected ? 'bg-purple-600 text-white shadow-md' : 'bg-purple-50 text-purple-600 border border-purple-100 hover:bg-purple-100/50',
+    };
+  }
+  if (t === 'Máy cắt') {
+    return {
+      icon: <Zap className="w-5 h-5 shrink-0" />,
+      bg: isSelected ? 'bg-rose-600 text-white shadow-md' : 'bg-rose-50 text-rose-600 border border-rose-100 hover:bg-rose-100/50',
+    };
+  }
+  if (t === 'Máy biến áp') {
+    return {
+      icon: <Box className="w-5 h-5 shrink-0" />,
+      bg: isSelected ? 'bg-amber-600 text-white shadow-md' : 'bg-amber-50 text-amber-600 border border-amber-100 hover:bg-amber-100/50',
+    };
+  }
+  if (t === 'Biến dòng') {
+    return {
+      icon: <Activity className="w-5 h-5 shrink-0" />,
+      bg: isSelected ? 'bg-teal-600 text-white shadow-md' : 'bg-teal-50 text-teal-600 border border-teal-100 hover:bg-teal-100/50',
+    };
+  }
+  if (t === 'Biến điện áp') {
+    return {
+      icon: <Binary className="w-5 h-5 shrink-0" />,
+      bg: isSelected ? 'bg-pink-600 text-white shadow-md' : 'bg-pink-50 text-pink-600 border border-pink-100 hover:bg-pink-100/50',
+    };
+  }
+  if (t === 'Dao cách ly') {
+    return {
+      icon: <GitCommit className="w-5 h-5 shrink-0" />,
+      bg: isSelected ? 'bg-emerald-600 text-white shadow-md' : 'bg-emerald-50 text-emerald-600 border border-emerald-100 hover:bg-emerald-100/50',
+    };
+  }
+  if (t === 'Chống sét van') {
+    return {
+      icon: <Shield className="w-5 h-5 shrink-0" />,
+      bg: isSelected ? 'bg-sky-600 text-white shadow-md' : 'bg-sky-50 text-sky-600 border border-sky-100 hover:bg-sky-100/50',
+    };
+  }
+  if (t?.includes('Vị trí') || t?.includes('Cột')) {
+    return {
+      icon: <MapPin className="w-5 h-5 shrink-0" />,
+      bg: isSelected ? 'bg-indigo-600 text-white shadow-md' : 'bg-indigo-50 text-indigo-600 border border-indigo-100 hover:bg-indigo-100/50',
+    };
+  }
+  if (t?.includes('Ngăn lộ')) {
+    return {
+      icon: <ListChecks className="w-5 h-5 shrink-0" />,
+      bg: isSelected ? 'bg-violet-600 text-white shadow-md' : 'bg-violet-50 text-violet-600 border border-violet-100 hover:bg-violet-100/50',
+    };
+  }
+  if (t?.includes('Hệ thống')) {
+    return {
+      icon: <Layers className="w-5 h-5 shrink-0" />,
+      bg: isSelected ? 'bg-fuchsia-600 text-white shadow-md' : 'bg-fuchsia-50 text-fuchsia-600 border border-fuchsia-100 hover:bg-fuchsia-100/50',
+    };
+  }
+  if (t === 'Bộ điều khiển' || t?.includes('điều khiển') || t?.includes('BĐK')) {
+    return {
+      icon: <Wrench className="w-5 h-5 shrink-0" />,
+      bg: isSelected ? 'bg-orange-600 text-white shadow-md' : 'bg-orange-50 text-orange-600 border border-orange-100 hover:bg-orange-100/50',
+    };
+  }
+  if (t === 'Sứ cách điện' || t === 'Phụ kiện' || t?.includes('Sứ') || t?.includes('Phụ') || t?.includes('PK')) {
+    return {
+      icon: <Settings className="w-5 h-5 shrink-0" />,
+      bg: isSelected ? 'bg-indigo-600 text-white shadow-md' : 'bg-indigo-50 text-indigo-600 border border-indigo-100 hover:bg-indigo-100/50',
+    };
+  }
+  return {
+    icon: <Package className="w-5 h-5 shrink-0" />,
+    bg: isSelected ? 'bg-gray-600 text-white shadow-md' : 'bg-gray-50 text-gray-500 border border-gray-100 hover:bg-gray-100/50',
+  };
 };
 
 // Pre-defined list of standard testing items for electrical machinery
@@ -1052,6 +1084,18 @@ export const DanhMucThiNghiemScreen = ({
   };
 
   const renderThietLapHangMucView = () => {
+    const isClassificationLevelLocal = (name: string) => {
+      const n = name?.trim()?.toLowerCase() || '';
+      if (!n) return true;
+      const genericLevels = [
+        'tất cả', 'trạm', 'nút', 'ngăn lộ', 'máy biến áp', 'máy cắt', 'biến dòng', 
+        'biến điện áp', 'đường dây', 'chống sét van', 'thiết bị', 'loại thiết bị'
+      ];
+      return genericLevels.includes(n) || n === 'mba' || n === 'mc' || n === 'ti' || n === 'tu' || n === 'csv';
+    };
+    const realDevicesPathLocal = (devicePath || []).filter(p => !isClassificationLevelLocal(p));
+    const branchName = realDevicesPathLocal[0] || 'Chi nhánh';
+
     const workingUnit = devicePath && devicePath.length > 0 
       ? devicePath[devicePath.length - 1] 
       : 'Đơn vị';
@@ -1187,7 +1231,7 @@ export const DanhMucThiNghiemScreen = ({
               </button>
               <div className="flex items-center gap-1">
                 <h2 className="text-[13pt] font-black text-[#164399] tracking-tight">
-                  Hạng mục & Thông số thí nghiệm - {workingUnit}
+                  Hạng mục & Thông số - <span className="text-blue-600 font-extrabold">{branchName}</span>
                 </h2>
               </div>
             </div>
@@ -1195,7 +1239,7 @@ export const DanhMucThiNghiemScreen = ({
             {/* Selection Options & Search row */}
             <div className="flex flex-wrap items-center gap-3">
               {/* Category selector switch "Thí nghiệm" | "Kiểm định" | "Hiệu chuẩn" */}
-              <div className="flex bg-slate-100 p-1 rounded-full border-none shadow-inner shrink-0 leading-none h-10 items-center">
+              <div className="flex bg-slate-100 p-1 rounded-full border-none shadow-inner shrink-0 leading-none h-[42px] items-center">
                 {(['Thí nghiệm', 'Kiểm định', 'Hiệu chuẩn'] as const).map(type => (
                   <button
                     key={type}
@@ -1204,9 +1248,9 @@ export const DanhMucThiNghiemScreen = ({
                       setTlhm_selectedCatalog(null);
                       setTlhm_selectedSupCatalog(null);
                     }}
-                    className={`px-4 py-1.5 text-[9.5pt] rounded-full transition-all font-bold tracking-tight text-center cursor-pointer ${
+                    className={`px-4 h-[34px] flex items-center justify-center text-[9.5pt] rounded-full transition-all font-bold tracking-tight text-center cursor-pointer ${
                       tlhm_testType === type 
-                        ? 'bg-[#164399] text-white shadow-sm' 
+                        ? 'bg-[#164399] text-white shadow-md' 
                         : 'text-slate-500 hover:text-slate-800'
                     }`}
                   >
@@ -1280,7 +1324,7 @@ export const DanhMucThiNghiemScreen = ({
                       onClick={() => {
                         setTlhm_selectedDevice(item);
                       }}
-                      className={`w-full text-left p-2.5 rounded-xl border transition-all flex items-center justify-between cursor-pointer ${
+                      className={`w-full text-left p-2.5 rounded-xl border transition-all flex items-center justify-between cursor-pointer group ${
                         isSelected 
                           ? 'bg-blue-50/20 border-blue-200/80 shadow-xs' 
                           : 'border-slate-100 bg-white hover:bg-slate-50 hover:border-slate-200'
@@ -1300,8 +1344,8 @@ export const DanhMucThiNghiemScreen = ({
                            <Box className="w-3.5 h-3.5 shrink-0" />}
                         </span>
                         <div className="min-w-0">
-                          <h4 className={`text-[9.5pt] leading-tight truncate ${isSelected ? 'font-black text-[#164399]' : 'font-semibold text-slate-800'}`}>
-                            <span className="font-mono text-[9pt] font-black text-slate-400 mr-1 inline">{item.code}</span> - {item.name}
+                          <h4 className={`text-[9.5pt] leading-tight truncate transition-colors ${isSelected ? 'font-black text-[#164399]' : 'font-semibold text-slate-800 group-hover:text-blue-600'}`}>
+                            <span className="font-mono text-[9pt] font-black text-slate-400 mr-1 inline transition-colors group-hover:text-slate-400">{item.code}</span> - {item.name}
                           </h4>
                         </div>
                       </div>
@@ -1335,7 +1379,7 @@ export const DanhMucThiNghiemScreen = ({
                     setHmAttachedImages([]);
                     setShowAddHmModal(true);
                   }}
-                  className="flex items-center gap-1 px-3 py-1.5 bg-[#164399] hover:bg-blue-800 text-white rounded-lg text-[8pt] font-black uppercase tracking-tight shadow-xs active:scale-95 transition-all cursor-pointer"
+                  className="flex items-center gap-1 px-3 py-1.5 bg-[#164399] hover:bg-blue-800 text-white rounded-lg text-[8pt] font-black uppercase tracking-tight shadow-xs active:scale-95 transition-all cursor-pointer border-none"
                 >
                   <Plus className="w-3.5 h-3.5 stroke-[3]" /> Thêm HM
                 </button>
@@ -1348,9 +1392,9 @@ export const DanhMucThiNghiemScreen = ({
                     setHmListSelectedIds([]);
                     setShowAddHmFromListModal(true);
                   }}
-                  className="flex items-center gap-1 px-3 py-1.5 bg-sky-50 hover:bg-sky-100 text-[#0f5ca6] border border-sky-200 rounded-lg text-[8pt] font-black uppercase tracking-tight shadow-xs active:scale-95 transition-all cursor-pointer select-none"
+                  className="flex items-center gap-1 px-3 py-1.5 bg-blue-50 hover:bg-blue-100 text-blue-600 border border-blue-200 rounded-lg text-[8pt] font-black uppercase tracking-tight shadow-xs active:scale-95 transition-all cursor-pointer select-none border-none"
                 >
-                  + Từ Danh sách
+                  + Từ DS
                 </button>
               </div>
             </div>
@@ -1397,30 +1441,26 @@ export const DanhMucThiNghiemScreen = ({
                             ]);
                             setShowAddHmModal(true);
                           }}
-                          className={`cursor-pointer transition-colors leading-snug ${
+                          className={`cursor-pointer transition-all duration-150 leading-snug group hover:bg-blue-50/20 ${
                             isSelected 
-                              ? 'bg-blue-50/45 text-[#164399]' 
-                              : 'hover:bg-slate-50/50 bg-white'
+                              ? 'bg-blue-50/45 text-blue-600' 
+                              : 'bg-white'
                           }`}
-                          title="Kích đúp chuột để Xem chi tiết"
+                          title="Nhấn đúp chuột để xem chi tiết"
                         >
                           <td className="px-2 py-3 text-center font-mono font-black text-slate-350">{std.stt || index + 1}</td>
                           <td className="px-3 py-3 leading-snug font-semibold text-slate-705">
-                            <div className={isSelected ? 'font-black text-[#164399]' : 'font-bold text-slate-700'}>
+                            <div className={`transition-colors ${isSelected ? 'font-black text-blue-600' : 'font-bold text-slate-700 group-hover:text-blue-600'}`}>
                               {std.name}
                             </div>
                             {std.note && (
-                              <div className="text-[7.5pt] text-slate-450 font-normal italic mt-1 leading-normal">
+                              <div className="text-[7.5pt] text-slate-400 font-normal italic mt-1 leading-normal transition-colors group-hover:text-slate-400">
                                 {std.source === 'EVN' || std.source === 'TCT' ? `Quy chuẩn: ${std.note}` : std.note}
                               </div>
                             )}
                           </td>
                           <td className="px-2 py-3 text-center select-none">
-                            <span className={`text-[7.5pt] font-bold px-1.5 py-0.5 rounded ${
-                              std.valueType === 'Có/Không' || std.valueType === 'Đạt/Không đạt'
-                                ? 'bg-orange-50 text-orange-700'
-                                : 'bg-green-50 text-green-700 border border-green-100'
-                            }`}>
+                            <span className="text-[7.5pt] font-black uppercase px-2 py-0.5 rounded border bg-gray-100 text-gray-700 border-gray-200">
                               {std.valueType === 'Có/Không' ? 'Đạt/K.Đạt' : 'Nhập Text'}
                             </span>
                           </td>
@@ -1430,7 +1470,7 @@ export const DanhMucThiNghiemScreen = ({
                                 ? 'bg-red-50 text-red-700 border border-red-100'
                                 : std.source === 'TCT'
                                 ? 'bg-orange-50 text-orange-700 border border-orange-100'
-                                : 'bg-blue-50 text-blue-700 border border-blue-100'
+                                : 'bg-yellow-100 text-slate-700 border border-[#eab308]/20'
                             }`}>
                               {std.source || 'ĐV'}
                             </span>
@@ -1482,9 +1522,9 @@ export const DanhMucThiNghiemScreen = ({
                     setTsListSelectedIds([]);
                     setShowAddTsFromListModal(true);
                   }}
-                  className="flex items-center gap-1 px-2.5 py-1.5 bg-sky-50 hover:bg-sky-100 text-[#0f5ca6] border border-sky-200 rounded-lg text-[8pt] font-black uppercase tracking-tight shadow-xs active:scale-95 transition-all disabled:opacity-55 disabled:pointer-events-none cursor-pointer select-none"
+                  className="flex items-center gap-1 px-2.5 py-1.5 bg-blue-50 hover:bg-blue-100 text-blue-600 border border-blue-200 rounded-lg text-[8pt] font-black uppercase tracking-tight shadow-xs active:scale-95 transition-all disabled:opacity-55 disabled:pointer-events-none cursor-pointer select-none"
                 >
-                  + Từ Danh sách
+                  + Từ DS
                 </button>
               </div>
             </div>
@@ -1535,14 +1575,14 @@ export const DanhMucThiNghiemScreen = ({
                           ]);
                           setShowAddTsModal(true);
                         }}
-                        className="hover:bg-slate-50/50 transition-colors cursor-pointer"
-                        title="Kích đúp chuột để Xem chi tiết"
+                        className="hover:bg-blue-50/20 transition-all duration-150 cursor-pointer group"
+                        title="Nhấn đúp chuột để xem chi tiết"
                       >
                         <td className="px-2 py-3 text-center font-mono font-black text-slate-350">{param.stt || index + 1}</td>
                         <td className="px-3 py-3 leading-snug">
-                          <div className="font-bold text-slate-750">{param.name}</div>
+                          <div className="font-bold text-slate-700 transition-colors group-hover:text-blue-600">{param.name}</div>
                           {param.note && (
-                            <div className="text-[7.5pt] text-slate-400 font-normal italic mt-1 leading-normal">
+                            <div className="text-[7.5pt] text-slate-400 font-normal italic mt-1 leading-normal transition-colors group-hover:text-slate-400">
                               {param.note}
                             </div>
                           )}
@@ -1551,7 +1591,7 @@ export const DanhMucThiNghiemScreen = ({
                           <div className="flex flex-col gap-0.5 items-center justify-center">
                             <span className={`text-[7.5pt] font-black uppercase px-2 py-0.5 rounded border ${
                               param.measureType?.includes('Số')
-                                ? 'bg-blue-50 text-blue-700 border-blue-100'
+                                ? 'bg-gray-100 text-gray-700 border-gray-200'
                                 : 'bg-indigo-50 text-indigo-700 border-indigo-100/50'
                             }`}>
                               {param.measureType || 'Nhập Số'}
@@ -1574,8 +1614,8 @@ export const DanhMucThiNghiemScreen = ({
                             param.source === 'EVN'
                               ? 'bg-red-50 text-red-700 border border-red-100'
                               : param.source === 'TCT'
-                              ? 'bg-orange-50 text-orange-700 border border-orange-100'
-                              : 'bg-blue-50 text-blue-700 border-blue-100'
+                              ? 'bg-orange-50 text-orange-700 border-orange-100'
+                              : 'bg-yellow-100 text-slate-700 border border-yellow-200'
                           }`}>
                             {param.source || 'ĐV'}
                           </span>
@@ -1782,7 +1822,7 @@ export const DanhMucThiNghiemScreen = ({
                   {editingHmItem && (
                     <div className="mt-4 p-3.5 bg-slate-50 border border-slate-150 rounded-xl space-y-2 text-[8.5pt]">
                       <div className="flex justify-between items-center">
-                        <span className="font-extrabold text-gray-700 uppercase tracking-wider text-[7.5pt]">Cấp khởi tạo:</span>
+                        <span className="font-bold text-slate-400 uppercase tracking-wider text-[7.5pt]">Cấp khởi tạo:</span>
                         <span className={`px-2 py-0.5 rounded text-[8pt] font-black border ${
                           editingHmItem.source === 'EVN'
                             ? 'bg-red-50 text-red-700 border-red-100'
@@ -1795,14 +1835,14 @@ export const DanhMucThiNghiemScreen = ({
                       </div>
                       <div className="grid grid-cols-2 gap-4 pt-2 border-t border-slate-200/60">
                         <div>
-                          <div className="text-gray-700 text-[7.5pt] font-black uppercase tracking-wider">Người khởi tạo</div>
+                          <div className="text-slate-400 text-[7.5pt] font-bold uppercase tracking-wider">Người khởi tạo</div>
                           <div className="font-bold text-slate-700">{(editingHmItem as any).createdBy || 'Hệ thống'}</div>
-                          <div className="text-[8pt] text-slate-450 font-mono font-bold mt-0.5">{(editingHmItem as any).createdAt || '01/01/2026'}</div>
+                          <div className="text-[8pt] text-slate-450 font-mono font-medium mt-0.5">{(editingHmItem as any).createdAt || '01/01/2026'}</div>
                         </div>
                         <div>
-                          <div className="text-gray-700 text-[7.5pt] font-black uppercase tracking-wider">Người cập nhật</div>
+                          <div className="text-slate-400 text-[7.5pt] font-bold uppercase tracking-wider">Người cập nhật</div>
                           <div className="font-bold text-slate-700">{(editingHmItem as any).updatedBy || 'Hệ thống'}</div>
-                          <div className="text-[8pt] text-slate-450 font-mono font-bold mt-0.5">{(editingHmItem as any).updatedAt || '01/01/2026'}</div>
+                          <div className="text-[8pt] text-slate-450 font-mono font-medium mt-0.5">{(editingHmItem as any).updatedAt || '01/01/2026'}</div>
                         </div>
                       </div>
                     </div>
@@ -2183,7 +2223,7 @@ export const DanhMucThiNghiemScreen = ({
                   {editingTsItem && (
                     <div className="mt-4 p-3.5 bg-slate-50 border border-slate-150 rounded-xl space-y-2 text-[8.5pt]">
                       <div className="flex justify-between items-center">
-                        <span className="font-extrabold text-gray-700 uppercase tracking-wider text-[7.5pt]">Cấp khởi tạo:</span>
+                        <span className="font-bold text-slate-400 uppercase tracking-wider text-[7.5pt]">Cấp khởi tạo:</span>
                         <span className={`px-2 py-0.5 rounded text-[8pt] font-black border ${
                           editingTsItem.source === 'EVN'
                             ? 'bg-red-50 text-red-700 border-red-100'
@@ -2196,14 +2236,14 @@ export const DanhMucThiNghiemScreen = ({
                       </div>
                       <div className="grid grid-cols-2 gap-4 pt-2 border-t border-slate-200/60">
                         <div>
-                          <div className="text-gray-700 text-[7.5pt] font-black uppercase tracking-wider">Người khởi tạo</div>
+                          <div className="text-slate-400 text-[7.5pt] font-bold uppercase tracking-wider">Người khởi tạo</div>
                           <div className="font-bold text-slate-700">{(editingTsItem as any).createdBy || 'Hệ thống'}</div>
-                          <div className="text-[8pt] text-slate-450 font-mono font-bold mt-0.5">{(editingTsItem as any).createdAt || '01/01/2026'}</div>
+                          <div className="text-[8pt] text-slate-450 font-mono font-medium mt-0.5">{(editingTsItem as any).createdAt || '01/01/2026'}</div>
                         </div>
                         <div>
-                          <div className="text-gray-700 text-[7.5pt] font-black uppercase tracking-wider">Người cập nhật</div>
+                          <div className="text-slate-400 text-[7.5pt] font-bold uppercase tracking-wider">Người cập nhật</div>
                           <div className="font-bold text-slate-700">{(editingTsItem as any).updatedBy || 'Hệ thống'}</div>
-                          <div className="text-[8pt] text-slate-450 font-mono font-bold mt-0.5">{(editingTsItem as any).updatedAt || '01/01/2026'}</div>
+                          <div className="text-[8pt] text-slate-450 font-mono font-medium mt-0.5">{(editingTsItem as any).updatedAt || '01/01/2026'}</div>
                         </div>
                       </div>
                     </div>
@@ -2490,7 +2530,7 @@ export const DanhMucThiNghiemScreen = ({
                     disabled={hmListSelectedIds.length === 0}
                     className="px-5 py-1.5 bg-[#164399] hover:bg-blue-800 disabled:opacity-50 disabled:pointer-events-none text-white font-bold rounded-lg text-[9pt] transition-all shadow-sm flex items-center gap-1.5 cursor-pointer select-none"
                   >
-                    <Check className="w-4 h-4 stroke-[2.5]" /> Liên kết hạng mục ({hmListSelectedIds.length})
+                    <Check className="w-4 h-4 stroke-[2.5]" /> Sử dụng ({hmListSelectedIds.length})
                   </button>
                 </div>
               </div>
@@ -3219,17 +3259,8 @@ export const DanhMucThiNghiemScreen = ({
                         <div className="flex gap-4 items-start min-w-0 flex-1">
                           {/* Custom Category Icon Container */}
                           <div className="shrink-0">
-                            <div className={`w-12 h-12 rounded-full flex items-center justify-center ${
-                              cat.status === 'Quá hạn' ? 'bg-red-50 border border-red-100' :
-                              cat.status === 'Đến hạn' ? 'bg-amber-50 border border-amber-100' :
-                              cat.status === 'Sắp đến hạn' ? 'bg-blue-50 border border-blue-100' :
-                              'bg-green-50 border border-green-100'
-                            }`}>
-                              {cat.status === 'Quá hạn' ? <AlertCircle className="w-6 h-6 text-red-600" /> :
-                               cat.status === 'Đến hạn' ? <Clock className="w-6 h-6 text-amber-600" /> :
-                               cat.status === 'Sắp đến hạn' ? <Clock className="w-6 h-6 text-blue-600" /> :
-                               <CheckCircle2 className="w-6 h-6 text-green-600" />
-                              }
+                            <div className={`w-11 h-11 rounded-lg flex flex-col items-center justify-center ${visual.bg}`}>
+                              {visual.icon}
                             </div>
                           </div>
 
@@ -3237,31 +3268,51 @@ export const DanhMucThiNghiemScreen = ({
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center justify-between mb-1.5">
                               <div className="flex items-center gap-1.5 flex-wrap">
-                                <span className="text-[7.5pt] font-black tracking-wider font-mono px-1.5 py-0.5 rounded-lg bg-slate-100 text-slate-500 border border-slate-200 uppercase shadow-xs select-none">
+                                <span className={`text-[7.5pt] font-black tracking-wider uppercase font-mono px-1.5 py-0.5 rounded-lg border transition-all ${
+                                  isSelected ? 'bg-amber-50 text-amber-700 border-amber-200' : 'bg-transparent text-gray-500 border-transparent group-hover:bg-amber-50 group-hover:text-amber-700 group-hover:border-amber-200'
+                                }`}>
                                   {(cat as any).voltage || getDeviceVoltage((cat as any).device || '')}
                                 </span>
-                                <span className="text-[8.5pt] font-black tracking-wider font-mono px-1.5 py-0.5 rounded-lg bg-red-50 text-red-600 border border-red-100 uppercase shadow-xs">
+                                
+                                <span className={`text-[7.5pt] font-black tracking-wider uppercase px-1.5 py-0.5 rounded-lg border transition-all ${
+                                  isSelected ? 'bg-blue-50 text-[#164399] border-blue-200' : 'bg-transparent text-[#164399] border-transparent group-hover:bg-blue-50 group-hover:text-[#164399] group-hover:border-blue-200'
+                                }`}>
+                                  {normalizeType(cat.type)}
+                                </span>
+
+                                <span className={`text-[8.5pt] font-black tracking-wider uppercase font-mono px-1.5 py-0.5 rounded-lg border transition-all ${
+                                  isSelected ? 'bg-red-50 text-red-600 border-red-200' : 'bg-transparent text-gray-500 border-transparent group-hover:bg-red-50 group-hover:text-red-600 group-hover:border-red-200'
+                                }`}>
                                   {cat.code || 'CT-N/A'}
                                 </span>
-                                <div className={`flex items-center gap-1 px-2 py-0.5 rounded-lg border transition-all ${isSelected ? 'bg-blue-100 border-blue-200 text-[#164399]' : 'bg-gray-100 border-gray-200 text-gray-500'}`}>
-                                  <span className="text-gray-700 text-[7.5pt] font-black uppercase tracking-tighter">
-                                    {normalizeType(cat.type)}
-                                  </span>
-                                </div>
                               </div>
                             </div>
 
-                            <h4 className={`text-[11.5pt] font-medium mb-1 line-clamp-2 leading-snug transition-colors tracking-tight ${isSelected ? 'text-[#164399]' : 'text-gray-800 group-hover:text-blue-800'}`}>
+                            <h4 className={`text-[11.5pt] font-medium mb-1 line-clamp-2 leading-snug transition-colors tracking-tight ${isSelected ? 'text-[#164399]' : 'text-gray-800 group-hover:text-[#164399]'}`}>
                               {cat.device}
                             </h4>
                           </div>
                         </div>
 
                         {/* Right part: Ngày Thí nghiệm / Kiểm định / Hiệu chuẩn tiếp theo */}
-                        <div className="flex flex-col items-end shrink-0 text-right bg-slate-50/60 p-2.5 rounded-xl border border-gray-100 group-hover:bg-white transition-all min-w-[125px]">
-                          <span className="text-[7.5pt] text-gray-700 font-extrabold uppercase tracking-wider">Ngày tiếp theo</span>
-                          <span className="text-[10pt] font-black text-blue-600 tracking-tight mt-0.5 flex items-center gap-1">
-                            <Calendar className="w-3.5 h-3.5 opacity-75 text-blue-500" />
+                        <div className={`flex flex-col items-end shrink-0 text-right p-2.5 rounded-xl border transition-all min-w-[125px] ${
+                          cat.status === 'Quá hạn' ? 'bg-red-50/50 border-red-100 group-hover:bg-red-50' :
+                          cat.status === 'Đến hạn' ? 'bg-amber-50/50 border-amber-100 group-hover:bg-amber-50' :
+                          'bg-slate-50/60 border-gray-100 group-hover:bg-white'
+                        }`}>
+                          <span className={`text-[7.5pt] font-extrabold uppercase tracking-wider ${
+                            cat.status === 'Quá hạn' ? 'text-red-700' :
+                            cat.status === 'Đến hạn' ? 'text-amber-700' :
+                            'text-gray-700'
+                          }`}>Ngày tiếp theo</span>
+                          <span className={`text-[10pt] font-black tracking-tight mt-0.5 flex items-center gap-1.5 ${
+                            cat.status === 'Quá hạn' ? 'text-red-600' :
+                            cat.status === 'Đến hạn' ? 'text-amber-600' :
+                            'text-blue-600'
+                          }`}>
+                            {cat.status === 'Quá hạn' ? <AlertCircle className="w-4 h-4" /> :
+                             cat.status === 'Đến hạn' ? <Clock className="w-4 h-4" /> :
+                             <Calendar className="w-4 h-4 opacity-75" />}
                             {cat.nextDue || '15/06/2026'}
                           </span>
                         </div>
@@ -3274,8 +3325,8 @@ export const DanhMucThiNghiemScreen = ({
 
             {/* Custom Pagination Panel styled exactly like the Device list paging */}
             {totalPages > 1 && (
-              <div className="py-4 border-t border-gray-200 flex items-center justify-between container-paging shrink-0 bg-white -mx-6 px-6">
-                <span className="text-[8.5pt] font-black text-gray-700 uppercase tracking-wider">
+              <div className="py-2 border-t border-gray-200 flex items-center justify-between container-paging shrink-0 bg-white -mx-6 px-6">
+                <span className="text-[8.5pt] font-semibold text-gray-400 uppercase tracking-wider">
                   Xem {startIndex + 1} - {Math.min(startIndex + itemsPerPage, totalItems)} / {totalItems} hồ sơ
                 </span>
                 <div className="flex items-center gap-1">
@@ -3358,16 +3409,17 @@ export const DanhMucThiNghiemScreen = ({
                         <div className="flex-1">
                           {/* Row 1: Code and Type placed closely together with auto-width, no titles */}
                           <div className="flex flex-wrap items-center gap-2">
-                            <span className="bg-slate-100 text-slate-600 font-mono font-black text-[9pt] uppercase px-3 py-1.5 rounded-lg border border-slate-200 block w-auto shadow-sm select-none">
+                            <span className="bg-[#F5E6E1] text-[#795548] font-mono font-black text-[9pt] uppercase px-3 py-1.5 rounded-lg border border-[#D7CCC8] block w-auto shadow-sm select-none">
                               {(activeCat as any).voltage || getDeviceVoltage((activeCat as any).device || '')}
-                            </span>
-                            <span className="bg-red-50 text-red-600 font-mono font-black text-[9pt] uppercase px-3 py-1.5 rounded-lg border border-red-100 block w-auto shadow-sm select-none">
-                              {activeCat.code || 'PD-MBA-001'}
                             </span>
                             
                             <div className="bg-blue-50 text-[#164399] font-black text-[9pt] uppercase px-3 py-1.5 rounded-[10px] border border-[#164399]/10 flex items-center w-auto shadow-sm select-none">
                               <span>{normalizeType(activeCat.type)}</span>
                             </div>
+
+                            <span className="bg-red-50 text-red-600 font-mono font-black text-[9pt] uppercase px-3 py-1.5 rounded-lg border border-red-100 block w-auto shadow-sm select-none">
+                              {activeCat.code || 'PD-MBA-001'}
+                            </span>
                           </div>
 
                           {/* Row 2: Device Name and Tree Location Path */}
@@ -3402,6 +3454,15 @@ export const DanhMucThiNghiemScreen = ({
                               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                 <div className="bg-slate-50/70 p-3 rounded-xl border border-gray-100 flex items-center justify-between">
                                   <div>
+                                    <span className="text-[7.5pt] text-gray-400 font-bold uppercase block tracking-wider">Ngày tiếp theo</span>
+                                    <span className="text-[11pt] font-black text-blue-600 inline-block mt-1 uppercase">
+                                      {activeCat.nextDue || '15/06/2027'}
+                                    </span>
+                                  </div>
+                                </div>
+                                
+                                <div className="bg-slate-50/70 p-3 rounded-xl border border-gray-100 flex items-center justify-between">
+                                  <div>
                                     <span className="text-[7.5pt] text-gray-400 font-bold uppercase block tracking-wider">Trạng thái đến hạn</span>
                                     <span className={`text-[11.5pt] font-black inline-block mt-1 uppercase ${
                                       activeCat.status === 'Quá hạn' ? 'text-red-600' :
@@ -3410,15 +3471,6 @@ export const DanhMucThiNghiemScreen = ({
                                       'text-green-600'
                                     }`}>
                                       {activeCat.status || 'Bình thường'}
-                                    </span>
-                                  </div>
-                                </div>
-                                
-                                <div className="bg-slate-50/70 p-3 rounded-xl border border-gray-100 flex items-center justify-between">
-                                  <div>
-                                    <span className="text-[7.5pt] text-gray-400 font-bold uppercase block tracking-wider">Ngày tiếp theo</span>
-                                    <span className="text-[11pt] font-black text-blue-600 inline-block mt-1 uppercase">
-                                      {activeCat.nextDue || '15/06/2027'}
                                     </span>
                                   </div>
                                 </div>
@@ -3552,18 +3604,14 @@ export const DanhMucThiNghiemScreen = ({
                                     <td className="px-6 py-3.5">
                                       <div className={`font-bold text-[11pt] ${isSelected ? 'text-[#164399]' : 'text-gray-800'}`}>{std.name}</div>
                                       {std.note && (
-                                        <div className="text-[7.5pt] text-slate-400 font-normal italic mt-1 leading-normal">
+                                        <div className="text-[8pt] text-gray-500 font-normal italic mt-1 leading-normal">
                                           {std.note}
                                         </div>
                                       )}
                                     </td>
 
                                     <td className="px-6 py-3.5 text-center select-none">
-                                      <span className={`text-[7.5pt] font-bold px-1.5 py-0.5 rounded border ${
-                                        std.unit !== 'mΩ' && std.unit !== 'μΩ' && std.unit !== 'μA'
-                                          ? 'bg-orange-50 text-orange-700 border-orange-100'
-                                          : 'bg-green-50 text-green-700 border-green-100'
-                                      }`}>
+                                      <span className="text-[7.5pt] font-bold px-1.5 py-0.5 rounded border bg-gray-50 text-gray-500 border-gray-200">
                                         {std.unit !== 'mΩ' && std.unit !== 'μΩ' && std.unit !== 'μA' ? 'Đạt/K.Đạt' : 'Nhập Text'}
                                       </span>
                                     </td>
@@ -3594,7 +3642,7 @@ export const DanhMucThiNghiemScreen = ({
                         
                         return (
                           <div className="bg-white rounded-xl border border-blue-200 overflow-hidden shadow-sm animate-in zoom-in-95 duration-200">
-                            <div className="px-4 py-3 bg-blue-50/50 border-b border-blue-100 flex items-center justify-between">
+                            <div className="px-4 py-3 bg-transparent border-b border-blue-100 flex items-center justify-between">
                               <h4 className="text-[10pt] font-black text-gray-700 uppercase tracking-wider flex items-center gap-2">
                                 <FileText className="w-4 h-4 text-blue-500" />
                                 Danh sách thông số ({selectedStd.name})
@@ -3602,7 +3650,7 @@ export const DanhMucThiNghiemScreen = ({
                             </div>
                             <div className="overflow-x-auto">
                               <table className="w-full text-left border-collapse">
-                                <thead className="bg-[#f0f4fa] text-slate-500 font-bold text-[8.5pt] uppercase tracking-wider select-none">
+                                <thead className="bg-[#f0f4fa] text-[#164399] font-bold text-[8.5pt] uppercase tracking-wider select-none">
                                   <tr>
                                     <th className="px-4 py-3 w-16 text-center">STT</th>
                                     <th className="px-6 py-3 text-left">Tên thông số - ĐVT - Kiểu đo</th>

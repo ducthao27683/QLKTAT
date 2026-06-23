@@ -100,6 +100,7 @@ export const PmisLuoiApp = ({ config, onBack }: PmisLuoiAppProps) => {
     mode: 'view' | 'edit' | 'add',
     data?: any
   } | null>(null);
+  const [deviceFormDraftName, setDeviceFormDraftName] = useState<string>('');
   const [showNotifications, setShowNotifications] = useState(false);
   const [showDeviceFilterList, setShowDeviceFilterList] = useState(false);
   const [deviceFilterStatuses, setDeviceFilterStatuses] = useState<string[]>(['Đang vận hành']);
@@ -187,6 +188,12 @@ export const PmisLuoiApp = ({ config, onBack }: PmisLuoiAppProps) => {
     }
   }, [devicePath, detailForm]);
 
+  useEffect(() => {
+    if (detailForm && detailForm.type === 'device') {
+      setDeviceFormDraftName(typeof detailForm.data === 'string' ? detailForm.data : '');
+    }
+  }, [detailForm?.data, detailForm?.mode]);
+
   const [isDuPhongEditing, setIsDuPhongEditing] = useState(false);
   const isEditing = (detailForm && (detailForm.mode === 'add' || detailForm.mode === 'edit')) || isDuPhongEditing;
 
@@ -209,15 +216,16 @@ export const PmisLuoiApp = ({ config, onBack }: PmisLuoiAppProps) => {
       return <><span className="text-[#164399]">Chi tiết - {docType} -</span> <span className="text-blue-600 font-extrabold ml-1.5">{branchName}</span></>;
     } else if (type === 'testing_catalog') {
       const deviceName = detailForm.data?.device || 'Thiết bị mới';
-      const label = mode === 'view' ? 'Chi tiết thiết lập -' : mode === 'add' ? 'Thiết lập Thiết bị mới -' : 'Cập nhật thiết lập -';
+      const label = mode === 'view' ? 'Thiết lập -' : mode === 'add' ? 'Thiết lập Thiết bị mới -' : 'Cập nhật thiết lập -';
       return <><span className="text-[#164399]">{label}</span> <span className="text-blue-600 font-extrabold ml-1.5">{deviceName}</span></>;
     } else if (type === 'test_report') {
       const deviceName = detailForm.data?.device || 'Thiết bị';
       const label = mode === 'view' ? 'Chi tiết Biên bản -' : mode === 'add' ? 'Tạo mới Biên bản -' : 'Cập nhật Biên bản -';
       return <><span className="text-[#164399]">{label}</span> <span className="text-blue-600 font-extrabold ml-1.5">{deviceName}</span></>;
     } else {
-      const label = mode === 'view' ? 'Chi tiết Sự cố của -' : mode === 'add' ? 'Thêm mới Sự cố của -' : 'Cập nhật Sự cố của -';
-      return <><span className="text-[#164399]">{label}</span> <span className="text-blue-600 font-extrabold ml-1.5">{lastInstance}</span></>;
+      const label = mode === 'view' ? 'Chi tiết sự cố của -' : mode === 'add' ? 'Thêm mới Sự cố của -' : 'Cập nhật Sự cố của -';
+      const labelColor = mode === 'view' ? 'text-gray-700 font-bold' : 'text-[#164399]';
+      return <><span className={labelColor}>{label}</span> <span className="text-blue-600 font-extrabold ml-1.5">{lastInstance}</span></>;
     }
     return null;
   };
@@ -431,7 +439,19 @@ export const PmisLuoiApp = ({ config, onBack }: PmisLuoiAppProps) => {
                           Hủy
                         </button>
                         <button 
-                          onClick={() => setDetailForm({ ...detailForm, mode: 'view' })}
+                          onClick={() => {
+                            if (detailForm.type === 'device') {
+                              setDetailForm({ ...detailForm, mode: 'view', data: deviceFormDraftName });
+                            } else {
+                              if (detailForm.type === 'testing_plan') {
+                                if (detailForm.data?.status === 'Từ chối' && !detailForm.data?.rejectReason?.trim()) {
+                                  setDetailForm({ ...detailForm, validationError: true });
+                                  return;
+                                }
+                              }
+                              setDetailForm({ ...detailForm, mode: 'view', validationError: false });
+                            }
+                          }}
                           className="px-4 py-1.5 bg-[#164399] text-white rounded-lg text-[12pt] font-bold hover:bg-blue-800 transition-all flex items-center gap-2"
                         >
                           <Check className="w-4 h-4" />
@@ -459,10 +479,10 @@ export const PmisLuoiApp = ({ config, onBack }: PmisLuoiAppProps) => {
                       {(detailForm.type === 'testing_plan' || detailForm.type === 'testing_catalog' || !detailForm.data?.status || (detailForm.data.status !== 'Đã duyệt' && detailForm.data.status !== 'Từ chối')) && (
                         <button 
                           onClick={() => { setConfirmAction({ title: 'Xác nhận xóa', message: 'Bạn có chắc chắn muốn xóa hồ sơ phiếu này không?', onConfirm: () => { setDetailForm(null); } }); }} 
-                          className="p-2.5 bg-red-50 hover:bg-red-100 hover:scale-105 text-red-650 rounded-xl border border-transparent transition-all cursor-pointer duration-150 flex items-center justify-center shrink-0 shadow-sm" 
+                          className="p-2.5 bg-red-50 hover:bg-red-100 hover:scale-105 text-red-600 rounded-xl border border-transparent transition-all cursor-pointer duration-150 flex items-center justify-center shrink-0 shadow-sm" 
                           title="Xóa"
                         >
-                          <Trash2 className="w-4 h-4" />
+                          <Trash2 className="w-4 h-4 text-red-600" />
                         </button>
                       )}
                     </div>
@@ -502,7 +522,7 @@ export const PmisLuoiApp = ({ config, onBack }: PmisLuoiAppProps) => {
                             {detailForm.type === 'device' ? (
                               <div className="space-y-4">
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-stretch">
-                                  {/* Cột trái: Tên thiết bị (chiều cao bằng 2 dòng Cấp điện áp + Mã thiết bị) và Trạng thái thiết bị */}
+                                  {/* Cột trái: Tên thiết bị (chiều cao bằng 2 dòng Cấp điện áp + Mã thiết bị) và Trạng thái */}
                                   <div className="flex flex-col gap-4 justify-between h-full">
                                     {/* Ô Tên thiết bị */}
                                     <div className="flex flex-col justify-start space-y-1.5 bg-gray-50/50 p-4 rounded-xl border border-gray-100 flex-1 min-h-[114px]">
@@ -516,16 +536,16 @@ export const PmisLuoiApp = ({ config, onBack }: PmisLuoiAppProps) => {
                                           rows={2}
                                           defaultValue={detailForm.data || ""} 
                                           onChange={(e) => {
-                                            setDetailForm({ ...detailForm, data: e.target.value });
+                                            setDeviceFormDraftName(e.target.value);
                                           }}
                                           className="w-full px-3 py-1.5 text-[12pt] font-extrabold rounded-[10px] transition-all text-slate-800 bg-white border border-gray-250 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 text-left"
                                         />
                                       )}
                                     </div>
 
-                                    {/* Ô Trạng thái thiết bị phía dưới Tên thiết bị */}
-                                    <div className="bg-[#f0f4f8]/70 p-4 rounded-xl border border-[#e2edf8] flex items-center justify-between h-[52px] shrink-0">
-                                      <span className="text-[10pt] font-bold text-gray-400 uppercase tracking-wider shrink-0">Trạng thái thiết bị</span>
+                                    {/* Ô Trạng thái phía dưới Tên thiết bị */}
+                                    <div className="bg-gray-50/50 p-4 rounded-xl border border-gray-100 flex items-center justify-between h-[52px] shrink-0">
+                                      <span className="text-[10pt] font-bold text-gray-400 uppercase tracking-wider shrink-0">Trạng thái</span>
                                       <div className="flex-1 min-w-0 flex justify-end">
                                         <select 
                                           disabled={detailForm.mode === 'view'}
@@ -599,7 +619,7 @@ export const PmisLuoiApp = ({ config, onBack }: PmisLuoiAppProps) => {
                                 </div>
                              <div className="grid grid-cols-2 gap-4">
                                 <div className="space-y-1">
-                                 <label className="text-[10pt] font-bold text-gray-500 uppercase">Ngày vận hành</label>
+                                 <label className="text-[10pt] font-semibold text-gray-400 uppercase">Ngày vận hành</label>
                                  <input 
                                    type="date" 
                                    defaultValue="2020-01-01"
@@ -608,7 +628,7 @@ export const PmisLuoiApp = ({ config, onBack }: PmisLuoiAppProps) => {
                                  />
                                </div>
                                <div className="space-y-1">
-                                 <label className="text-[10pt] font-bold text-gray-500 uppercase">Mã liên kết khác</label>
+                                 <label className="text-[10pt] font-semibold text-gray-400 uppercase">Mã liên kết khác</label>
                                  <input 
                                    type="text" 
                                    defaultValue="-"
@@ -617,7 +637,7 @@ export const PmisLuoiApp = ({ config, onBack }: PmisLuoiAppProps) => {
                                  />
                                </div>
                                <div className="space-y-1">
-                                 <label className="text-[10pt] font-bold text-gray-500 uppercase">Số S/N</label>
+                                 <label className="text-[10pt] font-semibold text-gray-400 uppercase">Số S/N</label>
                                  <input 
                                    type="text" 
                                    defaultValue="SN-123456"
@@ -626,7 +646,7 @@ export const PmisLuoiApp = ({ config, onBack }: PmisLuoiAppProps) => {
                                  />
                                </div>
                                <div className="space-y-1">
-                                 <label className="text-[10pt] font-bold text-gray-500 uppercase">Mã CMIS</label>
+                                 <label className="text-[10pt] font-semibold text-gray-400 uppercase">Mã CMIS</label>
                                  <input 
                                    type="text" 
                                    defaultValue="CMIS-001"
@@ -635,7 +655,7 @@ export const PmisLuoiApp = ({ config, onBack }: PmisLuoiAppProps) => {
                                  />
                                </div>
                                <div className="space-y-1">
-                                 <label className="text-[10pt] font-bold text-gray-500 uppercase">Số thẻ TSCD</label>
+                                 <label className="text-[10pt] font-semibold text-gray-400 uppercase">Số thẻ TSCD</label>
                                  <input 
                                    type="text" 
                                    defaultValue="3001"
@@ -644,7 +664,7 @@ export const PmisLuoiApp = ({ config, onBack }: PmisLuoiAppProps) => {
                                  />
                                </div>
                                <div className="space-y-1">
-                                 <label className="text-[10pt] font-bold text-gray-500 uppercase">Góc lái</label>
+                                 <label className="text-[10pt] font-semibold text-gray-400 uppercase">Góc lái</label>
                                  <input 
                                    type="text" 
                                    defaultValue="0.0"
@@ -653,7 +673,7 @@ export const PmisLuoiApp = ({ config, onBack }: PmisLuoiAppProps) => {
                                  />
                                </div>
                                <div className="space-y-1">
-                                 <label className="text-[10pt] font-bold text-gray-500 uppercase">Khoảng cách vị trí</label>
+                                 <label className="text-[10pt] font-semibold text-gray-400 uppercase">Khoảng cách vị trí</label>
                                  <input 
                                    type="text" 
                                    defaultValue="0"
@@ -662,7 +682,7 @@ export const PmisLuoiApp = ({ config, onBack }: PmisLuoiAppProps) => {
                                  />
                                </div>
                                <div className="space-y-1">
-                                 <label className="text-[10pt] font-bold text-gray-500 uppercase">Tiếp địa</label>
+                                 <label className="text-[10pt] font-semibold text-gray-400 uppercase">Tiếp địa</label>
                                  <input 
                                    type="text" 
                                    defaultValue="RC1"
@@ -671,7 +691,7 @@ export const PmisLuoiApp = ({ config, onBack }: PmisLuoiAppProps) => {
                                  />
                                </div>
                                <div className="space-y-1">
-                                 <label className="text-[10pt] font-bold text-gray-400 uppercase tracking-widest">Khu vực</label>
+                                 <label className="text-[10pt] font-semibold text-gray-400 uppercase tracking-widest">Khu vực</label>
                                  <input 
                                    type="text" 
                                    defaultValue="Đồng bằng"
@@ -681,7 +701,7 @@ export const PmisLuoiApp = ({ config, onBack }: PmisLuoiAppProps) => {
                                </div>
                              </div>
                              <div className="space-y-1">
-                               <label className="text-[10pt] font-bold text-gray-400 uppercase tracking-widest pl-1">Mô tả chi tiết</label>
+                               <label className="text-[10pt] font-semibold text-gray-400 uppercase tracking-widest pl-1">Mô tả chi tiết</label>
                                <textarea 
                                  rows={3}
                                  readOnly={detailForm.mode === 'view'}
@@ -871,33 +891,6 @@ export const PmisLuoiApp = ({ config, onBack }: PmisLuoiAppProps) => {
                                mode={detailForm.mode} 
                                onFileSelect={(files) => console.log('Selected documents:', files)} 
                             />
-                          </div>
-                        </div>
-
-                        {/* Thống kê nghiệp vụ */}
-                        <div className="space-y-4 pt-4 border-t border-gray-100/60 mt-4">
-                          <div className="flex items-center justify-between border-b border-gray-100 pb-4">
-                            <h4 className="text-[10pt] font-black text-gray-700 uppercase tracking-wider flex items-center gap-2 pl-1 font-sans">
-                              <BarChart2 className="w-5 h-5 text-purple-500" /> THỐNG KÊ NGHIỆP VỤ
-                            </h4>
-                          </div>
-                          <div className="grid grid-cols-2 gap-3">
-                            <div className="bg-red-50/85 p-3.5 rounded-xl border border-red-100/60 shadow-xs">
-                               <p className="text-[10pt] font-bold text-red-700/80 mb-1">Sự cố</p>
-                               <p className="text-[15pt] font-black text-red-650">2</p>
-                            </div>
-                            <div className="bg-sky-50/85 p-3.5 rounded-xl border border-sky-100/60 shadow-xs">
-                               <p className="text-[10pt] font-bold text-sky-700/80 mb-1">Sửa chữa</p>
-                               <p className="text-[15pt] font-black text-sky-650">3</p>
-                            </div>
-                            <div className="bg-purple-50/85 p-3.5 rounded-xl border border-purple-100/60 shadow-xs">
-                               <p className="text-[10pt] font-bold text-purple-700/80 mb-1">Thí nghiệm</p>
-                               <p className="text-[15pt] font-black text-purple-650">10</p>
-                            </div>
-                            <div className="bg-amber-50/85 p-3.5 rounded-xl border border-amber-100/60 shadow-xs">
-                               <p className="text-[10pt] font-bold text-amber-700/80 mb-1">Công việc</p>
-                               <p className="text-[15pt] font-black text-amber-700">1</p>
-                            </div>
                           </div>
                         </div>
                       </div>
