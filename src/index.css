@@ -7,6 +7,15 @@
   --font-size-header: 12pt;
   --font-size-prominent: 16pt;
   --font-size-secondary: 12pt;
+
+  /* Soft and professional custom system colors commonly used for subtle borders/accents */
+  --color-slate-150: #f1f5f9;
+  --color-gray-150: #f3f4f6;
+  --color-slate-250: #cbd5e1;
+  --color-gray-250: #e5e7eb;
+  --color-blue-150: #eff6ff;
+  --color-emerald-150: #ecfdf5;
+  --color-amber-150: #fef3c7;
 }
 
 /* Pie Chart Hover Shadow */

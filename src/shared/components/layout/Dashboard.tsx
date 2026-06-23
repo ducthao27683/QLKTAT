@@ -179,7 +179,7 @@ export const Dashboard = ({
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-100 lg:col-span-2 hover:shadow-xl hover:border-blue-200 transition-all duration-300 group">
           <DesignTooltip id="title_thong_ke_thiet_bi">
-            <h3 className="text-gray-500 font-bold mb-4 flex items-center gap-2 uppercase text-[12pt]">
+            <h3 className="text-gray-700 font-bold mb-4 flex items-center gap-2 uppercase text-[12pt]">
               <BarChart2 className="w-5 h-5 text-blue-500 group-hover:scale-110 transition-transform" />
               Thống kê thiết bị
             </h3>
@@ -212,7 +212,7 @@ export const Dashboard = ({
                   </PieChart>
                 </ResponsiveContainer>
               </div>
-              <h4 className="text-secondary font-bold text-gray-600 mt-2">Tháng này năm nay</h4>
+              <h4 className="text-secondary font-bold text-gray-700 mt-2">Tháng này năm nay</h4>
             </div>
             <div className="flex-1 text-center relative flex flex-col">
               <div className="flex-1">
@@ -241,7 +241,7 @@ export const Dashboard = ({
                   </PieChart>
                 </ResponsiveContainer>
               </div>
-              <h4 className="text-secondary font-bold text-gray-600 mt-2">Số liệu tháng trước</h4>
+              <h4 className="text-secondary font-bold text-gray-700 mt-2">Số liệu tháng trước</h4>
             </div>
             <div className="flex-1 text-center relative flex flex-col">
               <div className="flex-1">
@@ -270,7 +270,7 @@ export const Dashboard = ({
                   </PieChart>
                 </ResponsiveContainer>
               </div>
-              <h4 className="text-secondary font-bold text-gray-600 mt-2">Cùng kỳ năm trước</h4>
+              <h4 className="text-secondary font-bold text-gray-700 mt-2">Cùng kỳ năm trước</h4>
             </div>
           </div>
           <div className="mt-4 flex justify-center">
@@ -286,7 +286,7 @@ export const Dashboard = ({
         </div>
         <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-100 hover:shadow-xl hover:border-blue-200 transition-all duration-300 group">
           <DesignTooltip id="title_su_co_3_thang">
-            <h3 className="text-gray-500 font-bold mb-4 flex items-center gap-2 uppercase text-[12pt]">
+            <h3 className="text-gray-700 font-bold mb-4 flex items-center gap-2 uppercase text-[12pt]">
               <AlertTriangle className="w-5 h-5 text-red-500 group-hover:scale-110 transition-transform" />
               Sự cố 3 tháng gần nhất
             </h3>
@@ -313,7 +313,7 @@ export const Dashboard = ({
         <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
           <div className="p-4 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
             <DesignTooltip id="title_su_co_moi_nhat">
-              <h3 className="text-gray-500 font-bold flex items-center gap-2 uppercase text-[12pt]">
+              <h3 className="text-gray-700 font-bold flex items-center gap-2 uppercase text-[12pt]">
                 <AlertTriangle className="w-5 h-5 text-red-500" />
                 Sự cố mới nhất
               </h3>
@@ -355,7 +355,7 @@ export const Dashboard = ({
         <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
           <div className="p-4 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
             <DesignTooltip id="title_chi_dao_cbm">
-              <h3 className="text-gray-500 font-bold flex items-center gap-2 uppercase text-[12pt]">
+              <h3 className="text-gray-700 font-bold flex items-center gap-2 uppercase text-[12pt]">
                 <Wrench className="w-5 h-5 text-orange-500" />
                 Chỉ đạo xử lý tồn tại CBM
               </h3>
@@ -375,7 +375,7 @@ export const Dashboard = ({
               >
                 <div className="w-16 shrink-0 flex flex-col items-center group-hover/card:scale-110 transition-transform">
                   <div className="w-12 h-12 border border-gray-200 bg-white rounded-[10px] flex flex-col items-center justify-center shadow-sm group-hover/card:border-blue-300 group-hover/card:shadow-md transition-all border-t-2 border-t-[#164399]">
-                    <span className="text-[7pt] text-[#164399] font-bold uppercase tracking-wider mb-0.5">Ngày</span>
+                    <span className="text-[7pt] text-gray-700 font-bold uppercase tracking-wider mb-0.5">Ngày</span>
                     <span className="text-secondary font-bold text-[#164399] leading-none text-[14pt]">{item.date.split('/')[0]}</span>
                   </div>
                 </div>
@@ -404,7 +404,7 @@ export const Dashboard = ({
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 pb-8">
         <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-100 lg:col-span-2 hover:shadow-xl hover:border-blue-200 transition-all duration-300 group">
           <DesignTooltip id="title_khoi_luong_cong_viec">
-            <h3 className="text-gray-500 font-bold mb-4 flex items-center gap-2 uppercase text-[12pt]">
+            <h3 className="text-gray-700 font-bold mb-4 flex items-center gap-2 uppercase text-[12pt]">
               <Activity className="w-5 h-5 text-green-500 group-hover:scale-110 transition-transform" />
               Khối lượng công việc
             </h3>
@@ -429,7 +429,7 @@ export const Dashboard = ({
         <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden flex flex-col">
           <div className="p-4 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
             <DesignTooltip id="title_thong_bao_he_thong">
-              <h3 className="text-gray-500 font-bold flex items-center gap-2 uppercase text-[12pt]">
+              <h3 className="text-gray-700 font-bold flex items-center gap-2 uppercase text-[12pt]">
                 <Bell className="w-5 h-5 text-blue-500" />
                 Thông báo hệ thống
               </h3>

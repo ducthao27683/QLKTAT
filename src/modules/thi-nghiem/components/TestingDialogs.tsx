@@ -49,10 +49,10 @@ export const TestingDialogs = ({
       {showApprovalPopup && (
         <div className="fixed inset-0 z-[400] flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setShowApprovalPopup(false)}></div>
-          <div className="relative w-full max-w-lg bg-white rounded-3xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300">
+          <div className="relative w-full max-w-lg bg-white rounded-xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300">
             <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between bg-blue-50/30">
-              <h3 className="text-[13pt] font-black text-[#164399] uppercase tracking-widest leading-none">Phê duyệt kế hoạch</h3>
-              <button onClick={() => setShowApprovalPopup(false)} className="p-2 hover:bg-gray-100 rounded-full transition-colors">
+              <h3 className="text-[13pt] font-black text-gray-700 uppercase tracking-widest leading-none">Phê duyệt kế hoạch</h3>
+              <button onClick={() => setShowApprovalPopup(false)} className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
                 <X className="w-5 h-5 text-gray-400" />
               </button>
             </div>
@@ -60,7 +60,7 @@ export const TestingDialogs = ({
               <div className="space-y-1">
                 <label className="text-[10pt] font-black text-gray-400 uppercase tracking-widest">Ý kiến phê duyệt</label>
                 <textarea 
-                  className="w-full px-3 py-2 border border-gray-200 rounded-xl outline-none focus:border-blue-500 font-bold"
+                  className="w-full px-3 py-2 border border-gray-200 rounded-lg outline-none focus:border-blue-500 font-bold"
                   rows={3}
                   placeholder="Nhập ý kiến hoặc lý do từ chối..."
                 />
@@ -68,7 +68,7 @@ export const TestingDialogs = ({
               <div className="grid grid-cols-2 gap-3">
                 <button 
                   onClick={() => {
-                    setDetailForm({ ...detailForm, data: { ...detailForm.data, status: 'Từ chối' } });
+                    setDetailForm({ ...detailForm, data: { ...detailForm.data, status: 'Không duyệt' } });
                     setShowApprovalPopup(false);
                   }}
                   className="py-3 rounded-xl border border-red-200 text-red-600 font-black text-[11pt] hover:bg-red-50 transition-all"
@@ -80,7 +80,7 @@ export const TestingDialogs = ({
                     setDetailForm({ ...detailForm, data: { ...detailForm.data, status: 'Đã duyệt' } });
                     setShowApprovalPopup(false);
                   }}
-                  className="py-3 rounded-xl bg-green-600 text-white font-black text-[11pt] shadow-lg shadow-green-100 hover:shadow-xl hover:-translate-y-0.5 transition-all uppercase"
+                  className="py-3 rounded-lg bg-green-600 text-white font-black text-[11pt] shadow-lg shadow-green-100 hover:shadow-xl hover:-translate-y-0.5 transition-all uppercase"
                 >
                   PHÊ DUYỆT
                 </button>
@@ -94,20 +94,20 @@ export const TestingDialogs = ({
       {showDeviceSelection && (
         <div className="fixed inset-0 z-[300] flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setShowDeviceSelection(false)}></div>
-          <div className="relative w-full max-w-6xl h-[85vh] bg-white rounded-3xl shadow-2xl flex flex-col overflow-hidden animate-in zoom-in-95 duration-300">
+          <div className="relative w-full max-w-6xl h-[85vh] bg-white rounded-xl shadow-2xl flex flex-col overflow-hidden animate-in zoom-in-95 duration-300">
             <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between bg-blue-50/30">
               <div className="flex items-center gap-3">
-                <div className="p-2 bg-[#164399] text-white rounded-xl">
+                <div className="p-2 bg-[#164399] text-white rounded-lg">
                   <Plus className="w-5 h-5" />
                 </div>
                 <div>
-                  <h3 className="text-[14pt] font-black text-gray-800 whitespace-normal break-words">Chọn thiết bị</h3>
-                  <p className="text-[10pt] text-gray-500 font-bold uppercase tracking-widest leading-none mt-1 whitespace-normal break-words">
+                  <h3 className="text-[14pt] font-black text-gray-700 whitespace-normal break-words">Chọn thiết bị</h3>
+                  <p className="text-[10pt] text-gray-700 font-bold uppercase tracking-widest leading-none mt-1 whitespace-normal break-words">
                     Nhánh: {devicePath?.filter((p, i) => i % 2 === 0 && p && p.trim().toUpperCase() !== 'TẤT CẢ').join(' / ') || ""}
                   </p>
                 </div>
               </div>
-              <button onClick={() => setShowDeviceSelection(false)} className="p-2 hover:bg-gray-100 rounded-full transition-colors">
+              <button onClick={() => setShowDeviceSelection(false)} className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
                 <X className="w-6 h-6 text-gray-400" />
               </button>
             </div>
@@ -148,7 +148,7 @@ export const TestingDialogs = ({
 
                 <div className="flex-1 overflow-auto custom-scrollbar">
                   <table className="w-full text-left border-collapse">
-                    <thead className="bg-slate-100/90 backdrop-blur-sm text-slate-700 text-[9pt] font-black uppercase sticky top-0 z-10 border-b border-gray-200">
+                    <thead className="bg-[#f0f4fa] sticky top-0 z-20 text-[#164399] font-black text-[9pt] uppercase tracking-wider text-left border-b border-gray-200">
                       <tr>
                         <th className="px-6 py-3 w-10 text-center">
                           <input type="checkbox" className="rounded" />
@@ -186,12 +186,12 @@ export const TestingDialogs = ({
                              <div className="flex items-center gap-2 mb-1">
                                 <span className="text-[10pt] font-black text-red-600 font-mono italic">{dev.code}</span>
                                 <span className="text-gray-300">|</span>
-                                <span className="text-[10pt] font-normal text-gray-500 uppercase tracking-tighter">{dev.type}</span>
+                                <span className="text-[10pt] font-normal text-gray-700 uppercase tracking-tighter">{dev.type}</span>
                              </div>
                              <p className="text-[11pt] font-bold text-gray-700">{dev.name}</p>
                           </td>
                           <td className="px-4 py-4">
-                            <p className="text-[9pt] text-gray-400 font-normal uppercase tracking-widest">{dev.path}</p>
+                            <p className="text-[9pt] text-gray-700 font-normal uppercase tracking-widest">{dev.path}</p>
                           </td>
                           <td className="px-4 py-4 text-[10pt] font-normal text-gray-500 text-center">
                              {dev.nextDue.split('-').reverse().join('/')}
@@ -205,30 +205,30 @@ export const TestingDialogs = ({
 
               {/* Right Column: Selected Devices */}
               <div className="w-[40%] flex flex-col bg-gray-50/50">
-                <div className="px-6 py-4 bg-[#164399]/5 border-b border-gray-100 flex items-center justify-between shrink-0">
-                   <h4 className="text-[11pt] font-black text-[#164399] uppercase tracking-widest">Đã chọn ({selectedPlanDevices.length})</h4>
+                <div className="px-6 py-4 bg-[#f0f4fa] border-b border-gray-100 flex items-center justify-between shrink-0">
+                   <h4 className="text-[11pt] font-black text-gray-700 uppercase tracking-widest">Đã chọn ({selectedPlanDevices.length})</h4>
                    <button onClick={() => setSelectedPlanDevices([])} className="text-[10pt] font-bold text-red-500 hover:underline">Xóa tất cả</button>
                 </div>
                 <div className="flex-1 overflow-y-auto p-4 custom-scrollbar">
                    <div className="space-y-3">
                       {selectedPlanDevices.map(dev => (
-                        <div key={dev.id} className="p-3 bg-white rounded-xl border border-blue-100 shadow-sm flex items-center justify-between group animate-in slide-in-from-right-2">
+                        <div key={dev.id} className="p-3 bg-white rounded-2xl border border-blue-100 shadow-sm flex items-center justify-between group animate-in slide-in-from-right-2">
                            <div className="flex items-center gap-3">
-                              <div className="w-8 h-8 rounded-lg bg-blue-50 text-[#164399] flex items-center justify-center">
+                              <div className="w-8 h-8 rounded-full bg-blue-50 text-[#164399] flex items-center justify-center">
                                  <Box className="w-4 h-4" />
                               </div>
                               <div className="flex flex-col">
                                  <div className="flex items-center gap-2 mb-0.5">
                                     <span className="text-[9pt] font-black text-red-600 font-mono italic">{dev.code}</span>
                                     <span className="text-gray-300 text-[8pt]">|</span>
-                                    <span className="text-[9pt] text-gray-400 font-normal uppercase tracking-tighter">{dev.type}</span>
+                                    <span className="text-[9pt] text-gray-700 font-normal uppercase tracking-tighter">{dev.type}</span>
                                  </div>
                                  <p className="text-[11pt] font-bold text-gray-700 whitespace-normal break-words leading-tight">{dev.name}</p>
                               </div>
                            </div>
                            <button 
                              onClick={() => setSelectedPlanDevices(selectedPlanDevices.filter(d => d.id !== dev.id))}
-                             className="p-2 text-gray-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all"
+                             className="p-2 text-gray-300 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all"
                            >
                               <Trash2 className="w-4 h-4" />
                            </button>
@@ -248,7 +248,7 @@ export const TestingDialogs = ({
             <div className="p-6 border-t border-gray-100 bg-gray-50 flex justify-between items-center shrink-0">
               <span className="text-[11pt] text-gray-500 font-bold">Tổng số thiết bị được chọn: <span className="text-[#164399] font-black">{selectedPlanDevices.length}</span></span>
               <div className="flex gap-3">
-                <button onClick={() => setShowDeviceSelection(false)} className="px-6 py-2.5 text-[12pt] font-bold text-gray-500 hover:bg-gray-100 rounded-xl transition-all">Hủy</button>
+                <button onClick={() => setShowDeviceSelection(false)} className="px-6 py-2.5 text-[12pt] font-bold text-gray-500 hover:bg-gray-100 rounded-lg transition-all">Hủy</button>
                 <button 
                   onClick={() => {
                     const newDevices = selectedPlanDevices.map(d => ({
@@ -261,7 +261,7 @@ export const TestingDialogs = ({
                     setShowDeviceSelection(false);
                     setSelectedPlanDevices([]);
                   }} 
-                  className="px-8 py-2.5 bg-[#164399] text-white rounded-xl font-black shadow-lg shadow-blue-200 hover:shadow-xl hover:-translate-y-0.5 transition-all"
+                  className="px-8 py-2.5 bg-[#164399] text-white rounded-lg font-black shadow-lg shadow-blue-200 hover:shadow-xl hover:-translate-y-0.5 transition-all"
                 >
                   Xác nhận
                 </button>
@@ -275,18 +275,18 @@ export const TestingDialogs = ({
       {showRecordCreation && (
         <div className="fixed inset-0 z-[305] flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-black/70 backdrop-blur-md" onClick={() => setShowRecordCreation(false)}></div>
-          <div className="relative w-full max-w-5xl h-[90vh] bg-white rounded-[2rem] shadow-2xl flex flex-col overflow-hidden animate-in slide-in-from-bottom-10 duration-500">
+          <div className="relative w-full max-w-5xl h-[90vh] bg-white rounded-xl shadow-2xl flex flex-col overflow-hidden animate-in slide-in-from-bottom-10 duration-500">
             <div className="px-8 py-5 border-b border-gray-100 flex items-center justify-between bg-pink-50/30">
               <div className="flex items-center gap-4">
-                <div className="p-3 bg-pink-600 text-white rounded-2xl shadow-lg shadow-pink-200">
+                <div className="p-3 bg-pink-600 text-white rounded-xl shadow-lg shadow-pink-200">
                   <ClipboardList className="w-6 h-6" />
                 </div>
                 <div>
-                  <h3 className="text-[16pt] font-black text-gray-800 whitespace-normal break-words">Lập biên bản thí nghiệm mới</h3>
-                  <p className="text-[10pt] text-gray-500 font-bold uppercase tracking-widest leading-none mt-1 whitespace-normal break-words">Kế hoạch: {detailForm.data?.title}</p>
+                  <h3 className="text-[16pt] font-black text-gray-700 whitespace-normal break-words">Lập biên bản thí nghiệm mới</h3>
+                  <p className="text-[10pt] text-gray-700 font-bold uppercase tracking-widest leading-none mt-1 whitespace-normal break-words">Kế hoạch: {detailForm.data?.title}</p>
                 </div>
               </div>
-              <button onClick={() => setShowRecordCreation(false)} className="p-2 hover:bg-gray-100 rounded-full transition-colors group">
+              <button onClick={() => setShowRecordCreation(false)} className="p-2 hover:bg-gray-100 rounded-lg transition-colors group">
                 <X className="w-8 h-8 text-gray-300 group-hover:text-pink-600 transition-colors" />
               </button>
             </div>
@@ -295,11 +295,11 @@ export const TestingDialogs = ({
               <div className="grid grid-cols-3 gap-8">
                 <div className="col-span-1 space-y-6">
                   <div className="p-6 bg-gray-50 rounded-2xl space-y-4">
-                    <h4 className="text-[11pt] font-black text-gray-400 uppercase tracking-widest border-b border-gray-200 pb-2">Thông tin cơ bản</h4>
+                    <h4 className="text-[11pt] font-black text-gray-700 uppercase tracking-widest border-b border-gray-200 pb-2">Thông tin cơ bản</h4>
                     <div className="space-y-4">
                       <div className="space-y-1">
                         <label className="text-[9pt] font-bold text-gray-500 uppercase">Thiết bị thí nghiệm</label>
-                        <select className="w-full px-3 py-2 bg-white border border-gray-200 rounded-xl text-[11pt] font-normal text-gray-700 outline-none focus:border-sky-400 focus:ring-1 focus:ring-sky-100">
+                        <select className="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg text-[11pt] font-normal text-gray-700 outline-none focus:border-sky-400 focus:ring-1 focus:ring-sky-100">
                            {detailForm.data?.devices?.map((dev: any) => (
                              <option key={dev.id} value={dev.id}>{dev.name}</option>
                            ))}
@@ -307,11 +307,11 @@ export const TestingDialogs = ({
                       </div>
                       <div className="space-y-1">
                         <label className="text-[9pt] font-bold text-gray-500 uppercase">Ngày thí nghiệm</label>
-                        <input type="date" className="w-full px-3 py-2 bg-white border border-gray-200 rounded-xl text-[11pt] font-normal text-gray-700 outline-none focus:border-sky-400 focus:ring-1 focus:ring-sky-100" defaultValue={new Date().toISOString().split('T')[0]} />
+                        <input type="date" className="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg text-[11pt] font-normal text-gray-700 outline-none focus:border-sky-400 focus:ring-1 focus:ring-sky-100" defaultValue={new Date().toISOString().split('T')[0]} />
                       </div>
                       <div className="space-y-1">
                         <label className="text-[9pt] font-bold text-gray-500 uppercase">Người thí nghiệm chính</label>
-                        <input type="text" className="w-full px-3 py-2 bg-white border border-gray-200 rounded-xl text-[11pt] font-normal text-gray-700 outline-none focus:border-sky-400 focus:ring-1 focus:ring-sky-100" placeholder="Nhập tên..." />
+                        <input type="text" className="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg text-[11pt] font-normal text-gray-700 outline-none focus:border-sky-400 focus:ring-1 focus:ring-sky-100" placeholder="Nhập tên..." />
                       </div>
                     </div>
                   </div>
@@ -319,11 +319,11 @@ export const TestingDialogs = ({
                 <div className="col-span-2 space-y-6">
                    <div className="p-6 bg-blue-50/50 rounded-2xl border border-blue-100 space-y-6">
                       <div className="flex items-center justify-between">
-                        <h4 className="text-[12pt] font-black text-gray-800 flex items-center gap-2">
+                        <h4 className="text-[12pt] font-black text-gray-700 flex items-center gap-2">
                            <Target className="w-5 h-5 text-blue-600" />
                            Các hạng mục thí nghiệm cần nhập liệu
                         </h4>
-                        <span className="px-3 py-1 bg-blue-600 text-white rounded-full text-[9pt] font-black uppercase">Chờ xử lý</span>
+                        <span className="px-3 py-1 bg-blue-600 text-white rounded-lg text-[9pt] font-black uppercase">Chờ xử lý</span>
                       </div>
                       
                       <div className="grid grid-cols-1 gap-3">
@@ -335,7 +335,7 @@ export const TestingDialogs = ({
                            "Đo dòng điện không tải",
                            "Kiểm tra độ bền cách điện xoay chiều"
                          ].map((item, idx) => (
-                           <div key={idx} className="bg-white p-4 rounded-xl border border-gray-100 shadow-sm flex items-center justify-between group hover:border-blue-500 transition-all cursor-pointer">
+                           <div key={idx} className="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm flex items-center justify-between group hover:border-blue-500 transition-all cursor-pointer">
                               <div className="flex items-center gap-3">
                                 <div className="w-8 h-8 rounded-full bg-gray-50 flex items-center justify-center text-gray-400 group-hover:bg-blue-50 group-hover:text-blue-600 transition-all">
                                    {idx + 1}
@@ -354,16 +354,16 @@ export const TestingDialogs = ({
             <div className="p-8 border-t border-gray-100 bg-gray-50 flex justify-end gap-4 shrink-0">
               <button 
                 onClick={() => setShowRecordCreation(false)}
-                className="px-8 py-3 text-[12pt] font-bold text-gray-500 hover:bg-gray-200 rounded-2xl transition-all"
+                className="px-8 py-3 text-[12pt] font-bold text-gray-500 hover:bg-gray-200 rounded-lg transition-all"
               >
                 Đóng
               </button>
               <button 
                 onClick={() => {
-                   alert('Chức năng đang được cập nhật...');
+                   console.log('Chức năng đang được cập nhật...');
                    setShowRecordCreation(false);
                 }}
-                className="px-10 py-3 bg-pink-600 text-white rounded-2xl font-black shadow-xl shadow-pink-100 hover:shadow-2xl hover:-translate-y-1 transition-all uppercase tracking-widest text-[11pt]"
+                className="px-10 py-3 bg-pink-600 text-white rounded-lg font-black shadow-xl shadow-pink-100 hover:shadow-2xl hover:-translate-y-1 transition-all uppercase tracking-widest text-[11pt]"
               >
                 Khởi tạo biểu mẫu
               </button>
@@ -376,20 +376,20 @@ export const TestingDialogs = ({
       {showDeviceParams && (
         <div className="fixed inset-0 z-[410] flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-black/70 backdrop-blur-md" onClick={() => setShowDeviceParams(null)}></div>
-          <div className="relative w-full max-w-4xl bg-white rounded-3xl shadow-2xl flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-500 border border-white/20">
+          <div className="relative w-full max-w-4xl bg-white rounded-2xl shadow-2xl flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-500 border border-white/20">
              <div className="bg-[#164399] px-8 py-6 text-white relative overflow-hidden">
-                <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -translate-y-32 translate-x-32 blur-3xl"></div>
+                <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-xl -translate-y-32 translate-x-32 blur-3xl"></div>
                 <div className="relative z-10 flex items-start justify-between">
                    <div className="space-y-1">
                       <h3 className="text-[20pt] font-black leading-tight tracking-tight whitespace-normal break-words">{showDeviceParams.name}</h3>
                       <div className="flex items-center gap-3">
-                         <span className="px-3 py-1 bg-white/20 rounded-full text-[10pt] font-black uppercase tracking-widest">{showDeviceParams.type}</span>
+                         <span className="text-gray-700 px-3 py-1 bg-white/20 rounded-full text-[10pt] font-black uppercase tracking-widest">{showDeviceParams.type}</span>
                          <span className={`px-3 py-1 rounded-full text-[10pt] font-black uppercase tracking-widest ${showDeviceParams.status === 'Đã xong' ? 'bg-green-400 text-white' : 'bg-orange-400 text-white'}`}>
                             {showDeviceParams.status}
                          </span>
                       </div>
                    </div>
-                   <button onClick={() => setShowDeviceParams(null)} className="p-2 hover:bg-white/20 rounded-full transition-colors">
+                   <button onClick={() => setShowDeviceParams(null)} className="p-2 hover:bg-white/20 rounded-xl transition-colors">
                       <X className="w-8 h-8" />
                    </button>
                 </div>
@@ -399,7 +399,7 @@ export const TestingDialogs = ({
                 <div className="grid grid-cols-2 gap-8">
                    <div className="space-y-6">
                       <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm space-y-4">
-                         <h4 className="text-[11pt] font-black text-gray-400 uppercase tracking-widest flex items-center gap-2">
+                         <h4 className="text-[11pt] font-black text-gray-700 uppercase tracking-widest flex items-center gap-2">
                             <Info className="w-4 h-4" /> Thông tin vị trí
                          </h4>
                          <div className="grid grid-cols-1 gap-3">
@@ -411,7 +411,7 @@ export const TestingDialogs = ({
                       </div>
                       
                       <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm space-y-4">
-                         <h4 className="text-[11pt] font-black text-gray-400 uppercase tracking-widest flex items-center gap-2">
+                         <h4 className="text-[11pt] font-black text-gray-700 uppercase tracking-widest flex items-center gap-2">
                             <Activity className="w-4 h-4 text-blue-500" /> Kết quả đo gần nhất
                          </h4>
                          <div className="space-y-3">
@@ -435,11 +435,11 @@ export const TestingDialogs = ({
                    
                    <div className="space-y-6">
                       <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm space-y-4">
-                         <h4 className="text-[11pt] font-black text-gray-400 uppercase tracking-widest flex items-center gap-2">
+                         <h4 className="text-[11pt] font-black text-gray-700 uppercase tracking-widest flex items-center gap-2">
                             <FileText className="w-4 h-4 text-pink-500" /> Biên bản & Hồ sơ
                          </h4>
                          <div className="space-y-2">
-                           <button className="w-full flex items-center justify-between p-4 bg-gray-50 hover:bg-pink-50 rounded-xl border border-transparent hover:border-pink-200 transition-all group">
+                           <button className="p-1 px-3 hover:bg-slate-100 rounded-lg cursor-pointer">
                               <div className="flex items-center gap-3">
                                  <FileText className="w-5 h-5 text-gray-400 group-hover:text-pink-600" />
                                  <div className="text-left">
@@ -468,13 +468,13 @@ export const TestingDialogs = ({
              <div className="px-8 py-5 border-t border-gray-100 bg-gray-50 flex justify-end gap-3">
                 <button 
                   onClick={() => setShowDeviceParams(null)}
-                  className="px-8 py-3 bg-white border border-gray-200 text-gray-500 font-bold rounded-2xl hover:bg-gray-50 transition-all uppercase tracking-widest"
+                  className="px-8 py-3 bg-white border border-gray-200 text-gray-500 font-bold rounded-lg hover:bg-gray-50 transition-all uppercase rounded-lg tracking-widest"
                 >
                    Đóng
                 </button>
-                <button 
-                  className="px-10 py-3 bg-[#164399] text-white font-black rounded-2xl shadow-xl shadow-blue-100 hover:shadow-2xl hover:-translate-y-1 transition-all uppercase tracking-widest"
+                <button
                   onClick={() => setShowRecordCreation(true)}
+                  className="px-8 py-3 bg-[#164399] text-white font-bold rounded-lg hover:bg-blue-800 shadow-md transition-all uppercase tracking-widest cursor-pointer"
                 >
                    Nhập liệu Thí nghiệm
                 </button>

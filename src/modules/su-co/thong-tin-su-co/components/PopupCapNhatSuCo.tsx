@@ -18,7 +18,7 @@ export const IncidentDetailForm = ({
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
       {/* Column 1: Info */}
       <div className="space-y-6">
-        <div className="bg-white p-6 rounded-xl border border-gray-100 shadow-sm space-y-4">
+        <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm space-y-4">
           <div className="space-y-4">
             <div className="space-y-1">
               <label className="text-[10pt] font-bold text-gray-500 uppercase">Thiết bị xảy ra sự cố</label>
@@ -96,7 +96,7 @@ export const IncidentDetailForm = ({
       {/* Column 2: Images & Attachments */}
       <div className="space-y-8">
         <div className="space-y-4">
-          <h4 className="text-[12pt] font-bold text-gray-400 uppercase tracking-widest flex items-center gap-2">
+          <h4 className="text-[12pt] font-bold text-gray-700 uppercase tracking-widest flex items-center gap-2">
             <Camera className="w-3.5 h-3.5" />
             Hình ảnh liên quan
           </h4>
@@ -120,9 +120,9 @@ export const IncidentDetailForm = ({
                       <div key={imgId} className="relative aspect-video rounded-xl overflow-hidden border border-gray-200 group">
                         <img src={`https://picsum.photos/seed/incident-${imgId}/400/225`} alt="Image" className="w-full h-full object-cover" referrerPolicy="no-referrer" />
                         {!isView && (
-                          <button className="absolute top-2 right-2 p-1.5 bg-red-600 text-white rounded-lg opacity-0 group-hover:opacity-100 transition-opacity">
-                            <Trash2 className="w-3.5 h-3.5" />
-                          </button>
+                          <button className="p-1.5 flex items-center justify-center bg-red-50 text-red-600 hover:bg-red-100 hover:text-red-700 transition-colors rounded-[20%] border-none cursor-pointer">
+<Trash2 className="w-3.5 h-3.5" />
+</button>
                         )}
                       </div>
                     )
@@ -143,7 +143,7 @@ export const IncidentDetailForm = ({
         </div>
 
         <div className="space-y-4">
-          <h4 className="text-[12pt] font-bold text-gray-400 uppercase tracking-widest flex items-center gap-2">
+          <h4 className="text-[12pt] font-bold text-gray-700 uppercase tracking-widest flex items-center gap-2">
             <FileText className="w-3.5 h-3.5" />
             Tài liệu đính kèm
           </h4>
@@ -160,9 +160,9 @@ export const IncidentDetailForm = ({
                   </div>
                 </div>
                 {!isView && (
-                  <button className="p-2 text-gray-400 hover:text-red-600 transition-colors">
-                    <Trash2 className="w-4 h-4" />
-                  </button>
+                  <button className="p-1.5 flex items-center justify-center bg-red-50 text-red-600 hover:bg-red-100 hover:text-red-700 transition-colors rounded-[20%] border-none cursor-pointer">
+<Trash2 className="w-4 h-4" />
+</button>
                 )}
               </div>
             ))}

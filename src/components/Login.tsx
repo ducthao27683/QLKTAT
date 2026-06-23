@@ -71,7 +71,7 @@ export const Login = ({ onLogin }: LoginProps) => {
 
           <button 
             type="submit"
-            className="w-full bg-[#164399] hover:bg-[#313193] text-white font-bold py-3 rounded-full transition-colors mt-4 shadow-lg"
+            className="w-full bg-[#164399] hover:bg-[#313193] text-white font-bold py-3 rounded-lg transition-colors mt-4 shadow-lg"
           >
             Đăng nhập
           </button>
@@ -85,14 +85,14 @@ export const Login = ({ onLogin }: LoginProps) => {
           </div>
 
           <div className="flex gap-4 justify-center mb-6">
-            <button className="flex items-center justify-center gap-2 bg-green-500 hover:bg-green-600 text-white py-2 px-4 rounded-md flex-1 transition-colors">
+            <button className="flex items-center justify-center gap-2 bg-green-500 hover:bg-green-600 text-white py-2 px-4 rounded-lg flex-1 transition-colors">
               <Apple className="w-6 h-6" />
               <div className="text-left leading-tight">
                 <div className="text-[10px] font-bold">DOWNLOAD</div>
                 <div className="text-[9px]">ios 12 trở lên</div>
               </div>
             </button>
-            <button className="flex items-center justify-center gap-2 bg-[#00a8ff] hover:bg-blue-500 text-white py-2 px-4 rounded-md flex-1 transition-colors">
+            <button className="flex items-center justify-center gap-2 bg-[#00a8ff] hover:bg-blue-500 text-white py-2 px-4 rounded-lg flex-1 transition-colors">
               <MonitorSmartphone className="w-6 h-6" />
               <div className="text-left leading-tight">
                 <div className="text-[10px] font-bold">DOWNLOAD</div>

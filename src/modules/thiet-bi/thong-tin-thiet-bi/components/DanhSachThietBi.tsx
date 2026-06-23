@@ -33,7 +33,7 @@ export const DeviceList = ({
   const children = getDeviceTreeChildren(devicePath);
   const filteredChildren = children.filter(c => c.toLowerCase().includes(childSearch.toLowerCase()));
   
-  const itemsPerPage = 20;
+  const itemsPerPage = 10;
   const totalPages = Math.ceil(filteredChildren.length / itemsPerPage);
   const startIndex = (deviceFormCurrentPage - 1) * itemsPerPage;
   const paginatedChildren = filteredChildren.slice(startIndex, startIndex + itemsPerPage);
@@ -53,7 +53,7 @@ export const DeviceList = ({
                 setActiveSubMenu(null);
               }
             }}
-            className="p-1.5 hover:bg-gray-100 rounded-full transition-colors"
+            className="p-1.5 hover:bg-gray-100 rounded-xl transition-colors"
           >
             <ArrowLeft className="w-5 h-5 text-gray-500" />
           </button>
@@ -84,20 +84,20 @@ export const DeviceList = ({
             <Plus className="w-4 h-4" />
             Thêm
           </button>
-          <button className="p-2 text-gray-600 hover:bg-blue-50 hover:text-blue-600 rounded-lg transition-colors border border-gray-200 bg-white shadow-sm" title="Sửa hàng loạt">
+          <button className="p-1 px-3 hover:bg-slate-100 rounded-lg cursor-pointer">
             <ListChecks className="w-5 h-5" />
           </button>
           
           <div className="relative">
             <button 
               onClick={() => setDeviceFormMenuOpen(!deviceFormMenuOpen)}
-              className={`p-2 rounded-lg transition-colors border border-gray-200 bg-white shadow-sm ${deviceFormMenuOpen ? 'bg-blue-50 text-blue-600 border-blue-200' : 'text-gray-600 hover:bg-gray-50'}`}
+              className={`p-2 rounded-xl transition-colors border border-gray-200 bg-white shadow-sm ${deviceFormMenuOpen ? 'bg-blue-50 text-blue-600 border-blue-200' : 'text-gray-600 hover:bg-gray-50'}`}
             >
               <MoreVertical className="w-5 h-5" />
             </button>
             
             {deviceFormMenuOpen && (
-              <div className="absolute right-0 mt-2 w-56 bg-white border border-gray-200 rounded-xl shadow-2xl z-50 py-2 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
+              <div className="absolute right-0 mt-2 w-56 bg-white border border-gray-200 rounded-lg shadow-2xl z-50 py-2 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
                 {[
                   { label: 'Sửa', icon: <Edit className="w-4 h-4" />, color: 'text-blue-600' },
                   { label: 'Di chuyển', icon: <Move className="w-4 h-4" />, color: 'text-orange-600' },
@@ -123,9 +123,9 @@ export const DeviceList = ({
       <div className="flex-1 flex flex-col overflow-hidden bg-white">
         <div className="overflow-y-auto flex-1 custom-scrollbar min-h-0">
           <table className="w-full text-[12pt] text-left border-collapse table-fixed">
-            <thead className="bg-white text-[#555555] text-[12pt] font-bold sticky top-0 z-20 shadow-sm">
+            <thead className="bg-white text-[#164399] text-[12pt] font-bold sticky top-0 z-20 shadow-sm">
               <tr>
-                <th className="px-4 h-12 border-b border-gray-200 w-12 text-center bg-white font-bold">
+                <th className="px-4 h-12 border-b border-gray-200 w-24 text-center bg-white font-bold">
                   <DesignTooltip id="th_stt">STT</DesignTooltip>
                 </th>
                 <th className="px-4 h-12 border-b border-gray-200 w-32 bg-white font-bold">
@@ -134,7 +134,6 @@ export const DeviceList = ({
                 <th className="px-4 h-12 border-b border-gray-200 bg-white font-bold">
                   <DesignTooltip id="th_ten_tb_chi_tiet">Tên Thiết Bị chi tiết</DesignTooltip>
                 </th>
-                <th className="px-4 h-12 border-b border-gray-200 w-12 text-center bg-white font-bold"></th>
               </tr>
             </thead>
             <tbody>
@@ -152,38 +151,18 @@ export const DeviceList = ({
                       setDeviceFormCurrentPage(1);
                     }}
                   >
-                    <td className="px-4 py-3 text-center text-gray-400 text-secondary">{actualIdx + 1}</td>
+                    <td className="px-4 py-3 text-center text-gray-400 text-[8pt] font-medium leading-none whitespace-nowrap">
+                      STT: <span className="text-red-650 font-black">{actualIdx + 1}</span>
+                    </td>
                     <td className="px-4 py-3">
-                      <div className={`px-2.5 py-1 rounded-md text-secondary uppercase tracking-wider text-center border text-[10pt] whitespace-nowrap ${DEVICE_TYPE_COLORS[type] || DEVICE_TYPE_COLORS['default']}`}>
+                      <div className="px-2.5 py-1 rounded-[10px] text-gray-700 font-bold border border-gray-200 bg-gray-50 text-[9.5pt] text-center whitespace-nowrap truncate shadow-xs">
                         {type}
                       </div>
                     </td>
-                    <td className="px-4 py-3 text-gray-700 group-hover:text-blue-700 transition-colors truncate text-[12pt]">
-                      {child}
-                    </td>
-                    <td className="px-4 py-3 text-center">
-                      <div className="relative group/menu inline-block">
-                        <button className="p-1.5 hover:bg-white hover:shadow-sm rounded-md text-gray-400 hover:text-blue-600 transition-all">
-                          <MoreVertical className="w-4 h-4" />
-                        </button>
-                        <div className="absolute right-0 top-full mt-1 w-48 bg-white border border-gray-200 rounded-lg shadow-xl z-50 py-1 hidden group-hover/menu:block">
-                          <button 
-                            className="w-full text-left px-3 py-2 text-secondary hover:bg-gray-50 flex items-center gap-2 text-gray-700"
-                            onClick={() => setDetailForm({ type: 'device', mode: 'view', data: child })}
-                          >
-                            <FileText className="w-3.5 h-3.5 text-blue-500" /> Xem lý lịch
-                          </button>
-                          <button className="w-full text-left px-3 py-2 text-secondary hover:bg-gray-50 flex items-center gap-2 text-gray-700">
-                            <Database className="w-3.5 h-3.5 text-green-500" /> Mã TSCĐ
-                          </button>
-                          <div className="border-t border-gray-100 my-1"></div>
-                          <button className="w-full text-left px-3 py-2 text-secondary hover:bg-gray-50 flex items-center gap-2 text-gray-700">
-                            <ChevronUp className="w-3.5 h-3.5 text-gray-500" /> Di chuyển lên trên
-                          </button>
-                          <button className="w-full text-left px-3 py-2 text-secondary hover:bg-gray-50 flex items-center gap-2 text-gray-700">
-                            <ChevronDown className="w-3.5 h-3.5 text-gray-500" /> Di chuyển xuống dưới
-                          </button>
-                        </div>
+                    <td className="px-4 py-3 text-left">
+                      <div className="flex flex-col min-w-0">
+                        <span className="text-red-650 font-mono font-black text-[9pt] leading-tight">TB-{1000 + actualIdx}</span>
+                        <span className="text-[#164399] font-black hover:text-blue-700 transition-colors truncate text-[11.5pt] mt-0.5 leading-snug">{child}</span>
                       </div>
                     </td>
                   </tr>
@@ -194,31 +173,41 @@ export const DeviceList = ({
         </div>
 
         {totalPages > 1 && (
-          <div className="p-3 border-t border-gray-100 bg-gray-50 flex items-center justify-between shrink-0">
-            <div className="text-secondary text-gray-500 font-medium">
-              Hiển thị {startIndex + 1} - {Math.min(startIndex + itemsPerPage, filteredChildren.length)} / {filteredChildren.length}
-            </div>
+          <div className="py-4 border-t border-gray-200 flex items-center justify-between container-paging shrink-0 bg-white px-6">
+            <span className="text-[8.5pt] font-black text-gray-700 uppercase tracking-wider">
+              Xem {startIndex + 1} - {Math.min(startIndex + itemsPerPage, filteredChildren.length)} / {filteredChildren.length} thiết bị
+            </span>
             <div className="flex items-center gap-1">
               <button 
                 disabled={deviceFormCurrentPage === 1}
-                onClick={() => setDeviceFormCurrentPage(prev => prev - 1)}
-                className="p-1.5 rounded hover:bg-white border border-transparent hover:border-gray-200 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+                onClick={() => setDeviceFormCurrentPage(1)}
+                className="hidden"
+              />
+              <button 
+                disabled={deviceFormCurrentPage === 1}
+                onClick={() => setDeviceFormCurrentPage(prev => Math.max(1, prev - 1))}
+                className="p-1.5 rounded-xl hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed transition-all cursor-pointer border-none bg-transparent text-gray-500"
               >
                 <ChevronLeft className="w-4 h-4" />
               </button>
-              {[...Array(totalPages)].map((_, i) => (
-                <button 
-                  key={i}
-                  onClick={() => setDeviceFormCurrentPage(i + 1)}
-                  className={`w-7 h-7 text-secondary font-bold rounded transition-all ${deviceFormCurrentPage === i + 1 ? 'bg-[#164399] text-white shadow-md' : 'hover:bg-white border border-transparent hover:border-gray-200 text-gray-600'}`}
-                >
-                  {i + 1}
-                </button>
-              ))}
+              <div className="flex items-center gap-1 px-1">
+                {[...Array(totalPages)].map((_, i) => {
+                  const page = i + 1;
+                  return (
+                    <button 
+                      key={page}
+                      onClick={() => setDeviceFormCurrentPage(page)}
+                      className={`w-7 h-7 rounded-full text-[9pt] font-bold transition-all cursor-pointer border-none ${deviceFormCurrentPage === page ? 'bg-blue-100 text-[#164399]' : 'text-gray-500 hover:bg-gray-100'}`}
+                    >
+                      {page}
+                    </button>
+                  );
+                })}
+              </div>
               <button 
                 disabled={deviceFormCurrentPage === totalPages}
-                onClick={() => setDeviceFormCurrentPage(prev => prev + 1)}
-                className="p-1.5 rounded hover:bg-white border border-transparent hover:border-gray-200 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+                onClick={() => setDeviceFormCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                className="p-1.5 rounded-xl hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed transition-all cursor-pointer border-none bg-transparent text-gray-500"
               >
                 <ChevronRight className="w-4 h-4" />
               </button>

@@ -1,8 +1,8 @@
 import React from 'react';
 import { 
-  ArrowLeft, Search, Plus, ListChecks, MoreVertical, Edit, Move, Copy, Shield, Trash2, 
+  ArrowLeft, ArrowUp, ArrowDown, Search, Plus, ListChecks, MoreVertical, Edit, Move, Copy, Shield, Trash2, 
   FileText, Database, ChevronUp, ChevronDown, ChevronLeft, ChevronRight, Settings, 
-  ExternalLink, Box, Camera, Upload, Download, Maximize2, Activity, Filter, X, Check, Flame, Layout,
+  ExternalLink, Eye, Box, Camera, Upload, Download, Maximize2, Activity, Filter, X, Check, Flame, Layout,
   ClipboardList, FlaskConical, Wrench, GitCommit, Zap, Package, Layers, MapPin,
   Building2, Network, Binary
 } from 'lucide-react';
@@ -10,6 +10,44 @@ import { DesignTooltip } from '../../../components/DesignTooltip';
 import { EvnLogo } from '../../../components/EvnLogo';
 import { getDetailedType, formatNumber, getDeviceTypes, getDeviceInstances } from '../../../shared/utils';
 import { DEVICE_TYPE_COLORS } from '../constants';
+
+const DOCUMENT_LIBRARY = [
+  { id: 'D1', name: 'QCVN 01:2020/BCT - Quy chuẩn kỹ thuật quốc gia về an toàn điện', category: 'quy-chuan', type: 'Quy chuẩn', size: '2.8 MB', code: 'QCVN 01:2020' },
+  { id: 'D2', name: 'TCVN 1985:2015 - Thử nghiệm và nghiệm thu máy biến áp lực', category: 'quy-chuan', type: 'TCVN', size: '1.4 MB', code: 'TCVN 1985' },
+  { id: 'D3', name: 'Thông tư 33/2015/TT-BCT - Quy định về kiểm định an toàn thiết bị, dụng cụ điện', category: 'quy-chuan', type: 'Thông tư', size: '1.2 MB', code: 'TT 33/2015' },
+  { id: 'D4', name: 'Quy trình thí nghiệm Máy biến áp lực trạm 110kV-500kV - EVN 2023', category: 'quy-trinh', type: 'Quy trình EVN', size: '4.5 MB', code: 'QT-MBA-EVN' },
+  { id: 'D5', name: 'Quy trình bảo dưỡng thí nghiệm Máy cắt SF6 cấp điện thế 110kV - EVN', category: 'quy-trinh', type: 'Quy trình EVN', size: '3.1 MB', code: 'QT-MC-SF6' },
+  { id: 'D6', name: 'Hướng dẫn kiểm thử và bảo trì Hệ thống đo biến dòng TI - EVN SPC', category: 'quy-trinh', type: 'Hướng dẫn EVN', size: '2.2 MB', code: 'HD-TI-SPC' },
+  { id: 'D7', name: 'Hướng dẫn chuẩn hóa đo lường biến điện áp TU - EVN NPC', category: 'quy-trinh', type: 'Hướng dẫn EVN', size: '1.9 MB', code: 'HD-TU-NPC' },
+  { id: 'D8', name: 'Sổ tay kỹ thuật vận hành và kiểm tra chống sét van (CSV)', category: 'huong-dan-nsx', type: 'Sách HD NSX', size: '5.2 MB', code: 'ST-CSV' },
+  { id: 'D9', name: 'Quy trình kiểm tra định kỳ hành lang an toàn và điện trở nối đất Đường dây', category: 'quy-trinh', type: 'Quy trình', size: '1.7 MB', code: 'QT-DD-ND' },
+  { id: 'D10', name: 'Biểu mẫu tiêu chuẩn kiểm tra trạm biến áp súc', category: 'bieu-mau', type: 'Biểu mẫu', size: '0.4 MB', code: 'BM-TBA' },
+  { id: 'D11', name: 'Quy trình Kiểm định Trạm Biến Áp Điện 110kV đồng bộ', category: 'quy-chuan', type: 'Quy trình', size: '2.5 MB', code: 'QT-KĐ-TBA' },
+  { id: 'D12', name: 'Hướng dẫn hiệu chuẩn thiết bị đo dòng rò trạm biến áp', category: 'huong-dan-nsx', type: 'Hướng dẫn', size: '1.1 MB', code: 'HD-HC-TB' },
+];
+
+const getTypeKey = (typeStr: string) => {
+  const t = (typeStr || '').toUpperCase();
+  if (t === 'MBA' || t === 'MÁY BIẾN ÁP' || t === 'TRẠM') return 'MBA';
+  if (t === 'MC' || t === 'MÁY CẮT' || t.includes('SF6')) return 'MC';
+  if (t === 'TI' || t === 'BIẾN DÒNG' || t === 'BIẾN DÒNG ĐIỆN') return 'TI';
+  if (t === 'TU' || t === 'BIẾN ĐIỆP ÁP' || t === 'BIẾN ĐIỆN ÁP') return 'TU';
+  if (t === 'CSV' || t === 'CHỐNG SÉT VAN') return 'CSV';
+  if (t === 'ĐD' || t === 'ĐƯỜNG DÂY') return 'ĐD';
+  return 'MBA';
+};
+
+const getDeviceVoltage = (deviceStr: string) => {
+  const text = (deviceStr || '').toLowerCase();
+  if (text.includes('110kv') || text.includes('110 kv')) return '110kV';
+  if (text.includes('220kv') || text.includes('220 kv')) return '220kV';
+  if (text.includes('35kv') || text.includes('35 kv')) return '35kV';
+  if (text.includes('22kv') || text.includes('22 kv')) return '22kV';
+  if (text.includes('500kv') || text.includes('500 kv')) return '500kV';
+  if (text.includes('6kv') || text.includes('6 kv')) return '6kV';
+  if (text.includes('0.4kv') || text.includes('0.4 kv') || text.includes('0,4kv')) return '0.4kV';
+  return '110kV';
+};
 
 interface DeviceModuleProps {
   devicePath: string[];
@@ -198,6 +236,18 @@ export const DeviceModule = ({
   setConfirmAction,
   getDeviceDetails
 }: DeviceModuleProps) => {
+  const getRealDeviceName = (path: string[]) => {
+    for (let i = path.length - 1; i >= 0; i--) {
+      if (i % 2 === 0) {
+        const val = path[i];
+        if (val && val !== "Tất cả") {
+          return val;
+        }
+      }
+    }
+    return path[0] || "";
+  };
+
   const currentDevice = devicePath[devicePath.length - 1] || "Thiết bị";
   const [selectedChild, setSelectedChild] = React.useState<string | null>(null);
   const [selectedTypes, setSelectedTypes] = React.useState<string[]>([]);
@@ -223,10 +273,62 @@ export const DeviceModule = ({
     return "Thiết bị";
   }, [devicePath]);
 
-  const children = React.useMemo(() => {
+  const defaultChildren = React.useMemo(() => {
     // Get ALL child instances of the current path
     return getDeviceInstances(devicePath, "Tất cả");
   }, [devicePath]);
+
+  const [childrenOrderMap, setChildrenOrderMap] = React.useState<Record<string, string[]>>({});
+
+  const childrenKey = React.useMemo(() => {
+    return devicePath.join(' > ');
+  }, [devicePath]);
+
+  const children = React.useMemo(() => {
+    const customOrder = childrenOrderMap[childrenKey];
+    if (customOrder && customOrder.length === defaultChildren.length && customOrder.every(x => defaultChildren.includes(x))) {
+      return customOrder;
+    }
+    return defaultChildren;
+  }, [defaultChildren, childrenOrderMap, childrenKey]);
+
+  const moveItemUp = (idx: number, e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (idx === 0) return;
+    const currentList = [...children];
+    const item1 = filteredChildren[idx];
+    const item2 = filteredChildren[idx - 1];
+    const absIdx1 = currentList.indexOf(item1);
+    const absIdx2 = currentList.indexOf(item2);
+    if (absIdx1 === -1 || absIdx2 === -1) return;
+
+    currentList[absIdx1] = item2;
+    currentList[absIdx2] = item1;
+
+    setChildrenOrderMap(prev => ({
+      ...prev,
+      [childrenKey]: currentList
+    }));
+  };
+
+  const moveItemDown = (idx: number, e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (idx === filteredChildren.length - 1) return;
+    const currentList = [...children];
+    const item1 = filteredChildren[idx];
+    const item2 = filteredChildren[idx + 1];
+    const absIdx1 = currentList.indexOf(item1);
+    const absIdx2 = currentList.indexOf(item2);
+    if (absIdx1 === -1 || absIdx2 === -1) return;
+
+    currentList[absIdx1] = item2;
+    currentList[absIdx2] = item1;
+
+    setChildrenOrderMap(prev => ({
+      ...prev,
+      [childrenKey]: currentList
+    }));
+  };
 
   const deviceTypesList = React.useMemo(() => {
     return getDeviceTypes(devicePath).filter(t => t !== "Tất cả");
@@ -247,25 +349,38 @@ export const DeviceModule = ({
     return matchesSearch && matchesType;
   });
   
-  const itemsPerPage = 20;
+  const itemsPerPage = 10;
   const totalPages = Math.ceil(filteredChildren.length / itemsPerPage);
   const startIndex = (deviceFormCurrentPage - 1) * itemsPerPage;
   const paginatedChildren = filteredChildren.slice(startIndex, startIndex + itemsPerPage);
 
-  const effectiveDevice = selectedChild || lastInstance;
+  const currentPathEnd = devicePath[devicePath.length - 1];
+  let effectiveDevice = selectedChild;
+  if (!effectiveDevice) {
+    if (filteredChildren && filteredChildren.length > 0) {
+      effectiveDevice = filteredChildren[0];
+    } else if (currentPathEnd === 'Tất cả' && devicePath.length > 1) {
+      effectiveDevice = devicePath.slice().reverse().find(p => p !== 'Tất cả') || currentPathEnd;
+    } else {
+      effectiveDevice = currentPathEnd;
+    }
+  }
+  if (effectiveDevice === 'Tất cả') {
+    effectiveDevice = devicePath.slice().reverse().find(p => p !== 'Tất cả') || 'Thiết bị';
+  }
   const details = getDeviceDetails(effectiveDevice);
   const [showDeviceFilter, setShowDeviceFilter] = React.useState(false);
 
   const LIFECYCLE_STEPS = [
-    { date: '20/05/2026', type: 'Thí nghiệm', content: 'Thí nghiệm định kỳ đạt yêu cầu', result: 'Đạt' },
-    { date: '15/02/2026', type: 'Sửa chữa thường xuyên', content: 'Vệ sinh sứ, siết lại kẹp cực', result: 'Hoàn thành' },
-    { date: '10/01/2026', type: 'Hòa lưới', content: 'Hòa lưới sau đại tu', result: 'Thành công' },
-    { date: '05/12/2025', type: 'Sửa chữa lớn', content: 'Thay thế bộ truyền động máy cắt', result: 'Hoàn thành' },
-    { date: '12/11/2025', type: 'Bảo dưỡng định kỳ', content: 'Bảo dưỡng cơ cấu truyền lực', result: 'Hoàn thành' },
-    { date: '08/10/2025', type: 'Sự cố', content: 'Nhảy máy cắt do tác động của bảo vệ so lệch', result: 'Đã xử lý' },
-    { date: '01/10/2025', type: 'Kiểm định', content: 'Kiểm định định kỳ thiết bị', result: 'Đạt' },
-    { date: '15/09/2025', type: 'Điều động', content: 'Điều động từ Trạm A sang Trạm B', result: 'Hoàn thành' },
-    { date: '01/09/2025', type: 'Nhập kho', content: 'Nhập kho thiết bị mới', result: 'Hoàn thành' },
+    { date: '20/05/2026', type: 'Thí nghiệm', content: 'Thí nghiệm định kỳ đạt yêu cầu', result: 'Đạt', operator: 'Trần Văn Đức (Ban Kỹ thuật)' },
+    { date: '15/02/2026', type: 'Sửa chữa thường xuyên', content: 'Vệ sinh sứ, siết lại kẹp cực', result: 'Hoàn thành', operator: 'Lê Hoàng Nam (Đội sửa chữa)' },
+    { date: '10/01/2026', type: 'Hòa lưới', content: 'Hòa lưới sau đại tu', result: 'Thành công', operator: 'Phạm Minh Hải (Trưởng ca vận hành)' },
+    { date: '05/12/2025', type: 'Sửa chữa lớn', content: 'Thay thế bộ truyền động máy cắt', result: 'Hoàn thành', operator: 'Nguyễn Tiến Dũng (CBM Centric)' },
+    { date: '12/11/2025', type: 'Bảo dưỡng định kỳ', content: 'Bảo dưỡng cơ cấu truyền lực', result: 'Hoàn thành', operator: 'Vũ Quốc Việt (Đội bảo trì)' },
+    { date: '08/10/2025', type: 'Sự cố', content: 'Nhảy máy cắt do tác động của bảo vệ so lệch', result: 'Đã xử lý', operator: 'Hoàng Văn Bách (KTV rơ-le)' },
+    { date: '01/10/2025', type: 'Kiểm định', content: 'Kiểm định định kỳ thiết bị', result: 'Đạt', operator: 'Đỗ Mạnh Thắng (Trung tâm thí nghiệm)' },
+    { date: '15/09/2025', type: 'Điều động', content: 'Điều động từ Trạm A sang Trạm B', result: 'Hoàn thành', operator: 'Nguyễn Văn Hòa (Phòng điều độ)' },
+    { date: '01/09/2025', type: 'Nhập kho', content: 'Nhập kho thiết bị mới', result: 'Hoàn thành', operator: 'Nguyễn Thị Hoa (Thủ kho)' },
   ];
 
   React.useEffect(() => {
@@ -320,13 +435,13 @@ export const DeviceModule = ({
                 else if (devicePath.length > 0) setDevicePath(prev => prev.slice(0, -1));
                 else setActiveSubMenu(null);
               }}
-              className="p-1.5 hover:bg-gray-100 rounded-full transition-colors"
+              className="p-1.5 hover:bg-gray-100 rounded-xl transition-colors"
             >
               <ArrowLeft className="w-5 h-5 text-gray-500" />
             </button>
-            <h2 className="text-[12pt] font-semibold flex items-center gap-2 leading-[1.5]">
-                <span className="text-[#555555]">Thiết bị</span>
-                <span className="font-bold text-[#164399] tracking-tight">- Danh sách thiết bị của {lastInstance}</span>
+            <h2 className="text-[12pt] font-medium flex items-center gap-1.5 leading-[1.5] text-[#164399]">
+              <span className="w-1.5 h-1.5 rounded-full bg-blue-600 mr-1 shrink-0 animate-pulse"></span>
+              <span>Danh sách thiết bị của - {getRealDeviceName(devicePath)}</span>
             </h2>
           </div>
           
@@ -358,7 +473,7 @@ export const DeviceModule = ({
                         <span className="text-gray-400 font-bold italic text-[10pt] px-2 py-1">Tất cả</span>
                       ) : (
                         selectedTypes.map(t => (
-                          <span key={t} className="inline-flex items-center gap-1 px-2.5 py-1 bg-[#ECF3FE] text-[#164399] text-[10pt] font-black rounded-lg border border-blue-100 uppercase tracking-tighter">
+                          <span key={t} className="inline-flex items-center gap-1 px-2.5 py-1 bg-[#ECF3FE] text-gray-700 text-[10pt] font-black rounded-full border border-blue-100 uppercase tracking-tighter">
                             {t}
                             <button onClick={() => setSelectedTypes(prev => prev.filter(x => x !== t))} className="hover:text-red-500 transition-colors ml-1">
                               <X className="w-3.5 h-3.5 stroke-[3]" />
@@ -369,15 +484,15 @@ export const DeviceModule = ({
                       <div className="relative">
                         <button 
                           onClick={() => setShowTypeSelector(!showTypeSelector)}
-                          className="w-8 h-8 flex items-center justify-center hover:bg-gray-100 rounded-lg text-[#164399] transition-all"
+                          className="w-8 h-8 flex items-center justify-center hover:bg-gray-100 rounded-full text-[#164399] transition-all"
                           title="Thêm loại thiết bị"
                         >
                           <Plus className="w-5 h-5 stroke-[3]" />
                         </button>
                         {showTypeSelector && (
-                          <div className="absolute top-full left-0 mt-3 w-64 bg-white border border-gray-200 rounded-2xl shadow-2xl z-[100] py-3 animate-in fade-in slide-in-from-top-2 duration-300">
+                          <div className="absolute top-full left-0 mt-3 w-64 bg-white border border-gray-200 rounded-lg shadow-2xl z-[100] py-3 animate-in fade-in slide-in-from-top-2 duration-300">
                              <div className="px-4 pb-2 mb-2 border-b border-gray-50">
-                               <p className="text-[9pt] font-black text-gray-400 uppercase tracking-widest">Chọn loại thiết bị</p>
+                               <p className="text-[9pt] font-black text-gray-700 uppercase tracking-widest">Chọn loại thiết bị</p>
                              </div>
                              <div className="max-h-[300px] overflow-y-auto custom-scrollbar">
                                 {deviceTypesList.map(t => (
@@ -400,7 +515,7 @@ export const DeviceModule = ({
                             <div className="px-4 mt-3 pt-3 border-t border-gray-50">
                                <button 
                                  onClick={() => setShowTypeSelector(false)}
-                                 className="w-full py-2.5 bg-[#164399] text-white text-[10pt] font-black rounded-xl uppercase tracking-widest shadow-lg shadow-blue-900/20 active:scale-95 transition-all"
+                                 className="w-full py-2.5 bg-[#164399] text-white text-[10pt] font-black rounded-lg uppercase tracking-widest shadow-lg shadow-blue-900/20 active:scale-95 transition-all"
                                >
                                  HOÀN TẤT
                                </button>
@@ -428,29 +543,29 @@ export const DeviceModule = ({
                </div>
             </div>
 
-            <div className="flex flex-col gap-1 flex-1 min-w-[200px]">
-               <label className="text-[9pt] font-bold text-gray-400 uppercase">Tìm kiếm nhanh</label>
-               <div className="relative">
-                 <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-                 <input 
-                   type="text"
-                   placeholder="Tìm thiết bị..."
-                   className="pl-9 pr-4 py-2 bg-white border border-gray-200 rounded-[10px] text-[10pt] font-semibold focus:outline-none focus:ring-2 focus:ring-blue-500/20 w-full transition-all"
-                   value={childSearch}
-                   onChange={(e) => setChildSearch(e.target.value)}
-                 />
-               </div>
-            </div>
-          </div>
-        )}
-      </div>
-      
-      <div className="flex-1 flex overflow-hidden">
-        <div className="flex-1 flex bg-white overflow-hidden">
-          {/* Left Column: Device Cards List */}
-          <div className="w-[45%] flex flex-col border-r border-gray-100 overflow-hidden px-6 py-0">
-            <div className="flex-1 overflow-y-auto custom-scrollbar pl-1.5 pr-2 space-y-3 pt-6 pb-6">
-              {paginatedChildren.map((child, idx) => {
+             <div className="flex flex-col gap-1 flex-1 min-w-[200px]">
+                <label className="text-[9pt] font-bold text-gray-400 uppercase">Tìm kiếm nhanh</label>
+                <div className="relative">
+                  <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                  <input 
+                    type="text"
+                    placeholder="Tìm thiết bị..."
+                    className="pl-9 pr-4 py-2 bg-white border border-gray-200 rounded-[10px] text-[10pt] font-semibold focus:outline-none focus:ring-2 focus:ring-blue-500/20 w-full transition-all"
+                    value={childSearch}
+                    onChange={(e) => setChildSearch(e.target.value)}
+                  />
+                </div>
+             </div>
+           </div>
+         )}
+       </div>
+       
+       <div className="flex-1 flex overflow-hidden">
+         <div className="flex-1 flex bg-white overflow-hidden">
+           {/* Left Column: Device Cards List */}
+           <div className="w-[45%] flex flex-col border-r border-slate-100 bg-[#f8fafc] overflow-hidden px-3.5 py-0 animate-in fade-in duration-300">
+             <div className="flex-1 overflow-y-auto custom-scrollbar pl-1 pr-1.5 space-y-3 pt-4 pb-4 animate-in slide-in-from-left duration-500">
+              {filteredChildren.map((child, idx) => {
                 const type = getDetailedChildType(child);
                 const normType = normalizeType(type);
                 const isSelected = selectedChild === child;
@@ -464,77 +579,81 @@ export const DeviceModule = ({
                     key={idx}
                     onClick={() => setSelectedChild(child)}
                     onDoubleClick={() => handleDoubleClick(child)}
-                    className={`relative group rounded-xl border overflow-visible transition-all duration-300 cursor-pointer w-full ${
+                    className={`relative group rounded-xl border overflow-hidden transition-all duration-300 cursor-pointer w-full ${
                       isSelected 
-                        ? 'bg-blue-50/50 border-blue-200 shadow-md transform scale-[1.01]' 
-                        : 'bg-white border-gray-100 hover:border-blue-300 hover:shadow-md hover:scale-[1.01] hover:bg-slate-50/50 shadow-sm'
+                        ? 'bg-blue-50/40 border-blue-200/90 shadow-sm ring-1 ring-blue-400/10' 
+                        : 'bg-white border-slate-200 hover:border-blue-300 hover:bg-slate-50/30 shadow-xs'
                     } ${isLocked ? 'opacity-50 grayscale-[0.6]' : 'opacity-100'}`}
                   >
                     {isSelected && (
-                      <div className="absolute left-0 top-0 bottom-0 w-1 bg-red-600 rounded-l-xl z-20"></div>
+                      <div className="absolute left-0 top-0 bottom-0 w-1 bg-[#164399] z-20"></div>
                     )}
                     <div className="p-4 flex gap-4">
-                      {/* Device Icon/Type Badge */}
-                      {(() => {
-                        const visual = getDeviceItemVisual(type, isSelected);
-                        return (
-                          <div className={`w-12 h-12 rounded-xl flex flex-col items-center justify-center shrink-0 ${visual.bg}`}>
-                            {visual.icon}
-                          </div>
-                        );
-                      })()}
+                      {/* Device Icon/Type Badge with STT under it */}
+                      <div className="flex flex-col items-center shrink-0">
+                        {(() => {
+                          const visual = getDeviceItemVisual(type, isSelected);
+                          return (
+                            <div className={`w-11 h-11 rounded-lg flex flex-col items-center justify-center ${visual.bg}`}>
+                              {visual.icon}
+                            </div>
+                          );
+                        })()}
+                        <div className="text-[8pt] font-extrabold mt-2 select-none flex items-center justify-center gap-0.5">
+                          <span className="text-gray-400">STT:</span>
+                          <span className="text-red-650 font-black">{idx + 1}</span>
+                        </div>
+                      </div>
 
                       <div className="flex-1 min-w-0">
-                        <div className="flex items-center justify-between mb-1.5">
-                          <div className="flex items-center gap-2">
-                             <span className={`text-[8.5pt] font-black tracking-wider font-mono px-1.5 py-0.5 rounded ${isLocked ? 'bg-gray-100 text-gray-400' : 'bg-red-50 text-red-600'}`}>{deviceCode}</span>
-                             <div className={`flex items-center gap-1.5 px-2 py-0.5 rounded-full border transition-all ${isSelected ? 'bg-blue-100 border-blue-200 text-[#164399]' : 'bg-gray-50 border-gray-100 text-gray-400'}`}>
-                                <span className="text-[7.5pt] font-black uppercase tracking-tighter">
-                                  {normType}
-                                </span>
-                             </div>
+                        <div className="flex items-start justify-between mb-1.5 pb-1.5 border-b border-gray-100 transition-all">
+                          <div className="flex items-center gap-1.5 pt-1 transition-all flex-1">
+                             <span className={`text-[8.5pt] tracking-wider uppercase px-2 py-0.5 rounded-[20px] transition-all font-bold ${
+                               isSelected 
+                                 ? 'bg-amber-100/60 text-amber-700 font-extrabold' 
+                                 : 'bg-slate-100/80 text-gray-400 group-hover:bg-amber-100/60 group-hover:text-amber-700 group-hover:font-extrabold'
+                             }`}>
+                               {getDeviceVoltage(child)}
+                             </span>
+                             <span className={`text-[8.5pt] tracking-wider uppercase px-2 py-0.5 rounded-[20px] transition-all font-bold ${
+                               isSelected 
+                                 ? 'bg-blue-100/60 text-[#164399] font-extrabold' 
+                                 : 'bg-slate-100/80 text-gray-400 group-hover:bg-blue-100/60 group-hover:text-[#164399] group-hover:font-extrabold'
+                             }`}>
+                               {normType}
+                             </span>
+                             <span className={`text-[8.5pt] tracking-wider font-mono px-2 py-0.5 rounded-[20px] transition-all font-bold ${
+                               isLocked 
+                                 ? 'bg-slate-100/80 text-gray-300' 
+                                 : isSelected 
+                                   ? 'bg-red-100/60 text-red-600 font-extrabold' 
+                                   : 'bg-slate-100/80 text-gray-400 group-hover:bg-red-100/60 group-hover:text-red-600 group-hover:font-extrabold'
+                             }`}>
+                               {deviceCode}
+                             </span>
                           </div>
-                          <div className="flex items-center gap-1">
-                            <div className="relative inline-block">
-                              <button 
-                                onClick={(e) => {
-                                   e.stopPropagation();
-                                   setOpenMenuIdx(openMenuIdx === idx ? null : idx);
-                                }}
-                                className="w-7 h-7 flex items-center justify-center hover:bg-gray-100 rounded-lg text-gray-400 hover:text-blue-600 transition-all active:scale-90"
-                              >
-                                <MoreVertical className="w-4 h-4" />
-                              </button>
-                              {openMenuIdx === idx && (
-                                <div 
-                                  onClick={(e) => e.stopPropagation()}
-                                  className="absolute right-0 top-full mt-1 w-52 bg-white border border-gray-200 rounded-xl shadow-2xl z-[100] py-2 border-blue-100 animate-in fade-in slide-in-from-top-1 duration-200"
-                                >
-                                   <button 
-                                     onClick={(e) => {
-                                        e.stopPropagation();
-                                        setOpenMenuIdx(null);
-                                        setDetailForm({ type: 'device', mode: 'view', data: child });
-                                     }}
-                                     className="w-full text-left px-4 py-2 text-[10pt] font-bold text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors flex items-center gap-3"
-                                   >
-                                     <FileText className="w-4 h-4 text-blue-500" /> Xem lý lịch
-                                   </button>
-                                   <button 
-                                     onClick={(e) => {
-                                        e.stopPropagation();
-                                        setOpenMenuIdx(null);
-                                     }}
-                                     className="w-full text-left px-4 py-2 text-[10pt] font-bold text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors flex items-center gap-3"
-                                   >
-                                     <Database className="w-4 h-4 text-green-500" /> Mã TSCĐ
-                                   </button>
-                                </div>
-                              )}
-                            </div>
+                          
+                          {/* Reordering Controls (Move Up/Down) that replace the old short kebab menu */}
+                          <div className="flex items-center gap-1.5 shrink-0 ml-2">
+                            <button
+                              onClick={(e) => moveItemUp(idx, e)}
+                              disabled={idx === 0}
+                              className="w-7 h-7 flex items-center justify-center rounded-lg bg-white border border-slate-150/40 shadow-xs hover:bg-slate-50 text-[#164399] hover:text-blue-800 hover:scale-110 active:scale-95 transition-all disabled:opacity-20 disabled:cursor-not-allowed cursor-pointer"
+                              title="Dịch chuyển lên vị trí trước"
+                            >
+                              <ArrowUp className="w-4 h-4 stroke-[2.5]" />
+                            </button>
+                            <button
+                              onClick={(e) => moveItemDown(idx, e)}
+                              disabled={idx === filteredChildren.length - 1}
+                              className="w-7 h-7 flex items-center justify-center rounded-lg bg-white border border-slate-150/40 shadow-xs hover:bg-slate-50 text-[#164399] hover:text-blue-800 hover:scale-110 active:scale-95 transition-all disabled:opacity-20 disabled:cursor-not-allowed cursor-pointer"
+                              title="Dịch chuyển xuống vị trí sau"
+                            >
+                              <ArrowDown className="w-4 h-4 stroke-[2.5]" />
+                            </button>
                           </div>
                         </div>
-                        <h4 className={`text-[11.5pt] font-bold mb-1.5 line-clamp-2 leading-tight transition-colors tracking-tight ${isSelected ? 'text-[#164399]' : 'text-gray-800 group-hover:text-blue-800'}`}>{child}</h4>
+                        <h4 className={`text-[11.5pt] font-medium mb-1.5 line-clamp-2 leading-tight transition-all tracking-tight ${isSelected ? 'text-[#164399] font-black' : 'text-gray-800 group-hover:text-blue-600'}`}>{child}</h4>
                         <div className="flex items-center gap-2">
                           <span className="text-[7pt] font-black uppercase text-gray-400">{childCount} thiết bị con</span>
                           <div className="w-1 h-1 rounded-full bg-gray-300"></div>
@@ -551,48 +670,44 @@ export const DeviceModule = ({
               })}
             </div>
 
-            {/* Pagination Component */}
-            {totalPages > 1 && (
-              <div className="pt-4 border-t border-gray-100 flex items-center justify-between">
-                 <span className="text-[9pt] font-black text-gray-400 uppercase">
-                    Đang xem {startIndex + 1} - {Math.min(startIndex + itemsPerPage, filteredChildren.length)} / {filteredChildren.length} thiết bị
-                 </span>
-                 <div className="flex items-center gap-1">
-                    <button 
-                      disabled={deviceFormCurrentPage === 1}
-                      onClick={() => setDeviceFormCurrentPage(Math.max(1, deviceFormCurrentPage - 1))}
-                      className="p-1.5 rounded-lg hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
-                    >
-                      <ChevronLeft className="w-4 h-4" />
-                    </button>
-                    <div className="flex items-center gap-1 px-1">
-                      {[...Array(totalPages)].map((_, i) => {
-                        const page = i + 1;
-                        if (totalPages > 5 && Math.abs(page - deviceFormCurrentPage) > 1 && page !== 1 && page !== totalPages) {
-                          if (page === 2 || page === totalPages - 1) return <span key={page} className="text-gray-300 px-0.5">.</span>;
-                          return null;
-                        }
-                        return (
-                          <button 
-                            key={page}
-                            onClick={() => setDeviceFormCurrentPage(page)}
-                            className={`w-7 h-7 rounded-lg text-[9pt] font-bold transition-all ${deviceFormCurrentPage === page ? 'bg-blue-600 text-white shadow-sm' : 'text-gray-500 hover:bg-gray-50'}`}
-                          >
-                            {page}
-                          </button>
-                        );
-                      })}
-                    </div>
-                    <button 
-                      disabled={deviceFormCurrentPage === totalPages}
-                      onClick={() => setDeviceFormCurrentPage(Math.min(totalPages, deviceFormCurrentPage + 1))}
-                      className="p-1.5 rounded-lg hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
-                    >
-                      <ChevronRight className="w-4 h-4" />
-                    </button>
-                 </div>
-              </div>
-            )}
+            {/* Statistics Bar */}
+            {(() => {
+              let total = filteredChildren.length;
+              let cover = 0, repair = 0, reserve = 0, active = 0;
+              filteredChildren.forEach((_, i) => {
+                 const status = getDeviceStatus(i);
+                 if (status === 'Khóa') cover++;
+                 else if (status === 'Sửa chữa') repair++;
+                 else if (status === 'Dự phòng') reserve++;
+                 else active++;
+              });
+              return (
+                <div className="mt-4 pt-4 border-t border-slate-200/55 bg-gray-50/50 -mx-6 px-6 pb-2 shrink-0 select-none animate-in slide-in-from-bottom duration-500">
+                  <div className="grid grid-cols-5 gap-1.5 text-center">
+                     <div className="bg-blue-50/60 border border-blue-200/60 rounded-xl p-1.5 flex flex-col justify-center shadow-xs">
+                        <span className="text-[7pt] font-black uppercase text-blue-800 tracking-tighter leading-none mb-1">Tổng số</span>
+                        <span className="text-[12pt] font-mono font-black text-[#164399] leading-none">{total}</span>
+                     </div>
+                     <div className="bg-emerald-50/60 border border-emerald-200/60 rounded-xl p-1.5 flex flex-col justify-center shadow-xs">
+                        <span className="text-[7pt] font-black uppercase text-emerald-800 tracking-tighter leading-none mb-1">Vận hành</span>
+                        <span className="text-[11.5pt] font-mono font-black text-emerald-700 leading-none">{active}</span>
+                     </div>
+                     <div className="bg-amber-50/60 border border-amber-200/60 rounded-xl p-1.5 flex flex-col justify-center shadow-xs">
+                        <span className="text-[7pt] font-black uppercase text-amber-800 tracking-tighter leading-none mb-1">Dự phòng</span>
+                        <span className="text-[11.5pt] font-mono font-black text-amber-700 leading-none">{reserve}</span>
+                     </div>
+                     <div className="bg-purple-50/60 border border-purple-200/60 rounded-xl p-1.5 flex flex-col justify-center shadow-xs">
+                        <span className="text-[7pt] font-black uppercase text-purple-700 tracking-tighter leading-none mb-1">Sửa chữa</span>
+                        <span className="text-[11.5pt] font-mono font-black text-purple-700 leading-none">{repair}</span>
+                     </div>
+                     <div className="bg-gray-50/60 border border-slate-200 rounded-lg p-1.5 flex flex-col justify-center shadow-xs">
+                        <span className="text-[7pt] font-black uppercase text-gray-500 tracking-tighter leading-none mb-1">Khóa</span>
+                        <span className="text-[11.5pt] font-mono font-black text-gray-500 leading-none">{cover}</span>
+                     </div>
+                  </div>
+                </div>
+              );
+            })()}
           </div>
 
           {/* Right Column: Detailed Preview */}
@@ -620,141 +735,307 @@ export const DeviceModule = ({
           <div className="flex-1 overflow-y-auto custom-scrollbar p-6">
             {deviceFormTab === 'info' ? (
               <div className="space-y-10 animate-in fade-in duration-500">
-                <div className="flex items-start justify-between border-b border-gray-100 pb-6 mb-8 w-full">
-                   <div className="flex-1 space-y-4">
-                      {/* Row 1: Code and Type side-by-side */}
-                      <div className="flex items-center gap-4">
-                         <div className="flex flex-col gap-1">
-                            <label className="text-[8pt] font-black text-gray-400 uppercase tracking-widest ml-1">Mã thiết bị / PMIS</label>
-                            <span className="bg-red-50 text-red-600 font-mono font-black text-[11pt] uppercase px-3 py-1.5 rounded shadow-sm border border-red-100 block w-fit">
-                               {(() => {
-                                  const idxInPage = paginatedChildren.indexOf(effectiveDevice);
-                                  const devIndex = idxInPage >= 0 ? idxInPage : 0;
-                                  return getDeviceCode(effectiveDevice, devIndex);
-                               })()}
-                            </span>
-                         </div>
-                         <span className="text-gray-200 mt-6 h-10 w-[1px] bg-gray-100"></span>
-                         <div className="flex flex-col gap-1">
-                            <label className="text-[8pt] font-black text-gray-400 uppercase tracking-widest ml-1">Loại thiết bị</label>
-                            <div className="bg-blue-50 text-[#164399] font-black text-[9.5pt] uppercase px-3 py-1.5 rounded-xl border border-blue-100 flex items-center gap-2 w-fit">
-                               {getDeviceItemVisual(getDetailedType(effectiveDevice), true).icon}
-                               {normalizeType(getDetailedType(effectiveDevice))}
-                            </div>
-                         </div>
-                      </div>
+                <div className="flex items-start justify-between pb-2 mb-6 w-full">
+                    <div className="flex-1 space-y-3">
+                       {/* Row 1: Code, Type and Status shapes placed closely together with auto-width, no titles */}
+                       <div className="flex flex-wrap items-center gap-2">
+                          <span className="bg-amber-100/50 text-amber-700 font-black text-[9pt] uppercase px-3 py-1.5 rounded-md border border-amber-100 block w-auto shadow-sm select-none">
+                             {getDeviceVoltage(effectiveDevice)}
+                          </span>
 
-                      {/* Row 2: Device Name below them */}
-                      <div className="pt-2">
-                         <label className="text-[8pt] font-black text-gray-400 uppercase tracking-widest ml-1">Tên thiết bị</label>
-                         <h3 className="text-[16pt] font-bold text-[#164399] leading-tight tracking-tight mt-0.5">{effectiveDevice}</h3>
-                      </div>
-                   </div>
+                          <div className="bg-blue-100/50 text-[#164399] font-black text-[9pt] uppercase px-3 py-1.5 rounded-md border border-blue-100 flex items-center gap-1.5 w-auto shadow-sm select-none">
+                             {normalizeType(getDetailedType(effectiveDevice))}
+                          </div>
 
-                   {/* Action Button right-aligned */}
-                   <div className="mt-5 shrink-0 ml-4">
-                     <button 
-                       onClick={() => setDetailForm({ type: 'device', mode: 'view', data: effectiveDevice })}
-                       className="px-4 py-2.5 text-[12pt] font-bold text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors flex items-center gap-2 shadow-sm border border-blue-100"
-                     >
-                       <ExternalLink className="w-4 h-4" /> Xem
-                     </button>
-                   </div>
+                          <span className="bg-red-50 text-[#cb1c1c] font-mono font-black text-[9pt] uppercase px-3 py-1.5 rounded-md border border-red-100 block w-auto shadow-sm select-none">
+                             {(() => {
+                                const idxInPage = filteredChildren.indexOf(effectiveDevice);
+                                const devIndex = idxInPage >= 0 ? idxInPage : 0;
+                                return getDeviceCode(effectiveDevice, devIndex);
+                             })()}
+                          </span>
+                       </div>
+
+                       {/* Row 2: Device Name with NO title */}
+                       <div className="pt-1.5 pb-2">
+                          <h3 className="text-[17pt] md:text-[19pt] font-extrabold text-gray-700 leading-tight tracking-tight mt-0.5">{effectiveDevice}</h3>
+                          <div className="text-[9.5pt] text-gray-400 font-medium leading-relaxed mt-1 flex items-center gap-1.5 flex-wrap">
+                            <MapPin className="w-3.5 h-3.5" />
+                            {(() => {
+                              const instances = devicePath.filter((p, i) => i % 2 === 0 && p !== "Tất cả");
+                              const idx = instances.indexOf(effectiveDevice);
+                              if (idx !== -1) {
+                                return instances.slice(0, idx).join(' / ');
+                              }
+                              return instances.join(' / ');
+                            })()}
+                          </div>
+                       </div>
+                    </div>
+
+                    {/* Action Button right-aligned */}
+                    <div className="mt-5 shrink-0 ml-4">
+                      <button 
+                        onClick={() => {
+                          const currentPathEnd = devicePath[devicePath.length - 1];
+                          if (effectiveDevice && effectiveDevice !== currentPathEnd && effectiveDevice !== "Tất cả") {
+                            const category = getDetailedChildType(effectiveDevice);
+                            setDevicePath([...devicePath, category, effectiveDevice]);
+                          }
+                          setDetailForm({ type: 'device', mode: 'view', data: effectiveDevice });
+                        }}
+                        className="px-6 py-2 bg-blue-50 text-blue-600 rounded-full font-bold text-[12pt] whitespace-nowrap hover:bg-blue-100 transition-all flex items-center gap-2 whitespace-nowrap border border-blue-100 cursor-pointer"
+                      >
+                        <Eye className="w-4 h-4" /> Xem
+                      </button>
+                    </div>
                 </div>
 
                 <div className="space-y-8">
-                    <div className="space-y-4 p-7 bg-blue-50/20 rounded-2xl border border-blue-100/30 shadow-inner">
-                      <h4 className="text-[11pt] font-black text-[#164399] uppercase tracking-widest flex items-center gap-2">
-                        <Settings className="w-4 h-4" /> Đặc tính kỹ thuật
-                      </h4>
+                    <div className="space-y-4 p-7 bg-blue-50/20 rounded-xl border border-blue-100/30 shadow-inner">
+                      <div className="bg-gray-150/70 p-3 rounded-xl border border-gray-200/50 mb-2 flex items-center justify-between">
+                        <h4 className="text-[11pt] font-black text-gray-700 uppercase tracking-widest flex items-center gap-2">
+                          <Settings className="w-4 h-4 text-slate-500" /> Thông số kỹ thuật
+                        </h4>
+                        {(() => {
+                             const idxInPage = filteredChildren.indexOf(effectiveDevice);
+                             const devIndex = idxInPage >= 0 ? idxInPage : 0;
+                             const status = getDeviceStatus(devIndex);
+                             const statusColors: Record<string, string> = {
+                                'Khóa': 'bg-gray-50 text-gray-400 border-gray-100 shadow-sm',
+                                'Sửa chữa': 'bg-purple-50 text-purple-600 border-purple-100/50 shadow-sm',
+                                'Dự phòng': 'bg-amber-50 text-amber-600 border-amber-100/50 shadow-sm',
+                                'Đang vận hành': 'bg-emerald-50 text-emerald-800 border-emerald-100/50 shadow-sm',
+                             };
+                             return (
+                                <span className={`text-[9pt] font-black uppercase px-3 py-1.5 rounded-full border flex items-center gap-1.5 w-auto shadow-sm select-none ${statusColors[status] || statusColors['Đang vận hành']}`}>
+                                   {status}
+                                </span>
+                             );
+                        })()}
+                      </div>
                       <div className="grid grid-cols-2 gap-x-10 gap-y-1">
-                         {details.specs.filter((s:any) => s.label !== 'Mã thiết bị' && s.label !== 'Tên thiết bị' && s.label !== 'Vị trí').map((spec: any, i: number) => (
+                         {details.specs.filter((s:any) => s.label !== 'Mã thiết bị' && s.label !== 'Tên thiết bị' && s.label !== 'Vị trí' && s.label !== 'Loại thiết bị' && s.label !== 'Trạng thái').map((spec: any, i: number) => (
                            <div key={i} className="flex items-center justify-between py-3 border-b border-gray-200 hover:bg-white/40 transition-colors group px-0">
-                              <span className="text-[10pt] font-black text-[#475569] uppercase tracking-tight">{spec.label}</span>
+                              <span className="text-[10pt] font-black text-gray-700 uppercase tracking-tight">{spec.label}</span>
                               <span className="text-[11pt] font-black text-[#164399] tracking-tight">{spec.value}</span>
                            </div>
                          ))}
                       </div>
                     </div>
 
-                    <div className="space-y-8 pt-8 border-t border-gray-100">
-                      <div className="space-y-4">
-                        <h4 className="text-[10pt] font-bold text-gray-400 uppercase tracking-widest flex items-center gap-2">
-                          <Camera className="w-4 h-4" /> Hình ảnh thiết bị
-                        </h4>
-                        <div className="grid grid-cols-2 gap-4">
-                           {details.images.slice(0, 4).map((img: string, idx: number) => (
-                              <div key={idx} className="relative aspect-video rounded-xl overflow-hidden border border-gray-100 group cursor-pointer shadow-sm">
-                                 <img src={img} alt="TB" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" onClick={() => setPreviewContent({ type: 'image', url: img, name: effectiveDevice })} />
-                                 <div className="absolute inset-0 bg-black/10 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                                    <Maximize2 className="w-5 h-5 text-white" />
-                                 </div>
-                              </div>
-                           ))}
-                        </div>
-                      </div>
+                    <div className="space-y-8">
+                      {(() => {
+                         // Compute dynamic references loaded from Category Configurations
+                         let localDocs: Record<string, string[]> = {};
+                         let localImages: Record<string, string[]> = {};
+                         try {
+                           localDocs = JSON.parse(localStorage.getItem('pmis_reference_docs_map') || '{}');
+                           localImages = JSON.parse(localStorage.getItem('pmis_reference_images_map') || '{}');
+                         } catch (e) {
+                           console.error(e);
+                         }
 
-                      <div className="space-y-4 pt-4">
-                        <div className="flex items-center justify-between">
-                           <h4 className="text-[10pt] font-bold text-gray-400 uppercase tracking-widest flex items-center gap-2">
-                             <FileText className="w-4 h-4" /> Tài liệu đính kèm
-                           </h4>
-                        </div>
-                        <div className="space-y-2">
-                          {[
-                            { name: 'Sổ lý lịch thiết bị.pdf', size: '2.4 MB' },
-                            { name: 'Biên bản nghiệm thu bàn giao.pdf', size: '1.2 MB' },
-                            { name: 'Kết quả thí nghiệm 2026.pdf', size: '0.8 MB' }
-                          ].map((doc, i) => (
-                            <div key={i} className="flex items-center justify-between p-3 bg-gray-50/50 border border-gray-100 rounded-xl hover:border-blue-200 transition-all cursor-pointer group shadow-sm" onClick={() => setPreviewContent({ type: 'file', url: '#', name: doc.name })}>
-                               <div className="flex items-center gap-3 min-w-0">
-                                  <div className="p-2 bg-white rounded-lg text-blue-600 shadow-sm">
-                                     <FileText className="w-4 h-4" />
-                                  </div>
-                                  <div className="flex flex-col min-w-0">
-                                    <span className="text-[10pt] font-bold text-[#164399] group-hover:text-blue-600 transition-colors truncate">{doc.name}</span>
-                                    <span className="text-[8pt] text-gray-400 font-bold uppercase">{doc.size}</span>
-                                  </div>
+                         const devDetailedType = getDetailedType(effectiveDevice);
+                         const devTypeKey = getTypeKey(devDetailedType);
+                         const devVoltage = getDeviceVoltage(effectiveDevice);
+
+                         const docIds: string[] = [];
+                         const imageUrls: string[] = [];
+
+                         const targetSuffix = `-${devTypeKey}-${devVoltage}`;
+                         
+                         Object.keys(localDocs).forEach(k => {
+                           if (k.toLowerCase().endsWith(targetSuffix.toLowerCase())) {
+                             (localDocs[k] || []).forEach(dId => {
+                               if (!docIds.includes(dId)) docIds.push(dId);
+                             });
+                           }
+                         });
+
+                         Object.keys(localImages).forEach(k => {
+                           if (k.toLowerCase().endsWith(targetSuffix.toLowerCase())) {
+                             (localImages[k] || []).forEach(imgUrl => {
+                               if (!imageUrls.includes(imgUrl)) imageUrls.push(imgUrl);
+                             });
+                           }
+                         });
+
+                         // Fallbacks to guarantee visual excellence if they have not set up configs yet
+                         if (docIds.length === 0) {
+                           if (devTypeKey === 'MBA') docIds.push('D4', 'D2', 'D10');
+                           else if (devTypeKey === 'MC') docIds.push('D5', 'D2');
+                           else if (devTypeKey === 'TI') docIds.push('D6');
+                           else if (devTypeKey === 'TU') docIds.push('D7');
+                           else if (devTypeKey === 'CSV') docIds.push('D8');
+                           else docIds.push('D1');
+                         }
+
+                         if (imageUrls.length === 0) {
+                           if (devTypeKey === 'MBA') {
+                             imageUrls.push(
+                               'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?auto=format&fit=crop&w=400&q=80',
+                               'https://images.unsplash.com/photo-1581092160607-ee22621dd758?auto=format&fit=crop&w=400&q=80'
+                             );
+                           } else if (devTypeKey === 'MC') {
+                             imageUrls.push(
+                               'https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=400&q=80',
+                               'https://images.unsplash.com/photo-1531297484001-80022131f5a1?auto=format&fit=crop&w=400&q=80'
+                             );
+                           } else {
+                             imageUrls.push(
+                               'https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=400&q=80'
+                             );
+                           }
+                         }
+
+                         const loadedDocs = docIds.map(id => DOCUMENT_LIBRARY.find(d => d.id === id)).filter(Boolean) as typeof DOCUMENT_LIBRARY;
+
+                         return (
+                            <>
+                              <div className="space-y-4 pt-4 border-t border-slate-100 first:border-0 first:pt-0 pb-6 w-full max-w-full">
+                                 <div className="flex items-center justify-between border-b border-gray-100 pb-4">
+                                   <h4 className="text-[10pt] font-black text-gray-700 uppercase tracking-wider flex items-center gap-2 pl-1 font-sans">
+                                     <Camera className="w-5 h-5 text-orange-500" /> HÌNH ẢNH MINH HỌA
+                                   </h4>
+                                 </div>
+                                 <div className="grid grid-cols-2 gap-3 w-full">
+                                    {imageUrls.map((img: string, idx: number) => (
+                                       <div 
+                                         key={idx} 
+                                         className="aspect-video bg-gray-50 rounded-xl overflow-hidden border border-gray-100 group relative shadow-sm hover:shadow-md transition-all duration-300 cursor-zoom-in"
+                                         onClick={() => setPreviewContent({ type: 'image', url: img, name: effectiveDevice, imagesList: imageUrls, currentIndex: idx })} 
+                                       >
+                                          <img 
+                                            src={img} 
+                                            alt="TB" 
+                                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" 
+                                            referrerPolicy="no-referrer"
+                                          />
+                                          <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors flex items-center justify-center pointer-events-none">
+                                            <Camera className="w-5 h-5 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
+                                          </div>
+                                       </div>
+                                    ))}
+                                 </div>
                                </div>
-                               <Download className="w-4 h-4 text-gray-300 group-hover:text-blue-500 transition-colors shrink-0" />
-                            </div>
-                          ))}
-                        </div>
-                      </div>
+
+                               <div className="space-y-4 pt-6 w-full max-w-full">
+                                 <div className="flex items-center justify-between border-b border-gray-100 pb-4">
+                                   <h4 className="text-[10pt] font-black text-gray-700 uppercase tracking-wider flex items-center gap-2 pl-1 font-sans">
+                                     <FileText className="w-5 h-5 text-red-500" /> TÀI LIỆU ĐÍNH KÈM
+                                   </h4>
+                                 </div>
+                                 <div className="space-y-3 w-full">
+                                   {loadedDocs.map((doc, i) => (
+                                     <div 
+                                       key={i} 
+                                       className="flex items-center justify-between p-3 bg-gray-50/50 rounded-xl border border-gray-100 group hover:border-slate-300 hover:bg-white transition-all cursor-pointer shadow-xs" 
+                                       onClick={() => setPreviewContent({ type: 'file', url: '#', name: doc.name, fileCode: doc.code, fileDate: '15/06/2026', fileSize: doc.size, fileName: doc.name })}
+                                     >
+                                        <div className="flex items-center gap-2.5 min-w-0">
+                                           <div className="w-9 h-9 rounded-full bg-white border border-gray-100 flex items-center justify-center shrink-0 shadow-sm transition-transform group-hover:scale-105">
+                                             <FileText className="w-4.5 h-4.5 text-red-500" />
+                                           </div>
+                                           <div className="flex flex-col min-w-0 text-left">
+                                             <p className="text-[9.5pt] font-bold text-gray-800 line-clamp-1 group-hover:text-[#164399] transition-colors">{doc.name}</p>
+                                             <p className="text-[8.5pt] text-slate-400 font-medium tracking-tight text-left mt-0.5">Hệ thống | 15/06/2026 | {doc.size}</p>
+                                           </div>
+                                        </div>
+                                     </div>
+                                   ))}
+                                 </div>
+                               </div>
+                             
+                            </>
+                         );
+                      })()}
                     </div>
                 </div>
               </div>
             ) : deviceFormTab === 'reports' ? (
               <div className="space-y-6 animate-in fade-in duration-500">
                 {(() => {
-                  const trackingData = details.tracking.filter((s:any) => s.id !== 'lich-su');
+                  const orderMap: Record<string, number> = {
+                    'thong-so': 1,
+                    'su-co': 2,
+                    'sua-chua': 3,
+                    'thi-nghiem': 4,
+                    'cong-viec': 5
+                  };
+                  const trackingData = details.tracking
+                    .filter((s:any) => s.id !== 'lich-su')
+                    .sort((a:any, b:any) => (orderMap[a.id] || 99) - (orderMap[b.id] || 99));
+                    
                   return trackingData.map((section: any, i: number) => {
-                    const typeStyles: Record<string, { color: string, bg: string, icon: any }> = {
-                      'su-co': { color: 'text-red-700', bg: 'bg-red-50/30', icon: <Flame className="w-5 h-5 text-red-600" /> },
-                      'thi-nghiem': { color: 'text-pink-700', bg: 'bg-pink-50/30', icon: <FlaskConical className="w-5 h-5 text-pink-600" /> },
-                      'thong-so': { color: 'text-sky-700', bg: 'bg-sky-50/30', icon: <Activity className="w-5 h-5 text-sky-600" /> },
-                      'cong-viec': { color: 'text-green-700', bg: 'bg-green-50/30', icon: <ClipboardList className="w-5 h-5 text-green-600" /> },
-                      'sua-chua': { color: 'text-purple-700', bg: 'bg-purple-50/30', icon: <Wrench className="w-5 h-5 text-purple-600" /> },
-                      'default': { color: 'text-[#164399]', bg: 'bg-gray-50/30', icon: <Activity className="w-5 h-5 text-[#164399]" /> }
+                    const typeStyles: Record<string, { color: string, headerBg: string, bodyBg: string, border: string, btnStyle: string, icon: any }> = {
+                      'su-co': { 
+                        color: 'text-red-600', 
+                        headerBg: 'bg-red-50/70 border-red-100', 
+                        bodyBg: 'bg-red-50/10', 
+                        border: 'border-red-100/60',
+                        btnStyle: 'text-gray-500 hover:text-blue-600',
+                        icon: <Flame className="w-5 h-5 text-red-600 animate-pulse" /> 
+                      },
+                      'thi-nghiem': { 
+                        color: 'text-violet-600', 
+                        headerBg: 'bg-violet-50/70 border-violet-100', 
+                        bodyBg: 'bg-violet-50/10', 
+                        border: 'border-violet-100/60',
+                        btnStyle: 'text-gray-500 hover:text-blue-600',
+                        icon: <FlaskConical className="w-5 h-5 text-violet-600" /> 
+                      },
+                      'thong-so': { 
+                        color: 'text-green-600', 
+                        headerBg: 'bg-green-50/70 border-green-100', 
+                        bodyBg: 'bg-green-50/10', 
+                        border: 'border-green-100/60',
+                        btnStyle: 'text-gray-500 hover:text-blue-600',
+                        icon: <Activity className="w-5 h-5 text-green-600" /> 
+                      },
+                      'cong-viec': { 
+                        color: 'text-amber-700', 
+                        headerBg: 'bg-amber-50/70 border-amber-100', 
+                        bodyBg: 'bg-amber-50/10', 
+                        border: 'border-amber-100/60',
+                        btnStyle: 'text-gray-500 hover:text-blue-600',
+                        icon: <ClipboardList className="w-5 h-5 text-amber-700" /> 
+                      },
+                      'sua-chua': { 
+                        color: 'text-sky-600', 
+                        headerBg: 'bg-sky-50/70 border-sky-100', 
+                        bodyBg: 'bg-sky-50/10', 
+                        border: 'border-sky-100/60',
+                        btnStyle: 'text-gray-500 hover:text-blue-600',
+                        icon: <Wrench className="w-5 h-5 text-sky-600" /> 
+                      },
+                      'default': { 
+                        color: 'text-blue-600', 
+                        headerBg: 'bg-blue-50/70 border-blue-100', 
+                        bodyBg: 'bg-blue-50/10', 
+                        border: 'border-blue-100/60',
+                        btnStyle: 'text-gray-500 hover:text-blue-600',
+                        icon: <Activity className="w-5 h-5 text-blue-600" /> 
+                      }
                     };
 
                     const style = typeStyles[section.id as string] || typeStyles.default;
 
                     return (
-                      <div key={i} className={`rounded-2xl border border-gray-100 overflow-hidden shadow-sm ${style.bg}`}>
-                         <div className="px-6 py-3.5 flex items-center justify-between border-b border-gray-100/50">
+                      <div key={i} className={`rounded-xl border overflow-hidden shadow-sm transition-all hover:shadow-md ${style.border} ${style.bodyBg}`}>
+                         <div className={`px-6 py-3.5 flex items-center justify-between border-b ${style.headerBg}`}>
                             <div className="flex items-center gap-3">
                                <span>{style.icon}</span>
                                <h4 className={`text-[12pt] font-black uppercase tracking-tight ${style.color}`}>{section.title} ({section.items.length})</h4>
                             </div>
-                            <button className="text-[10pt] font-bold text-blue-600 hover:underline">Xem tất cả</button>
+                            <button className={`text-[10pt] font-black hover:underline ${style.btnStyle}`}>Xem tất cả</button>
                          </div>
-                         <div className="bg-white">
-                            <div className="divide-y divide-gray-50">
+                         <div className={`${style.bodyBg}`}>
+                            <div className="divide-y divide-gray-200/60">
                                {section.items.map((item: any, idx: number) => (
                                  <div 
                                     key={idx} 
-                                    className="px-6 py-4 flex items-center gap-4 transition-all cursor-pointer group hover:bg-gray-50/50"
+                                    className="px-6 py-4 flex items-center gap-4 transition-all cursor-pointer group hover:bg-white/50"
                                     onClick={() => {
                                       if (section.id === 'su-co') {
                                         setActiveSubMenu('Danh sách sự cố');
@@ -769,9 +1050,9 @@ export const DeviceModule = ({
                                       const m = parts[1] || '06';
                                       const y = parts[2] || '2026';
                                       return (
-                                        <div className="w-12 h-12 rounded-xl border border-gray-200 overflow-hidden flex flex-col items-center bg-white shrink-0 shadow-sm">
-                                          <div className="w-full bg-[#164399] text-[6.5pt] font-black uppercase text-white py-0.5 text-center leading-none tracking-wider">
-                                            T.{m}
+                                        <div className="w-12 h-12 rounded-[10px] border border-gray-200/70 overflow-hidden flex flex-col items-center bg-white shrink-0 shadow-sm group-hover:scale-105 transition-transform">
+                                          <div className="w-full bg-[#164399] text-[6.5pt] font-black text-white py-0.5 text-center leading-none tracking-wider uppercase">
+                                            T {m}
                                           </div>
                                           <div className="flex-1 flex flex-col items-center justify-center bg-white leading-none">
                                             <span className="text-[11pt] font-black text-slate-800 font-mono">{d}</span>
@@ -780,10 +1061,10 @@ export const DeviceModule = ({
                                         </div>
                                       );
                                     })()}
-                                    <div className="w-[1px] h-6 bg-gray-100 shrink-0"></div>
-                                    <span className="flex-1 text-[12pt] font-medium text-gray-700 tracking-tight leading-snug group-hover:text-blue-600 transition-colors">{item.content}</span>
-                                    <div className={`px-2.5 py-1 rounded-lg text-[8pt] font-bold uppercase tracking-tighter shrink-0 ${
-                                       item.status === 'Đã hoàn thành' || item.status === 'Hoàn thành' ? 'bg-green-50 text-green-600' : 'bg-blue-50 text-[#164399]'
+                                    <div className="w-[1px] h-6 bg-gray-250 shrink-0"></div>
+                                    <span className="flex-1 text-[11pt] font-normal text-slate-705 tracking-tight leading-snug group-hover:text-blue-700 transition-colors">{item.content}</span>
+                                    <div className={`px-2.5 py-1 rounded-full text-[8pt] font-bold uppercase tracking-tighter shrink-0 border shadow-sm ${
+                                       item.status === 'Đã hoàn thành' || item.status === 'Hoàn thành' ? 'bg-green-50/85 text-green-700 border-green-200/40' : 'bg-blue-50/85 text-[#164399] border-blue-200/40'
                                     }`}>
                                        {item.status}
                                     </div>
@@ -799,7 +1080,7 @@ export const DeviceModule = ({
             ) : (
               <div className="space-y-6 animate-in slide-in-from-right duration-500">
                  <div className="flex items-center justify-between border-b border-gray-100 pb-2">
-                    <h5 className="text-[10pt] font-bold text-gray-400 uppercase tracking-widest flex items-center gap-2">
+                    <h5 className="text-[10pt] font-bold text-gray-700 uppercase tracking-widest flex items-center gap-2">
                        <Activity className="w-4 h-4 text-blue-500" /> Vòng đời thiết bị 
                     </h5>
                     <button className="text-[9pt] font-bold text-blue-600 hover:underline">Xem tất cả</button>
@@ -823,7 +1104,7 @@ export const DeviceModule = ({
                           </div>
 
                           {/* Content Card */}
-                          <div className="p-4 bg-white rounded-xl border border-gray-200 hover:shadow-sm hover:border-blue-200 transition-all relative">
+                          <div onClick={() => { setDetailForm({ type: "event_detail", mode: "view", data: { device: effectiveDevice, description: item.content, cause: item.result ? "Kết quả kiểm định đạt tiêu chuẩn: " + item.result : "Mốc thời gian quản lý vận hành thiết bị tự động", time: item.date, status: item.result || "Hoàn thành", operator: item.operator } }); }} className="p-4 bg-white rounded-2xl border border-gray-200 hover:shadow-md hover:border-blue-300 hover:bg-slate-50/25 transition-all relative cursor-pointer">
                             <div className="flex items-start justify-between gap-4">
                               <div className="flex-1 min-w-0 space-y-1">
                                 <div className="flex items-center gap-2 flex-wrap">
@@ -835,12 +1116,40 @@ export const DeviceModule = ({
                                 <p className="text-[11.5pt] text-slate-800 font-extrabold leading-snug tracking-tight">
                                   {item.content}
                                 </p>
-                                {item.result && (
-                                  <div className="flex items-center gap-1 mt-1">
-                                    <span className="text-[8.5pt] font-bold text-gray-400 uppercase tracking-tighter">Kết quả:</span>
-                                    <span className="text-[9pt] font-bold text-green-600 uppercase tracking-tight">{item.result}</span>
+                                
+                                <div className="flex items-center justify-between gap-2 text-[8.5pt] mt-2 pt-2 border-t border-gray-100 flex-wrap">
+                                  {item.result ? (
+                                    <div className="flex items-center gap-1">
+                                      <span className="text-gray-700 font-bold uppercase tracking-tighter">Kết quả:</span>
+                                      <span className="text-gray-700 font-black uppercase tracking-tight">{item.result}</span>
+                                    </div>
+                                  ) : (
+                                    <div />
+                                  )}
+                                  <div className="flex items-center gap-1 text-right">
+                                    <span className="text-gray-700 font-bold uppercase tracking-tighter">Thực hiện:</span>
+                                    {(() => {
+                                      const val = item.operator || 'Hệ thống';
+                                      const match = val.match(/^([^\(]+)(?:\((.+)\))?/);
+                                      if (match) {
+                                        const name = match[1].trim();
+                                        const title = match[2] ? match[2].trim() : '';
+                                        if (title) {
+                                          return (
+                                            <span className="text-right">
+                                              <span className="text-[#164399] font-black">{name}</span>{' '}
+                                              <span className="text-gray-450 font-normal">({title})</span>
+                                            </span>
+                                          );
+                                        }
+                                      }
+                                      if (val === 'Hệ thống' || val === 'Lãnh đạo đơn vị' || val === 'Kỹ sư Trạm') {
+                                        return <span className="text-gray-450 font-normal">{val}</span>;
+                                      }
+                                      return <span className="text-[#164399] font-black">{val}</span>;
+                                    })()}
                                   </div>
-                                )}
+                                </div>
                               </div>
                               <div className="pt-1.5 shrink-0">
                                 <ChevronRight className="w-4 h-4 text-gray-300 group-hover:text-blue-500 group-hover:translate-x-1 transition-all" />

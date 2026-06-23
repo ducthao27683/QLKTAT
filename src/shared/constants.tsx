@@ -9,43 +9,43 @@ export const MENU_ITEMS = [
   {
     id: 'thiet-bi',
     title: 'Thiết bị',
-    icon: <Cpu className="w-6 h-6 text-blue-500" />,
+    icon: <Cpu className="w-6 h-6 text-pink-600" />,
     subItems: ['Sơ đồ thiết bị', 'Danh sách thiết bị', 'Thiết bị dự phòng', 'Tồn kho và Điều động']
   },
   {
-    id: 'cong-viec',
-    title: 'Công việc',
-    icon: <ClipboardList className="w-6 h-6 text-green-600" />,
-    subItems: ['Sổ vận hành', 'Tiết giảm công việc', 'Kết quả công việc', 'Thiết lập công việc']
+    id: 'thong-so',
+    title: 'Thông số',
+    icon: <Activity className="w-6 h-6 text-green-600" />,
+    subItems: ['Giám sát thông số', 'Bảng thông số đo', 'Số liệu vận hành']
   },
   {
     id: 'su-co',
     title: 'Sự cố',
-    icon: <AlertTriangle className="w-6 h-6 text-red-500" />,
+    icon: <AlertTriangle className="w-6 h-6 text-red-600" />,
     subItems: ['Danh sách sự cố', 'Xử lý giảm trừ sự cố', 'Theo dõi sau sự cố']
-  },
-  {
-    id: 'thong-so',
-    title: 'Vận hành',
-    icon: <Activity className="w-6 h-6 text-sky-500" />,
-    subItems: ['Giám sát thông số', 'Bảng thông số đo', 'Số liệu vận hành']
   },
   {
     id: 'scbd',
     title: 'SCBD',
-    icon: <Wrench className="w-6 h-6 text-purple-500" />,
+    icon: <Wrench className="w-6 h-6 text-sky-600" />,
     subItems: ['Sửa chữa theo CBM/RCM', 'Sửa chữa thường xuyên', 'Sửa chữa lớn']
   },
   {
     id: 'thi-nghiem',
     title: 'Thí nghiệm',
-    icon: <FlaskConical className="w-6 h-6 text-pink-500" />,
-    subItems: ['Danh mục thí nghiệm', 'Yêu cầu thí nghiệm', 'Kết quả thí nghiệm']
+    icon: <FlaskConical className="w-6 h-6 text-violet-600" />,
+    subItems: ['Thiết lập thí nghiệm', 'Thiết lập hạng mục', 'Thiết lập thiết bị', 'Yêu cầu thí nghiệm', 'Kết quả thí nghiệm']
+  },
+  {
+    id: 'cong-viec',
+    title: 'Công việc',
+    icon: <ClipboardList className="w-6 h-6 text-amber-700" />,
+    subItems: ['Sổ vận hành', 'Tiết giảm công việc', 'Kết quả công việc', 'Thiết lập công việc']
   },
   {
     id: 'bao-cao',
     title: 'Báo cáo',
-    icon: <BarChart2 className="w-6 h-6 text-teal-500" />,
+    icon: <BarChart2 className="w-6 h-6 text-orange-600" />,
     subItems: ['Báo cáo quản trị đơn vị', 'Báo cáo 5100 - EVN']
   },
   {

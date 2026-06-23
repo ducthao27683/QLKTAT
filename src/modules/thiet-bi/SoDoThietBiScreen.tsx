@@ -280,6 +280,11 @@ export const SoDoThietBiScreen = ({
   });
 
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [localConfirmAction, setLocalConfirmAction] = useState<{
+    title: string;
+    message: string;
+    onConfirm: () => void;
+  } | null>(null);
 
   // Drag and Pan states
   const containerRef = useRef<HTMLDivElement>(null);
@@ -584,13 +589,18 @@ export const SoDoThietBiScreen = ({
   const activeTooltipDev = hoveredDev || (searchMatches.length > 0 ? searchMatches[searchMatchIdx % searchMatches.length] : null);
 
   const handleDeleteDevice = (id: string, name: string) => {
-    if (confirm("Bạn có chắc chắn muốn xóa vị trí Thiết bị này không?")) {
-      setDevices(prev => prev.filter(d => d.id !== id));
-      setClickedDev(null);
-      setAlertMsg(`Đã xóa liên kết thiết bị "${name}" thành công!`);
-      setIsAlertOpen(true);
-      setTimeout(() => setIsAlertOpen(false), 3000);
-    }
+    setLocalConfirmAction({
+      title: 'Xác nhận xóa vị trí Thiết bị',
+      message: `Bạn có chắc chắn muốn xóa vị trí Thiết bị "${name}" này không?`,
+      onConfirm: () => {
+        setDevices(prev => prev.filter(d => d.id !== id));
+        setClickedDev(null);
+        setAlertMsg(`Đã xóa liên kết thiết bị "${name}" thành công!`);
+        setIsAlertOpen(true);
+        setTimeout(() => setIsAlertOpen(false), 3000);
+        setLocalConfirmAction(null);
+      }
+    });
   };
 
   const handleEditDevice = (dev: MappedDevice) => {
@@ -651,7 +661,7 @@ export const SoDoThietBiScreen = ({
           <div className="flex items-center gap-3">
             <button 
               onClick={() => setActiveSubMenu(null)}
-              className="p-1.5 hover:bg-gray-100 rounded-full transition-all duration-200 active:scale-95"
+              className="p-1.5 hover:bg-gray-100 rounded-xl transition-all duration-200 active:scale-95"
             >
               <ArrowLeft className="w-5 h-5 text-gray-500" />
             </button>
@@ -665,7 +675,7 @@ export const SoDoThietBiScreen = ({
 
           <div className="flex items-center gap-3">
             {/* Quick Search with Nav Controls - Styled to completely remove any inner boundaries, borders, or boxes */}
-            <div className="flex items-center gap-1.5 bg-slate-100/80 rounded-xl px-2 py-0.5 border border-transparent">
+            <div className="flex items-center gap-1.5 bg-slate-100/80 rounded-full px-2 py-0.5 border border-transparent">
               <div className="relative w-60 flex items-center">
                 <span className="absolute inset-y-0 left-0 flex items-center pointer-events-none">
                   <Search className="w-4 h-4 text-gray-400" />
@@ -689,7 +699,7 @@ export const SoDoThietBiScreen = ({
 
               {searchMatches.length > 0 && (
                 <div className="flex items-center border-l border-slate-200 pl-1.5 gap-1 select-none">
-                  <span className="text-[8pt] font-extrabold text-[#164399] tracking-tight bg-blue-50 px-1.5 py-0.5 rounded-md min-w-[50px] text-center">
+                  <span className="text-[8pt] font-extrabold text-[#164399] tracking-tight bg-blue-50 px-1.5 py-0.5 rounded-full min-w-[50px] text-center">
                     {searchMatchIdx + 1}/{searchMatches.length}
                   </span>
                   <button 
@@ -711,32 +721,20 @@ export const SoDoThietBiScreen = ({
             </div>
 
             {/* Zoom Controls */}
-            <div className="flex items-center bg-slate-50 border border-slate-200 rounded-xl overflow-hidden p-1">
-              <button 
-                onClick={handleZoomOut}
-                title="Thu nhỏ"
-                className="w-9 h-9 flex items-center justify-center text-gray-500 hover:text-[#164399] hover:bg-white rounded-lg transition-all active:scale-90"
-              >
+            <div className="flex items-center bg-slate-50 border border-slate-200 rounded-lg overflow-hidden p-1">
+              <button className="p-1 px-3 hover:bg-slate-100 rounded-lg cursor-pointer">
                 <ZoomOut className="w-4.5 h-4.5" />
               </button>
               <span className="px-2 text-[9pt] font-black text-gray-600 min-w-[50px] text-center">
                 {Math.round(zoom * 100)}%
               </span>
-              <button 
-                onClick={handleZoomIn}
-                title="Phóng to"
-                className="w-9 h-9 flex items-center justify-center text-gray-500 hover:text-[#164399] hover:bg-white rounded-lg transition-all active:scale-90"
-              >
+              <button className="p-1 px-3 hover:bg-slate-100 rounded-lg cursor-pointer">
                 <ZoomIn className="w-4.5 h-4.5" />
               </button>
             </div>
 
             {/* Updated interactive file picker trigger */}
-            <button 
-              onClick={handleTriggerUpload}
-              title="Tải lên hình ảnh sơ đồ lưới mới từ trình duyệt"
-              className="px-4 py-2 text-[10pt] font-extrabold text-[#164399] bg-blue-50 border border-blue-200 hover:bg-blue-100 rounded-xl transition-all flex items-center gap-2 shadow-sm active:scale-95"
-            >
+            <button className="p-1 px-3 hover:bg-slate-100 rounded-lg cursor-pointer">
               <ImageIcon className="w-4 h-4" />
               <span>Cập nhật</span>
             </button>
@@ -752,7 +750,7 @@ export const SoDoThietBiScreen = ({
           <div className="no-canvas-click w-96 bg-white border-r border-gray-200 flex flex-col shrink-0 shadow-2xl z-30 animate-in slide-in-from-left duration-300 popup-card relative h-full">
             {/* Header */}
             <div className="p-4 border-b border-gray-200 bg-slate-50 flex items-center justify-between sticky top-0 z-10 shadow-sm">
-              <h3 className="font-extrabold text-[11.5pt] text-[#164399] flex items-center gap-2">
+              <h3 className="font-extrabold text-[11.5pt] text-gray-700 flex items-center gap-2">
                 {editingDeviceId ? (
                   <Edit className="w-5 h-5 text-blue-600" />
                 ) : (
@@ -768,7 +766,7 @@ export const SoDoThietBiScreen = ({
                   setEditingDeviceId(null);
                   setLocPath([]);
                 }}
-                className="p-1 hover:bg-slate-200 rounded-full transition-colors text-gray-500"
+                className="p-1 hover:bg-slate-200 rounded-xl transition-colors text-gray-500"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -778,10 +776,10 @@ export const SoDoThietBiScreen = ({
             <div className="flex-1 overflow-y-auto custom-scrollbar p-4 space-y-5">
               
               {/* PHẦN TRÊN: 2 ô nhập tọa độ + 2 ô nhập kích thước */}
-              <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-3.5 shadow-sm">
+              <div className="bg-slate-50 p-4 rounded-2xl border border-slate-200 space-y-3.5 shadow-sm">
                 <div className="flex items-center gap-2 pb-1.5 border-b border-gray-200">
                   <div className="w-2.5 h-2.5 bg-red-600 rounded-full animate-pulse"></div>
-                  <h4 className="text-[9pt] font-black uppercase text-slate-700 tracking-wider">
+                  <h4 className="text-[9pt] font-black uppercase text-gray-700 tracking-wider">
                     Vị trí tương đối & Kích thước vùng
                   </h4>
                 </div>
@@ -839,7 +837,7 @@ export const SoDoThietBiScreen = ({
                         const val = parseInt(e.target.value);
                         setAddDevState(prev => ({ ...prev, wPx: isNaN(val) ? 20 : Math.max(5, val) }));
                       }}
-                      className="w-full bg-white border border-orange-200 rounded-lg p-2 text-[9.5pt] font-bold text-slate-800 outline-none focus:ring-1 focus:ring-orange-500"
+                      className="w-full bg-white border border-orange-200 rounded-xl p-2 text-[9.5pt] font-bold text-slate-800 outline-none focus:ring-1 focus:ring-orange-500"
                     />
                   </div>
                   <div>
@@ -855,18 +853,18 @@ export const SoDoThietBiScreen = ({
                         const val = parseInt(e.target.value);
                         setAddDevState(prev => ({ ...prev, hPx: isNaN(val) ? 20 : Math.max(5, val) }));
                       }}
-                      className="w-full bg-white border border-orange-200 rounded-lg p-2 text-[9.5pt] font-bold text-slate-800 outline-none focus:ring-1 focus:ring-orange-500"
+                      className="w-full bg-white border border-orange-200 rounded-xl p-2 text-[9.5pt] font-bold text-slate-800 outline-none focus:ring-1 focus:ring-orange-500"
                     />
                   </div>
                 </div>
               </div>
 
               {/* PHẦN DƯỚI: Nút chọn mở popup và hiển thị thông tin chung */}
-              <div className="bg-[#164399]/5 p-4 rounded-xl border border-[#164399]/10 space-y-4">
+              <div className="bg-[#f0f4fa] p-4 rounded-2xl border border-[#164399]/10 space-y-4">
                 <div className="flex items-center justify-between pb-1.5 border-b border-[#164399]/10">
                   <div className="flex items-center gap-1.5">
                     <Database className="w-4 h-4 text-[#164399]" />
-                    <h4 className="text-[9pt] font-black uppercase text-[#164399] tracking-wider">
+                    <h4 className="text-[9pt] font-black uppercase text-gray-700 tracking-wider">
                       Thông tin thiết bị liên kết
                     </h4>
                   </div>
@@ -885,7 +883,7 @@ export const SoDoThietBiScreen = ({
                     
                     {/* URL Path / Vị trí */}
                     <div className="flex flex-col gap-1 text-[9pt]">
-                      <span className="text-[7.5pt] font-extrabold text-[#164399]/80 uppercase tracking-wider">Vị trí trong cây thiết bị (URL)</span>
+                      <span className="text-[7.5pt] font-extrabold text-gray-700/80 uppercase tracking-wider">Vị trí trong cây thiết bị (URL)</span>
                       <p className="text-slate-700 font-extrabold leading-relaxed bg-white border border-slate-100 p-2.5 rounded-lg text-[8.5pt] break-words">
                         {addDevState.url}
                       </p>
@@ -894,7 +892,7 @@ export const SoDoThietBiScreen = ({
                     {/* Common fields detail display */}
                     <div className="grid grid-cols-2 gap-3">
                       <div className="flex flex-col gap-1">
-                        <span className="text-[7.5pt] font-extrabold text-slate-400 uppercase tracking-wider">Mã thiết bị</span>
+                        <span className="text-[7.5pt] font-extrabold text-gray-700 uppercase tracking-wider">Mã thiết bị</span>
                         <input 
                           type="text" 
                           value={addDevState.code}
@@ -903,7 +901,7 @@ export const SoDoThietBiScreen = ({
                         />
                       </div>
                       <div className="flex flex-col gap-1">
-                        <span className="text-[7.5pt] font-extrabold text-slate-400 uppercase tracking-wider">Loại thiết bị</span>
+                        <span className="text-[7.5pt] font-extrabold text-gray-700 uppercase tracking-wider">Loại thiết bị</span>
                         <input 
                           type="text" 
                           readOnly
@@ -914,7 +912,7 @@ export const SoDoThietBiScreen = ({
                     </div>
 
                     <div className="flex flex-col gap-1">
-                      <span className="text-[7.5pt] font-extrabold text-slate-400 uppercase tracking-wider">Tên đầy đủ thiết bị</span>
+                      <span className="text-[7.5pt] font-extrabold text-gray-700 uppercase tracking-wider">Tên đầy đủ thiết bị</span>
                       <input 
                         type="text" 
                         value={addDevState.name}
@@ -925,7 +923,7 @@ export const SoDoThietBiScreen = ({
 
                     {/* Technical Specifications details */}
                     <div className="border-t border-dashed border-[#164399]/20 pt-3 space-y-2">
-                      <span className="text-[7.5pt] font-extrabold text-[#164399] uppercase tracking-wider block">Thông số kỹ thuật chung</span>
+                      <span className="text-[7.5pt] font-extrabold text-gray-700 uppercase tracking-wider block">Thông số kỹ thuật chung</span>
                       <div className="space-y-1.5 text-[8.5pt]">
                         {Object.entries(addDevState.specs).map(([key, val]) => (
                           <div key={key} className="flex justify-between items-center bg-white px-2 py-1.5 rounded shadow-sm border border-slate-100">
@@ -962,7 +960,8 @@ export const SoDoThietBiScreen = ({
               <button 
                 onClick={() => {
                   if (!addDevState.url) {
-                    alert('Quy trình yêu cầu bạn phải chọn thiết bị/vị trí làm việc từ cây thư mục PMIS bằng nút Chọn!');
+                    setAlertMsg('Quy trình yêu cầu bạn phải chọn thiết bị/vị trí làm việc từ cây thư mục PMIS bằng nút Chọn!');
+                    setIsAlertOpen(true);
                     return;
                   }
                   const wPct = parseFloat(((addDevState.wPx / 2400) * 100).toFixed(2));
@@ -1105,8 +1104,8 @@ export const SoDoThietBiScreen = ({
                   {/* Subtle blink radar for failures / warnings */}
                   {dev.status === 'Sự cố' && (
                     <span className="absolute -top-1 -right-1 flex h-2.5 w-2.5">
-                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
-                      <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-red-500"></span>
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-xl bg-red-400 opacity-75"></span>
+                      <span className="relative inline-flex rounded-xl h-2.5 w-2.5 bg-red-500"></span>
                     </span>
                   )}
                 </div>
@@ -1172,28 +1171,28 @@ export const SoDoThietBiScreen = ({
                   transform: 'translateX(-50%)',
                   pointerEvents: 'none',
                 }}
-                className="z-50 bg-white text-slate-800 p-4 rounded-xl shadow-2xl border border-slate-200 w-[320px] flex flex-col gap-2 pointer-events-none animate-in fade-in slide-in-from-top-2 duration-150 mt-2 h-auto"
+                className="z-50 bg-white text-slate-800 p-4 rounded-2xl shadow-2xl border border-slate-200 w-[320px] flex flex-col gap-2 pointer-events-none animate-in fade-in slide-in-from-top-2 duration-150 mt-2 h-auto"
               >
                 <div className="flex items-center justify-between gap-4 border-b border-slate-100 pb-2">
-                  <span className="text-[10pt] font-black text-red-600 uppercase tracking-wider">{activeTooltipDev.code}</span>
-                  <div className="bg-[#164399]/5 font-mono text-[8pt] font-bold text-[#164399] py-0.5 px-2 rounded-lg border border-blue-100">
+                  <span className="text-[10pt] font-black text-gray-700 uppercase tracking-wider">{activeTooltipDev.code}</span>
+                  <div className="bg-[#f0f4fa] font-mono text-[8pt] font-bold text-[#164399] py-0.5 px-2 rounded-xl border border-blue-100">
                     {activeTooltipDev.type}
                   </div>
                 </div>
                 <div className="flex flex-col">
-                  <h4 className="text-[10.5pt] font-black tracking-tight text-[#164399]">{activeTooltipDev.name}</h4>
+                  <h4 className="text-[10.5pt] font-black tracking-tight text-gray-700">{activeTooltipDev.name}</h4>
                   <p className="text-[8.5pt] text-gray-500 font-bold leading-normal break-words whitespace-normal mt-1">
                     Vị trí: {activeTooltipDev.path.join(' → ')}
                   </p>
                 </div>
                 <div className="flex items-center gap-2 mt-1 justify-between text-[9pt]">
                   <span className="text-slate-500 italic font-normal">Trạng thái thiết bị:</span>
-                  <span className={`px-2 py-0.5 text-[8.5pt] font-extrabold rounded-md ${
+                  <span className={`px-2 py-0.5 text-[8.5pt] font-extrabold rounded-[10px] ${
                     activeTooltipDev.status === 'Đang vận hành' ? 'text-emerald-700 bg-emerald-50 border border-emerald-200' :
                     activeTooltipDev.status === 'Sự cố' ? 'text-red-700 bg-red-50 border border-red-200' :
                     'text-orange-700 bg-orange-50 border border-orange-200'
                   }`}>
-                    ● {activeTooltipDev.status}
+                    {activeTooltipDev.status}
                   </span>
                 </div>
               </div>
@@ -1219,21 +1218,21 @@ export const SoDoThietBiScreen = ({
                 <button 
                   onClick={() => handleEditDevice(clickedDev)}
                   title="Chỉnh sửa vị trí thiết bị trên sơ đồ"
-                  className="p-1.5 text-[#164399] hover:bg-blue-50 rounded-lg transition-all border border-gray-200"
+                  className="p-1.5 text-[#164399] hover:bg-blue-50 rounded-xl transition-all border border-gray-200"
                 >
                   <Edit className="w-4 h-4" />
                 </button>
                 <button 
                   onClick={() => handleDeleteDevice(clickedDev.id, clickedDev.name)}
                   title="Xóa mapping thiết bị khỏi sơ đồ"
-                  className="p-1.5 text-red-600 hover:bg-red-50 rounded-lg transition-all border border-gray-200"
+                  className="p-1.5 text-red-600 hover:bg-red-50 rounded-xl transition-all border border-gray-200"
                 >
                   <Trash2 className="w-4 h-4" />
                 </button>
                 <button 
                   onClick={() => setClickedDev(null)}
                   title="Đóng trang"
-                  className="p-1.5 text-gray-500 hover:bg-gray-100 rounded-lg transition-all border border-gray-200"
+                  className="p-1.5 text-gray-500 hover:bg-gray-100 rounded-xl transition-all border border-gray-200"
                 >
                   <X className="w-4 h-4" />
                 </button>
@@ -1245,10 +1244,10 @@ export const SoDoThietBiScreen = ({
               
               {/* Mã và Loại thiết bị đưa lên trên trước Tên (Bỏ các tiêu đề) */}
               <div className="grid grid-cols-2 gap-3 pb-4 border-b border-gray-100">
-                <span className="bg-red-50 text-red-600 font-mono font-black text-[9pt] uppercase px-3 py-2 rounded-xl border border-red-100 text-center w-full flex items-center justify-center">
+                <span className="bg-red-50 text-red-600 font-mono font-black text-[9pt] uppercase px-3 py-2 rounded-full border border-red-100 text-center w-full flex items-center justify-center">
                   {clickedDev.code}
                 </span>
-                <span className={`font-black text-[8.5pt] uppercase px-3 py-2 rounded-xl border flex items-center justify-center gap-1.5 w-full text-center ${getTypeBadgeColor(clickedDev.type)}`}>
+                <span className={`font-black text-[8.5pt] uppercase px-3 py-2 rounded-[10px] border flex items-center justify-center gap-1.5 w-full text-center ${getTypeBadgeColor(clickedDev.type)}`}>
                   <Cpu className="w-3.5 h-3.5 shrink-0" />
                   <span className="truncate">{clickedDev.type}</span>
                 </span>
@@ -1256,7 +1255,7 @@ export const SoDoThietBiScreen = ({
 
               {/* Tên Thiết Bị & Vị trí trực thuộc quản lý (Hủy bỏ các nhãn tiêu đề, vị trí cha nhỏ mờ ngay dưới) */}
               <div className="space-y-1.5 pb-4 border-b border-gray-100">
-                <h3 className="text-[12pt] font-black text-[#164399] tracking-tight leading-relaxed">
+                <h3 className="text-[12pt] font-black text-gray-700 tracking-tight leading-relaxed">
                   {clickedDev.name}
                 </h3>
                 <div className="flex items-center gap-1.5 text-[8.5pt] font-medium text-gray-400 hover:text-gray-500 transition-colors leading-tight">
@@ -1273,7 +1272,7 @@ export const SoDoThietBiScreen = ({
                   setPreviewingImgDev(clickedDev);
                   setImgModalZoom(1);
                 }}
-                className="overflow-hidden rounded-2xl border border-slate-200/60 bg-slate-50 relative aspect-video shadow-inner group cursor-pointer"
+                className="overflow-hidden rounded-xl border border-slate-200/60 bg-slate-50 relative aspect-video shadow-inner group cursor-pointer"
                 title="Bấm vào để xem ảnh đầy đủ"
               >
                 <img 
@@ -1283,16 +1282,16 @@ export const SoDoThietBiScreen = ({
                   referrerPolicy="no-referrer"
                 />
                 <div className="absolute inset-0 bg-slate-900/40 opacity-0 group-hover:opacity-100 transition-all duration-200 flex flex-col items-center justify-center gap-1.5 text-white">
-                  <div className="p-2 bg-white/20 backdrop-blur-md rounded-full shadow-lg border border-white/30 transform scale-90 group-hover:scale-100 transition-all">
+                  <div className="p-2 bg-white/20 backdrop-blur-md rounded-2xl shadow-lg border border-white/30 transform scale-90 group-hover:scale-100 transition-all">
                     <ZoomIn className="w-4.5 h-4.5 text-white" />
                   </div>
-                  <span className="text-[8.5pt] font-black uppercase tracking-wider text-white">Xem & Phóng to ảnh</span>
+                  <span className="text-gray-700 text-[8.5pt] font-black uppercase tracking-wider text-white">Xem & Phóng to ảnh</span>
                 </div>
               </div>
 
               {/* Specific details specifications */}
-              <div className="space-y-3 bg-[#164399]/5 rounded-2xl p-4 border border-[#164399]/10">
-                <h4 className="text-[10pt] font-black text-[#164399] uppercase tracking-wider flex items-center gap-2 pb-2 border-b border-[#164399]/10">
+              <div className="space-y-3 bg-[#f0f4fa] rounded-xl p-4 border border-[#164399]/10">
+                <h4 className="text-[10pt] font-black text-gray-700 uppercase tracking-wider flex items-center gap-2 pb-2 border-b border-[#164399]/10">
                   <Settings className="w-4 h-4" /> Thông số kỹ thuật
                 </h4>
                 <div className="space-y-2 text-[9.5pt]">
@@ -1366,7 +1365,7 @@ export const SoDoThietBiScreen = ({
 
       {/* Floating Status alert messages banner (Toast counterpart) */}
       {isAlertOpen && (
-        <div className="absolute top-20 left-1/2 -translate-x-1/2 z-[100] px-6 py-3.5 bg-white text-slate-800 rounded-2xl shadow-2xl flex items-center gap-3 border border-slate-100 animate-in fade-in zoom-in-95 duration-200">
+        <div className="absolute top-20 left-1/2 -translate-x-1/2 z-[100] px-6 py-3.5 bg-white text-slate-800 rounded-lg shadow-2xl flex items-center gap-3 border border-slate-100 animate-in fade-in zoom-in-95 duration-200">
           <Check className="w-5 h-5 text-emerald-600 shrink-0" />
           <span className="text-[10pt] font-extrabold tracking-tight">{alertMsg}</span>
         </div>
@@ -1377,13 +1376,13 @@ export const SoDoThietBiScreen = ({
         <div className="fixed inset-0 bg-slate-900/85 backdrop-blur-sm z-[200] flex flex-col items-center justify-center p-4 animate-in fade-in duration-200">
           
           {/* Modal Box */}
-          <div className="bg-white rounded-3xl w-full max-w-4xl max-h-[85vh] overflow-hidden shadow-2xl flex flex-col border border-slate-100">
+          <div className="bg-white rounded-2xl w-full max-w-4xl max-h-[85vh] overflow-hidden shadow-2xl flex flex-col border border-slate-100">
             
             {/* Modal Header */}
             <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between bg-slate-50 gap-4 flex-wrap">
               <div className="flex flex-col min-w-0">
-                <span className="text-[7.5pt] font-black uppercase tracking-widest text-[#164399]">Hồ sơ ảnh thiết bị chính</span>
-                <h4 className="text-[11.5pt] font-black text-slate-800 tracking-tight flex items-center gap-2 truncate">
+                <span className="text-[7.5pt] font-black uppercase tracking-widest text-gray-700">Hồ sơ ảnh thiết bị chính</span>
+                <h4 className="text-[11.5pt] font-black text-gray-700 tracking-tight flex items-center gap-2 truncate">
                   <span className="bg-red-50 text-red-600 font-mono text-[8pt] px-2 py-0.5 rounded border border-red-100 shrink-0">
                     {previewingImgDev.code}
                   </span>
@@ -1400,7 +1399,7 @@ export const SoDoThietBiScreen = ({
                 >
                   <ZoomOut className="w-4 h-4" />
                 </button>
-                <div className="text-[8.5pt] font-bold text-slate-500 font-mono px-2 py-1 bg-white border border-gray-200 rounded-xl min-w-[50px] text-center select-none">
+                <div className="text-[8.5pt] font-bold text-slate-500 font-mono px-2 py-1 bg-white border border-gray-200 rounded-lg min-w-[50px] text-center select-none">
                   {Math.round(imgModalZoom * 100)}%
                 </div>
                 <button 
@@ -1413,7 +1412,7 @@ export const SoDoThietBiScreen = ({
                 <button 
                   onClick={() => setImgModalZoom(1)}
                   title="Reset kích thước"
-                  className="px-2.5 py-1 text-[8pt] font-black uppercase text-[#164399] bg-blue-50 border border-blue-100 hover:bg-blue-100 rounded-lg transition-all"
+                  className="px-2.5 py-1 text-[8pt] font-black uppercase text-[#164399] bg-blue-50 border border-blue-100 hover:bg-blue-100 rounded-full transition-all"
                 >
                   100%
                 </button>
@@ -1431,7 +1430,7 @@ export const SoDoThietBiScreen = ({
                 <button 
                   onClick={() => setPreviewingImgDev(null)}
                   title="Đóng trang"
-                  className="p-1.5 text-gray-500 hover:bg-red-50 hover:text-red-600 transition-all rounded-xl border border-gray-200 ml-2"
+                  className="p-1.5 text-gray-500 hover:bg-red-50 hover:text-red-600 transition-all rounded-full border border-gray-200 ml-2"
                 >
                   <X className="w-4 h-4" />
                 </button>
@@ -1447,7 +1446,7 @@ export const SoDoThietBiScreen = ({
                 <img 
                   src={getDeviceIllustration(previewingImgDev.type)}
                   alt={previewingImgDev.name}
-                  className="max-w-full max-h-[50vh] object-contain rounded-lg shadow-2xl pointer-events-none"
+                  className="max-w-full max-h-[50vh] object-contain rounded-xl shadow-2xl pointer-events-none"
                   referrerPolicy="no-referrer"
                 />
               </div>
@@ -1465,6 +1464,38 @@ export const SoDoThietBiScreen = ({
             <div className="px-6 py-3.5 border-t border-gray-100 bg-slate-50 flex items-center justify-between text-[8pt] font-bold text-gray-400">
               <div className="truncate text-slate-500">Vị trí PMIS: {previewingImgDev.path.join(' → ')}</div>
               <div className="shrink-0 text-slate-400">Sử dụng nút thu nhỏ / phóng to để kiểm tra chi tiết thiết bị</div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {localConfirmAction && (
+        <div className="fixed inset-0 bg-black/60 z-[99999] flex items-center justify-center p-4 backdrop-blur-xs">
+          <div className="bg-white rounded-2xl w-full max-w-sm overflow-hidden shadow-2xl flex flex-col p-6 text-center animate-in zoom-in-95 duration-150">
+            <div className="w-12 h-12 rounded-full flex items-center justify-center bg-red-50 mx-auto mb-4">
+              <AlertTriangle className="w-6 h-6 text-red-500" />
+            </div>
+            <h3 className="text-[12.5pt] font-extrabold text-gray-700 mb-2">{localConfirmAction.title}</h3>
+            <p className="text-[10pt] text-gray-500 leading-relaxed mb-6">
+              {localConfirmAction.message}
+            </p>
+            <div className="flex gap-3 justify-end">
+              <button 
+                type="button"
+                onClick={() => setLocalConfirmAction(null)}
+                className="px-4 py-2 border border-gray-200 rounded-lg text-gray-650 hover:bg-slate-50 font-bold text-[9pt] transition-all cursor-pointer"
+              >
+                Hủy bỏ
+              </button>
+              <button 
+                type="button"
+                onClick={() => {
+                  localConfirmAction.onConfirm();
+                }}
+                className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg font-bold text-[9pt] transition-all shadow-sm cursor-pointer"
+              >
+                Xác nhận
+              </button>
             </div>
           </div>
         </div>

@@ -2,7 +2,7 @@ import React from 'react';
 import { 
   ArrowLeft, Search, Plus, Filter, Calendar, Clock, FileText, Camera, Upload, Download, 
   Trash2, Maximize2, Share2, MessageSquare, History, Archive, CheckCircle2, PlayCircle,
-  AlertTriangle, ExternalLink
+  AlertTriangle, ExternalLink, Eye, ChevronRight, ChevronLeft
 } from 'lucide-react';
 import { DesignTooltip } from '../../../components/DesignTooltip';
 import { EvnLogo } from '../../../components/EvnLogo';
@@ -78,7 +78,31 @@ export const IncidentModule = ({
     return "Đơn vị";
   }, [devicePath]);
 
-  const inc = MOCK_INCIDENTS.find(i => i.id === selectedIncidentId);
+  const [currentPage, setCurrentPage] = React.useState(1);
+  const itemsPerPage = 10;
+  const filteredIncidents = React.useMemo(() => {
+    let res = MOCK_INCIDENTS;
+    if (incidentSearch) {
+      res = res.filter(i => 
+        i.device.toLowerCase().includes(incidentSearch.toLowerCase()) ||
+        i.description.toLowerCase().includes(incidentSearch.toLowerCase()) ||
+        i.cause.toLowerCase().includes(incidentSearch.toLowerCase())
+      );
+    }
+    return res;
+  }, [incidentSearch]);
+
+  const totalPages = Math.ceil(filteredIncidents.length / itemsPerPage) || 1;
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const paginatedIncidents = React.useMemo(() => {
+    return filteredIncidents.slice(startIndex, startIndex + itemsPerPage);
+  }, [filteredIncidents, startIndex]);
+
+  const inc = filteredIncidents.find(i => i.id === selectedIncidentId) || filteredIncidents[0];
+
+  React.useEffect(() => {
+    setCurrentPage(1);
+  }, [incidentSearch, devicePath]);
 
   return (
     <div className="flex-1 flex flex-col overflow-hidden bg-white">
@@ -88,7 +112,7 @@ export const IncidentModule = ({
           <div className="flex items-center gap-4">
             <button 
               onClick={() => setActiveSubMenu(null)}
-              className="p-1.5 hover:bg-gray-100 rounded-full transition-colors"
+              className="p-1.5 hover:bg-gray-100 rounded-xl transition-colors"
             >
               <ArrowLeft className="w-5 h-5 text-gray-500" />
             </button>
@@ -119,7 +143,7 @@ export const IncidentModule = ({
 
         {/* Filter Bar */}
         {showIncidentFilter && (
-          <div className="mt-4 p-4 bg-gray-50 rounded-xl border border-gray-100 flex flex-wrap items-center gap-x-8 gap-y-[10px] animate-in slide-in-from-top-2 duration-200">
+          <div className="mt-4 p-4 bg-gray-50 rounded-2xl border border-gray-100 flex flex-wrap items-center gap-x-8 gap-y-[10px] animate-in slide-in-from-top-2 duration-200">
             <div className="flex items-center gap-4">
                <div className="flex flex-col gap-1">
                   <label className="text-[9pt] font-bold text-gray-400 uppercase">Loại TB</label>
@@ -172,9 +196,9 @@ export const IncidentModule = ({
       {/* Main Content */}
       <div className="flex-1 flex overflow-hidden">
         {/* Left: Incident List */}
-        <div className="w-1/2 flex flex-col border-r border-gray-100 bg-gray-50/20 overflow-hidden">
-          <div className="flex-1 overflow-y-auto custom-scrollbar px-6 py-4 space-y-3">
-            {MOCK_INCIDENTS.map((item) => {
+        <div className="w-1/2 flex flex-col border-r border-slate-100 bg-[#f8fafc] overflow-hidden px-3.5 py-0">
+          <div className="flex-1 overflow-y-auto custom-scrollbar pl-1 pr-1.5 space-y-3 pt-4 pb-4">
+            {paginatedIncidents.map((item) => {
               const isSelected = selectedIncidentId === item.id;
               const dateParts = item.time.split(' ');
               const [year, month, day] = dateParts[0].split('-');
@@ -184,26 +208,45 @@ export const IncidentModule = ({
                 <div 
                   key={item.id}
                   onClick={() => setSelectedIncidentId(item.id)}
-                  className={`p-4 rounded-xl border transition-all cursor-pointer group relative overflow-hidden ${
+                  className={`p-4 rounded-2xl border transition-all cursor-pointer group relative overflow-hidden ${
                     isSelected 
                       ? 'bg-blue-50/50 border-blue-200 shadow-sm' 
                       : 'bg-white border-gray-100 hover:border-blue-100/60 shadow-sm'
                   }`}
                 >
                   {isSelected && (
-                    <div className="absolute left-0 top-0 bottom-0 w-1 bg-red-600"></div>
+                    <div className="absolute left-0 top-0 bottom-0 w-1 bg-[#164399]"></div>
                   )}
                   
                   <div className="flex justify-between items-start mb-2">
                     <div className="flex items-center gap-2">
-                       <span className="text-[9pt] font-black tracking-wider font-mono text-red-600">SC-00{item.id}</span>
-                       <span className="text-[10pt] font-black text-[#164399]">• {day}/{month}/{year} {time}</span>
+                       <span className="text-[9pt] font-black tracking-wider font-mono text-red-600 px-2 py-0.5 rounded border border-red-100 bg-red-50">SC-00{item.id}</span>
+                       <span className="text-[10pt] font-black text-blue-600">• {day}/{month}/{year} {time}</span>
                     </div>
-                    <span className={`px-2 py-0.5 rounded-[10px] text-[8pt] font-black uppercase tracking-tighter ${
-                      item.status === 'Xử lý xong' ? 'bg-green-100 text-green-700' :
-                      item.status === 'Đang xử lý' ? 'bg-yellow-100 text-yellow-700' :
-                      'bg-red-100 text-red-700'
-                    }`}>{item.status}</span>
+                    {(() => {
+                      if (item.status === 'Xử lý xong') {
+                        return (
+                          <span className="text-gray-700 inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[7.5pt] font-black uppercase tracking-wider bg-emerald-50 text-emerald-700 border border-emerald-200/60 shadow-xs">
+                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                            {item.status}
+                          </span>
+                        );
+                      } else if (item.status === 'Đang xử lý') {
+                        return (
+                          <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[7.5pt] font-black uppercase tracking-wider bg-amber-50 text-gray-700 border border-amber-200/60 shadow-xs animate-pulse">
+                            <span className="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
+                            {item.status}
+                          </span>
+                        );
+                      } else {
+                        return (
+                          <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[7.5pt] font-black uppercase tracking-wider bg-rose-50 text-gray-700 border border-rose-200/60 shadow-xs">
+                            <span className="w-1.5 h-1.5 rounded-full bg-red-500"></span>
+                            Mới tạo
+                          </span>
+                        );
+                      }
+                    })()}
                   </div>
                   
                   <h3 className={`text-[11pt] font-black mb-2 line-clamp-1 leading-tight transition-colors transition-colors uppercase tracking-tight ${
@@ -227,16 +270,44 @@ export const IncidentModule = ({
               );
             })}
           </div>
-          {/* Pagination */}
-          <div className="p-3 border-t border-gray-100 bg-white flex items-center justify-between text-[10pt] font-bold text-gray-400">
-             <button className="px-3 py-1 hover:bg-gray-50 rounded border border-gray-100 text-gray-400 cursor-not-allowed uppercase">Trước</button>
-             <div className="flex items-center gap-2">
-                <span className="text-blue-600">1</span>
-                <span>/</span>
-                <span>8</span>
-             </div>
-             <button className="px-3 py-1 hover:bg-blue-50 rounded border border-blue-100 text-blue-600 uppercase">Tiếp</button>
-          </div>
+          {/* Custom Pagination Panel styled exactly like the Device list paging */}
+          {totalPages > 1 && (
+            <div className="py-4 border-t border-gray-200 flex items-center justify-between container-paging shrink-0 bg-white px-6">
+              <span className="text-[8.5pt] font-black text-gray-700 uppercase tracking-wider">
+                Xem {startIndex + 1} - {Math.min(startIndex + itemsPerPage, filteredIncidents.length)} / {filteredIncidents.length} sự cố
+              </span>
+              <div className="flex items-center gap-1">
+                <button 
+                  disabled={currentPage === 1}
+                  onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+                  className="p-1.5 rounded-xl hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed transition-all cursor-pointer text-gray-500 border-none bg-transparent"
+                >
+                  <ChevronLeft className="w-4 h-4" />
+                </button>
+                <div className="flex items-center gap-1 px-1">
+                  {[...Array(totalPages)].map((_, i) => {
+                    const page = i + 1;
+                    return (
+                      <button 
+                        key={page}
+                        onClick={() => setCurrentPage(page)}
+                        className={`w-7 h-7 rounded-full text-[9pt] font-bold transition-all cursor-pointer border-none ${currentPage === page ? 'bg-blue-100 text-[#164399]' : 'text-gray-500 hover:bg-gray-100'}`}
+                      >
+                        {page}
+                      </button>
+                    );
+                  })}
+                </div>
+                <button 
+                  disabled={currentPage === totalPages}
+                  onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
+                  className="p-1.5 rounded-xl hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed transition-all cursor-pointer text-gray-500 border-none bg-transparent"
+                >
+                  <ChevronRight className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Right: Incident Details */}
@@ -246,7 +317,7 @@ export const IncidentModule = ({
           ) : (
             <>
               {/* Tabs */}
-              <div className="flex border-b border-gray-200 bg-white shrink-0">
+              <div className="flex border-b border-gray-100 bg-white shrink-0">
                 {[
                   { id: 'detail', label: 'Chi tiết' },
                   { id: 'reduction', label: 'Giảm trừ' },
@@ -270,8 +341,8 @@ export const IncidentModule = ({
                   <div className="grid grid-cols-1 gap-8 animate-in fade-in duration-500">
                     <div className="flex items-center justify-between border-b border-gray-100 pb-5 mb-2">
                        <div className="space-y-1">
-                          <p className="text-[10pt] font-black text-red-600 uppercase tracking-widest font-mono">SC-00{inc.id}</p>
-                          <h3 className="text-[14pt] font-bold text-[#164399] leading-tight uppercase tracking-tight">{inc.device}</h3>
+                          <p className="text-[10pt] font-black text-gray-700 uppercase tracking-widest font-mono">SC-00{inc.id}</p>
+                          <h3 className="text-[14pt] font-bold text-gray-700 leading-tight uppercase tracking-tight">{inc.device}</h3>
                           <div className="flex items-center gap-2 pt-1">
                              <Calendar className="w-3.5 h-3.5 text-gray-400" />
                              <span className="text-[10pt] font-bold text-gray-500 uppercase">{inc.time}</span>
@@ -283,27 +354,38 @@ export const IncidentModule = ({
                        </div>
                        <button 
                          onClick={() => setDetailForm({ type: 'incident', mode: 'view', data: inc })}
-                         className="px-4 py-2 text-[12pt] font-bold text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors flex items-center gap-2 shadow-sm border border-blue-100"
+                         className="px-4 py-2 text-[12pt] font-bold text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-full transition-colors flex items-center gap-2 shadow-sm border border-blue-100"
                        >
-                         <ExternalLink className="w-4 h-4" /> Xem
+                         <Eye className="w-4 h-4" /> Xem
                        </button>
                     </div>
 
                     <div className="space-y-4">
-                      <h4 className="text-[12pt] font-bold text-gray-400 uppercase tracking-widest flex items-center gap-2">
+                      <h4 className="text-[12pt] font-bold text-gray-700 uppercase tracking-widest flex items-center gap-2">
                         <FileText className="w-3.5 h-3.5" />
                         Mô tả sự cố
                       </h4>
-                      <div className="bg-white p-4 rounded-xl border border-gray-100 shadow-sm space-y-4">
+                      
+  <div className="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm space-y-4">
+    <div className="grid grid-cols-2 gap-4 pb-4 border-b border-gray-100">
+      <div>
+        <p className="text-[10pt] text-gray-500 mb-1">Khởi tạo</p>
+        <p className="text-[11pt] font-bold text-slate-700">Nguyễn Văn A - 10/06/2026</p>
+      </div>
+      <div>
+        <p className="text-[10pt] text-gray-500 mb-1">Cập nhật mới nhất</p>
+        <p className="text-[11pt] font-bold text-slate-700">Trần Thị B - 12/06/2026</p>
+      </div>
+    </div>
                         <div>
                           <DesignTooltip id="lbl_dien_bien">
-                            <p className="text-[12pt] text-[#164399] mb-1 font-black uppercase tracking-tight">Diễn biến chi tiết</p>
+                            <p className="text-[12pt] text-gray-700 mb-1 font-black uppercase tracking-tight">Diễn biến chi tiết</p>
                           </DesignTooltip>
                           <p className="text-[12pt] text-gray-700 leading-relaxed font-normal">{inc.description}</p>
                         </div>
                         <div className="pt-4 border-t border-gray-100 bg-transparent p-0 rounded-none">
                           <DesignTooltip id="lbl_nguyen_nhan">
-                            <p className="text-[12pt] text-purple-600 mb-1 font-black uppercase tracking-tight">Nguyên nhân xác định</p>
+                            <p className="text-[12pt] text-gray-700 mb-1 font-black uppercase tracking-tight">Nguyên nhân xác định</p>
                           </DesignTooltip>
                           <p className="text-[12pt] text-purple-700 leading-relaxed font-normal">"{inc.cause}"</p>
                         </div>
@@ -312,7 +394,7 @@ export const IncidentModule = ({
 
                     <div className="space-y-4">
                       <div className="flex items-center justify-between">
-                        <h4 className="text-[12pt] font-bold text-gray-400 uppercase tracking-widest flex items-center gap-2">
+                        <h4 className="text-[12pt] font-bold text-gray-700 uppercase tracking-widest flex items-center gap-2">
                           <Camera className="w-3.5 h-3.5" />
                           Hình ảnh hiện trường
                         </h4>
@@ -335,7 +417,7 @@ export const IncidentModule = ({
                                   <div key={idx} className="relative aspect-video rounded-xl overflow-hidden border border-gray-100 group cursor-pointer">
                                     <img src={img} alt="Incident" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" referrerPolicy="no-referrer" onClick={() => setPreviewContent({ type: 'image', url: img, name: 'Hình ảnh hiện trường' })} />
                                     <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                                      <button className="p-1.5 bg-white/90 backdrop-blur-sm rounded-lg text-blue-600 hover:bg-white shadow-sm transition-all" title="Tải về">
+                                      <button className="p-1 px-3 hover:bg-slate-100 rounded-lg cursor-pointer">
                                         <Download className="w-3.5 h-3.5" />
                                       </button>
                                     </div>
@@ -356,7 +438,7 @@ export const IncidentModule = ({
 
                       <div className="space-y-4">
                         <div className="flex items-center justify-between gap-4">
-                          <h4 className="text-[12pt] font-bold text-gray-400 uppercase tracking-widest flex items-center gap-2 whitespace-nowrap">
+                          <h4 className="text-[12pt] font-bold text-gray-700 uppercase tracking-widest flex items-center gap-2 whitespace-nowrap">
                             <Share2 className="w-3.5 h-3.5" />
                             Tài liệu đính kèm
                           </h4>
@@ -365,21 +447,15 @@ export const IncidentModule = ({
                           {inc.attachments.map((doc, i) => (
                             <div key={i} className="flex items-center justify-between p-3 bg-gray-50 rounded-xl border border-gray-100 hover:border-blue-200 transition-all cursor-pointer group" onClick={() => setPreviewContent({ type: 'file', url: '#', name: doc.name })}>
                               <div className="flex items-center gap-3 flex-1 min-w-0">
-                                <div className="p-2 bg-white rounded-lg text-blue-600 shadow-sm shrink-0">
+                                <div className="p-2 bg-white rounded-xl text-blue-600 shadow-sm shrink-0">
                                   <FileText className="w-5 h-5" />
                                 </div>
                                 <div className="flex-1 min-w-0">
                                   <p className="text-[12pt] font-bold text-gray-700 group-hover:text-blue-600 transition-colors truncate">{doc.name}</p>
-                                  <p className="text-[10px] text-gray-400 font-bold uppercase">{doc.size} • 08/04/2026</p>
+                                  <p className="text-[10px] text-gray-400 font-bold uppercase">Nguyễn Văn A | 08/04/2026 | {doc.size}</p>
                                 </div>
                               </div>
-                              <div className="flex gap-1 shrink-0">
-                                <DesignTooltip id={`btn_tai_ve_tai_lieu_inc_${i}`}>
-                                  <button className="p-2 text-gray-400 hover:text-blue-600 transition-colors" title="Tải về">
-                                    <Download className="w-4 h-4" />
-                                  </button>
-                                </DesignTooltip>
-                              </div>
+                              {null}
                             </div>
                           ))}
                         </div>
@@ -389,18 +465,35 @@ export const IncidentModule = ({
 
                 {incidentDetailTab === 'reduction' && (
                   <div className="space-y-6">
-                    <div className="bg-white p-6 rounded-xl border border-gray-100 shadow-sm space-y-6">
+                    <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm space-y-6">
                       <div className="flex items-center justify-between">
                         <DesignTooltip id="title_thong_tin_giam_tru">
-                          <h4 className="text-[12pt] font-bold text-gray-400 uppercase tracking-widest">Thông tin giảm trừ sự cố</h4>
+                          <h4 className="text-[12pt] font-bold text-gray-700 uppercase tracking-widest">Thông tin giảm trừ sự cố</h4>
                         </DesignTooltip>
-                        <span className={`px-3 py-1 rounded-full text-[10pt] font-bold uppercase whitespace-nowrap ${
-                          inc.reduction.status === 'Đã duyệt' ? 'bg-green-100 text-green-700' :
-                          inc.reduction.status === 'Chờ duyệt' ? 'bg-orange-100 text-orange-700' :
-                          'bg-gray-100 text-gray-500'
-                        }`}>
-                          {inc.reduction.status}
-                        </span>
+                        {(() => {
+                          if (inc.reduction.status === 'Đã duyệt') {
+                            return (
+                              <span className="text-gray-700 inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[8.5pt] font-black uppercase tracking-wider bg-emerald-50 text-emerald-700 border border-emerald-200/60 shadow-xs">
+                                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                                {inc.reduction.status}
+                              </span>
+                            );
+                          } else if (inc.reduction.status === 'Chờ duyệt') {
+                            return (
+                              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[8.5pt] font-black uppercase tracking-wider bg-amber-50 text-gray-700 border border-amber-200/60 shadow-xs animate-pulse">
+                                <span className="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
+                                {inc.reduction.status}
+                              </span>
+                            );
+                          } else {
+                            return (
+                              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[8.5pt] font-black uppercase tracking-wider bg-gray-50 text-gray-700 border border-gray-200/60 shadow-xs">
+                                <span className="w-1.5 h-1.5 rounded-full bg-gray-400"></span>
+                                {inc.reduction.status}
+                              </span>
+                            );
+                          }
+                        })()}
                       </div>
                       
                       <div className="space-y-4">
@@ -431,35 +524,24 @@ export const IncidentModule = ({
                         
                         <div className="flex justify-start items-center gap-6 w-full">
                           <DesignTooltip id="btn_dang_ky_giam_tru">
-                            <button 
-                              className={`px-8 py-1.5 text-[12pt] font-bold rounded-lg transition-all whitespace-nowrap ${inc.reduction.status === 'Đã duyệt' ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : 'text-blue-600 bg-blue-50 hover:bg-blue-100 active:scale-95'}`}
-                              disabled={inc.reduction.status === 'Đã duyệt'}
-                            >
-                              Đăng ký
-                            </button>
+                            <button className="px-4 py-2 bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-700 transition-all shadow-md cursor-pointer whitespace-nowrap flex items-center justify-center gap-2">Đăng ký</button>
                           </DesignTooltip>
                           <span className="text-[10pt] text-gray-400 font-medium italic whitespace-nowrap">Đăng ký mới nhất: 08/04/2026 15:30</span>
                         </div>
                       </div>
                     </div>
 
-                    <div className="bg-white p-6 rounded-xl border border-gray-100 shadow-sm space-y-4">
+                    <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm space-y-4">
                       <div className="flex items-center justify-between gap-4">
                         <DesignTooltip id="title_tai_lieu_dinh_kem">
-                          <h4 className="text-[12pt] font-bold text-gray-400 uppercase tracking-widest whitespace-nowrap">Tài liệu đính kèm</h4>
+                          <h4 className="text-[12pt] font-bold text-gray-700 uppercase tracking-widest whitespace-nowrap">Tài liệu đính kèm</h4>
                         </DesignTooltip>
                         <div className="flex gap-2">
                           <DesignTooltip id="btn_thu_vien_tai_lieu">
-                            <button className="flex items-center gap-1 px-3 py-1.5 text-[12pt] font-bold text-gray-600 bg-gray-50 hover:bg-gray-100 border border-gray-200 rounded-lg transition-colors whitespace-nowrap">
-                              <Archive className="w-3.5 h-3.5" />
-                              Thư viện
-                            </button>
+                            <button onClick={(e) => { e.stopPropagation(); document.getElementById('giam-tru-upload') && document.getElementById('giam-tru-upload').click(); }} className="px-3 py-1.5 flex items-center gap-2 rounded-lg text-[9pt] font-black uppercase text-gray-500 border border-gray-200 hover:bg-gray-50 transition-colors bg-white shadow-sm cursor-pointer"><Archive className="w-4 h-4 text-gray-400" /> Từ Thư viện</button>
                           </DesignTooltip>
                           <DesignTooltip id="btn_tai_len_tai_lieu">
-                            <button className="flex items-center gap-1 px-3 py-1.5 text-[12pt] font-bold text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors whitespace-nowrap">
-                              <Upload className="w-3.5 h-3.5" />
-                              Tải lên
-                            </button>
+                            <button onClick={(e) => { e.stopPropagation(); document.getElementById('giam-tru-upload') && document.getElementById('giam-tru-upload').click(); }} className="px-3 py-1.5 flex items-center gap-2 rounded-lg text-[9pt] font-black uppercase text-blue-600 border border-blue-200 hover:bg-blue-50 transition-colors bg-blue-50/50 shadow-sm cursor-pointer"><Upload className="w-4 h-4 text-blue-500" /> Tải lên</button>
                           </DesignTooltip>
                         </div>
                       </div>
@@ -467,20 +549,16 @@ export const IncidentModule = ({
                         {inc.attachments.map((doc, i) => (
                           <div key={i} className="flex items-center justify-between p-3 bg-gray-50 rounded-xl border border-gray-100 hover:border-blue-200 transition-all cursor-pointer group" onClick={() => setPreviewContent({ type: 'file', url: '#', name: doc.name })}>
                             <div className="flex items-center gap-3 flex-1 min-w-0">
-                              <div className="p-2 bg-white rounded-lg text-blue-600 shadow-sm shrink-0">
+                              <div className="p-2 bg-white rounded-xl text-blue-600 shadow-sm shrink-0">
                                 <FileText className="w-5 h-5" />
                               </div>
                               <div className="flex-1 min-w-0">
                                 <p className="text-[12pt] font-bold text-gray-700 group-hover:text-blue-600 transition-colors truncate">{doc.name}</p>
-                                <p className="text-[10px] text-gray-400 font-bold uppercase">{doc.size} • 08/04/2026</p>
+                                <p className="text-[10px] text-gray-400 font-bold uppercase">{i === 0 ? 'Đức Thảo' : i === 1 ? 'Lê Minh' : 'Phan Anh'} | 08/04/2026 | {doc.size}</p>
                               </div>
                             </div>
-                            <div className="flex gap-1 shrink-0">
-                              <DesignTooltip id={`btn_tai_ve_tai_lieu_dinh_kem_${i}`}>
-                                <button className="p-2 text-gray-400 hover:text-blue-600 transition-colors" title="Tải về">
-                                  <Download className="w-4 h-4" />
-                                </button>
-                              </DesignTooltip>
+                            <div className="flex items-center gap-3 shrink-0">
+                              {null}
                               <DesignTooltip id={`btn_xoa_tai_lieu_dinh_kem_${i}`}>
                                 <button 
                                   className="p-2 text-gray-400 hover:text-red-600 transition-colors" 
@@ -503,9 +581,9 @@ export const IncidentModule = ({
                       </div>
                     </div>
 
-                    <div className="bg-white p-6 rounded-xl border border-gray-100 shadow-sm space-y-4">
+                    <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm space-y-4">
                       <DesignTooltip id="title_trao_doi_thao_luan">
-                        <h4 className="text-[12pt] font-bold text-gray-400 uppercase tracking-widest flex items-center gap-2">
+                        <h4 className="text-[12pt] font-bold text-gray-700 uppercase tracking-widest flex items-center gap-2">
                           <MessageSquare className="w-4 h-4 text-blue-500" />
                           Trao đổi & Thảo luận
                         </h4>
@@ -515,7 +593,7 @@ export const IncidentModule = ({
                           <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center shrink-0">
                             <span className="text-blue-700 font-bold text-[12pt]">NV</span>
                           </div>
-                          <div className="flex-1 bg-gray-50 p-3 rounded-lg rounded-tl-none border border-gray-100">
+                          <div className="flex-1 bg-gray-50 p-3 rounded-xl rounded-tl-none border border-gray-100">
                             <div className="flex justify-between items-center mb-1">
                               <span className="text-[12pt] font-bold text-gray-700">Nguyễn Văn A</span>
                               <span className="text-[10pt] text-gray-400">08/04/2026 10:30</span>
@@ -527,7 +605,7 @@ export const IncidentModule = ({
                           <div className="w-8 h-8 rounded-full bg-orange-100 flex items-center justify-center shrink-0">
                             <span className="text-orange-700 font-bold text-[12pt]">QL</span>
                           </div>
-                          <div className="flex-1 bg-gray-50 p-3 rounded-lg rounded-tl-none border border-gray-100">
+                          <div className="flex-1 bg-gray-50 p-3 rounded-xl rounded-tl-none border border-gray-100">
                             <div className="flex justify-between items-center mb-1">
                               <span className="text-[12pt] font-bold text-gray-700">Trần Quản Lý</span>
                               <span className="text-[10pt] text-gray-400">08/04/2026 14:15</span>
@@ -547,7 +625,7 @@ export const IncidentModule = ({
                           ></textarea>
                           <div className="flex justify-end">
                             <DesignTooltip id="btn_gui_trao_doi">
-                              <button className="px-8 py-1.5 text-[12pt] font-bold text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors whitespace-nowrap">
+                              <button className="p-1 px-3 hover:bg-slate-100 rounded-lg cursor-pointer">
                                 Gửi
                               </button>
                             </DesignTooltip>
@@ -559,21 +637,47 @@ export const IncidentModule = ({
                 )}
 
                 {incidentDetailTab === 'tracking' && (
-                  <div className="space-y-4">
-                    <h4 className="text-[12pt] font-bold text-gray-400 uppercase tracking-widest flex items-center gap-2">
+                  <div className="space-y-6">
+                    <h4 className="text-[12pt] font-bold text-gray-700 uppercase tracking-widest flex items-center gap-2">
                       <History className="w-3.5 h-3.5" />
-                      Diễn biến sau sự cố
+                      DIỄN BIẾN SỰ CỐ
                     </h4>
-                    <div className="relative pl-4 space-y-6 before:absolute before:left-[19px] before:top-2 before:bottom-2 before:w-[2px] before:bg-gray-100">
-                      {inc.tracking.length > 0 ? inc.tracking.map((t, i) => (
-                        <div key={i} className="relative pl-8">
-                          <div className="absolute left-0 top-1 w-3 h-3 rounded-full bg-white border-2 border-blue-500 z-10"></div>
-                          <div className="bg-white p-3 rounded-xl border border-gray-100 shadow-sm">
-                            <p className="text-[10pt] font-bold text-blue-600 mb-1">{t.date}</p>
-                            <p className="text-[12pt] text-gray-700">{t.content}</p>
+                    <div className="relative pl-8 border-l-2 border-slate-100 space-y-6 ml-4 pt-2">
+                      {inc.tracking.length > 0 ? inc.tracking.map((t, i) => {
+                        const typeVal = (t as any).type || (i === 0 ? 'Khắc phục' : 'Sự cố');
+                        const dotColor = typeVal === 'Khắc phục' ? 'bg-green-500' : 'bg-red-500';
+                        const badgeStyle = typeVal === 'Khắc phục' 
+                          ? 'bg-green-50 px-2 py-0.5 rounded text-[7.5pt] font-black uppercase tracking-wider border border-green-200 text-green-700'
+                          : 'bg-red-50 px-2 py-0.5 rounded text-[7.5pt] font-black uppercase tracking-wider border border-red-200 text-red-700';
+                        return (
+                          <div key={i} className="relative group text-left">
+                            {/* Timeline circular dot on the vertical line */}
+                            <div className="absolute -left-[41px] top-1.5 w-6 h-6 rounded-full bg-white border-2 border-slate-200 flex items-center justify-center group-hover:border-blue-500 transition-all z-10 shadow-sm">
+                              <div className={`w-2 h-2 rounded-full ${dotColor} group-hover:scale-125 transition-transform`}></div>
+                            </div>
+
+                            {/* Content Card */}
+                            <div className="p-4 bg-white rounded-2xl border border-gray-200 hover:shadow-sm hover:border-blue-200 transition-all relative">
+                              <div className="flex items-start justify-between gap-4">
+                                <div className="flex-1 min-w-0 space-y-1">
+                                  <div className="flex items-center gap-2 flex-wrap">
+                                    <span className={badgeStyle}>
+                                      {typeVal}
+                                    </span>
+                                    <span className="text-[9pt] text-gray-400 font-bold font-mono">{t.date}</span>
+                                  </div>
+                                  <p className="text-[11.5pt] text-slate-800 font-extrabold leading-snug tracking-tight">
+                                    {t.content}
+                                  </p>
+                                </div>
+                                <div className="pt-1.5 shrink-0">
+                                  <ChevronRight className="w-4 h-4 text-gray-300 group-hover:text-blue-500 group-hover:translate-x-1 transition-all" />
+                                </div>
+                              </div>
+                            </div>
                           </div>
-                        </div>
-                      )) : (
+                        );
+                      }) : (
                         <div className="text-center py-12 text-gray-400">
                           <Clock className="w-8 h-8 mx-auto mb-2 opacity-20" />
                           <p className="text-[12pt]">Chưa có diễn biến theo dõi</p>

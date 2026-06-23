@@ -78,6 +78,7 @@ const SecondaryCard = ({ module, onClick }: { module: Module; onClick: () => voi
 export const ModulesBoard = ({ config, onUpdateConfig, onModuleSelect }: ModulesBoardProps) => {
   const [isConfigOpen, setIsConfigOpen] = useState(false);
   const [bgLoaded, setBgLoaded] = useState(false);
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   useEffect(() => {
     // Preload background image
@@ -93,7 +94,8 @@ export const ModulesBoard = ({ config, onUpdateConfig, onModuleSelect }: Modules
     if (module.id === 'm3') {
       onModuleSelect(module.id);
     } else {
-      alert(`Mở module: ${module.title} - ${module.subtitle}`);
+      setToastMessage(`Hệ thống đang đồng bộ dữ liệu thời gian thực cho module "${module.title}"!`);
+      setTimeout(() => setToastMessage(null), 3000);
     }
   };
 
@@ -189,6 +191,13 @@ export const ModulesBoard = ({ config, onUpdateConfig, onModuleSelect }: Modules
         config={config}
         onSave={onUpdateConfig}
       />
+
+      {toastMessage && (
+        <div className="fixed bottom-24 left-1/2 -translate-x-1/2 z-[9999] bg-[#164399]/90 border border-[#164399]/40 text-white font-semibold text-[10pt] px-6 py-4 rounded-full shadow-2xl backdrop-blur-md flex items-center gap-2 animate-in fade-in slide-in-from-bottom-2 duration-200">
+          <div className="w-2 h-2 rounded-full bg-emerald-400 animate-ping shrink-0" />
+          <span>{toastMessage}</span>
+        </div>
+      )}
     </div>
   );
 };

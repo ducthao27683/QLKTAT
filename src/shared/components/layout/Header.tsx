@@ -114,7 +114,7 @@ export const Header = ({
               <span className="text-[#164399]">PMIS</span>
               {isMenuOpen && <span className="ml-0.5 text-red-600 italic">Lưới</span>}
             </span>
-            {isMenuOpen && <span className="text-[7pt] font-black text-gray-400 opacity-60 uppercase tracking-widest leading-none mt-0.5">v2.0.4 - 2026</span>}
+            {isMenuOpen && <span className="text-[7pt] font-black text-gray-700 opacity-60 uppercase tracking-widest leading-none mt-0.5">v2.0.4 - 2026</span>}
           </div>
         </div>
       </div>
@@ -134,16 +134,15 @@ export const Header = ({
              className="flex items-center gap-1.5 font-bold text-gray-400 cursor-pointer hover:text-gray-600 transition-all group px-3 py-1 hover:bg-gray-50 rounded-lg"
              onClick={onOpenDeviceTreePopup}
            >
-             <span className="text-[9.5pt] uppercase tracking-widest opacity-80 group-hover:opacity-100">{currentBranch || "CÔNG TY ĐIỆN LỰC HƯNG YÊN"}</span>
+             <span className="text-gray-700 text-[9.5pt] uppercase tracking-widest opacity-80 group-hover:opacity-100">{currentBranch || "CÔNG TY ĐIỆN LỰC HƯNG YÊN"}</span>
              <ChevronDown className="w-3.5 h-3.5 text-gray-300 group-hover:text-gray-500 group-hover:translate-y-0.5 transition-all" />
            </div>
         </div>
       </div>
 
       <div className="flex-1 px-4 relative flex items-center min-w-0" ref={searchContainerRef}>
-        <button 
-          className="p-2 hover:bg-gray-100 rounded-full transition-colors mr-3 group shrink-0" 
-          title="Thông tin nhanh"
+        <button
+          className="p-2 hover:bg-gray-100 rounded-lg cursor-pointer group"
           onClick={() => { setActiveMenu(null); setActiveSubMenu(null); }}
         >
           <LayoutDashboard className="w-5 h-5 text-blue-600 group-hover:scale-110 transition-transform" />
@@ -262,17 +261,13 @@ export const Header = ({
 
       <div className="flex items-center gap-1 pr-4">
         <DesignTooltip id="btn_bao_loi">
-          <button className="p-2 hover:bg-gray-100 rounded-full transition-colors relative" title="Báo lỗi">
+          <button className="p-2 hover:bg-gray-100 rounded-lg cursor-pointer transition-colors relative">
             <Bug className="w-6 h-6 text-gray-600" />
           </button>
         </DesignTooltip>
         <div className="relative">
           <DesignTooltip id="btn_thong_bao">
-            <button 
-              className="p-2 hover:bg-gray-100 rounded-full transition-colors relative" 
-              title="Thông báo"
-              onClick={() => setShowNotifications(!showNotifications)}
-            >
+            <button className="p-2 hover:bg-gray-100 rounded-lg cursor-pointer transition-colors relative" onClick={() => setShowNotifications(!showNotifications)}>
               <Bell className="w-6 h-6 text-gray-600" />
               <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full"></span>
             </button>
@@ -306,10 +301,7 @@ export const Header = ({
           )}
         </div>
         <div className="relative ml-2">
-          <button 
-            className="w-8 h-8 rounded-full overflow-hidden border border-gray-200"
-            onClick={() => setShowUserMenu(!showUserMenu)}
-          >
+          <button className="w-10 h-10 rounded-full border-2 border-transparent hover:border-gray-200 overflow-hidden cursor-pointer" onClick={() => setShowUserMenu(!showUserMenu)}>
             <img src={config.avatarUrl} alt="Avatar" className="w-full h-full object-cover" referrerPolicy="no-referrer" />
           </button>
           

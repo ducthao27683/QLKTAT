@@ -82,7 +82,7 @@ export const Dashboard = ({
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-100 flex items-center gap-4 hover:-translate-y-1 hover:shadow-lg transition-all duration-300 cursor-pointer group">
+        <div className="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 flex items-center gap-4 hover:-translate-y-1 hover:shadow-lg transition-all duration-300 cursor-pointer group">
           <div className="w-14 h-14 rounded-full bg-green-50 flex items-center justify-center shrink-0 group-hover:bg-green-100 transition-colors">
             <Cpu className="w-7 h-7 text-green-500 group-hover:scale-110 transition-transform" />
           </div>
@@ -91,7 +91,7 @@ export const Dashboard = ({
             <div className="text-prominent font-bold text-green-600 hover:scale-110 transition-transform cursor-default">{1245 * branchMultiplier} <span className="text-secondary font-normal text-gray-400">thiết bị</span></div>
           </div>
         </div>
-        <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-100 flex items-center gap-4 hover:-translate-y-1 hover:shadow-lg transition-all duration-300 cursor-pointer group">
+        <div className="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 flex items-center gap-4 hover:-translate-y-1 hover:shadow-lg transition-all duration-300 cursor-pointer group">
           <div className="w-14 h-14 rounded-full bg-blue-50 flex items-center justify-center shrink-0 group-hover:bg-blue-100 transition-colors">
             <Wrench className="w-7 h-7 text-blue-500 group-hover:scale-110 transition-transform" />
           </div>
@@ -100,7 +100,7 @@ export const Dashboard = ({
             <div className="text-prominent font-bold text-[#164399] hover:scale-110 transition-transform cursor-default">{84 * branchMultiplier} <span className="text-secondary font-normal text-gray-400">thiết bị</span></div>
           </div>
         </div>
-        <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-100 flex items-center gap-4 hover:-translate-y-1 hover:shadow-lg transition-all duration-300 cursor-pointer group">
+        <div className="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 flex items-center gap-4 hover:-translate-y-1 hover:shadow-lg transition-all duration-300 cursor-pointer group">
           <div className="w-14 h-14 rounded-full bg-red-50 flex items-center justify-center shrink-0 group-hover:bg-red-100 transition-colors">
             <AlertTriangle className="w-7 h-7 text-red-500 group-hover:scale-110 transition-transform" />
           </div>
@@ -109,7 +109,7 @@ export const Dashboard = ({
             <div className="text-prominent font-bold text-red-600 hover:scale-110 transition-transform cursor-default">{12 * branchMultiplier} <span className="text-secondary font-normal text-gray-400">thiết bị</span></div>
           </div>
         </div>
-        <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-100 flex items-center gap-4 hover:-translate-y-1 hover:shadow-lg transition-all duration-300 cursor-pointer group">
+        <div className="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 flex items-center gap-4 hover:-translate-y-1 hover:shadow-lg transition-all duration-300 cursor-pointer group">
           <div className="w-14 h-14 rounded-full bg-orange-50 flex items-center justify-center shrink-0 group-hover:bg-orange-100 transition-colors">
             <ClipboardList className="w-7 h-7 text-orange-500 group-hover:scale-110 transition-transform" />
           </div>
@@ -122,9 +122,9 @@ export const Dashboard = ({
 
       {/* Charts Row */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-100 lg:col-span-2 hover:shadow-xl hover:border-blue-200 transition-all duration-300 group">
+        <div className="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 lg:col-span-2 hover:shadow-xl hover:border-blue-200 transition-all duration-300 group">
           <DesignTooltip id="title_thong_ke_thiet_bi">
-            <h3 className="text-gray-500 font-bold mb-4 flex items-center gap-2 uppercase text-[12pt]">
+            <h3 className="text-gray-700 font-bold mb-4 flex items-center gap-2 uppercase text-[12pt]">
               <BarChart2 className="w-5 h-5 text-blue-500 group-hover:scale-110 transition-transform" />
               Thống kê thiết bị
             </h3>
@@ -157,7 +157,7 @@ export const Dashboard = ({
                   </PieChart>
                 </ResponsiveContainer>
               </div>
-              <h4 className="text-secondary font-bold text-gray-600 mt-2">Tháng này năm nay</h4>
+              <h4 className="text-secondary font-bold text-gray-700 mt-2">Tháng này năm nay</h4>
             </div>
             <div className="flex-1 text-center relative flex flex-col">
               <div className="flex-1">
@@ -186,7 +186,7 @@ export const Dashboard = ({
                   </PieChart>
                 </ResponsiveContainer>
               </div>
-              <h4 className="text-secondary font-bold text-gray-600 mt-2">Số liệu tháng trước</h4>
+              <h4 className="text-secondary font-bold text-gray-700 mt-2">Số liệu tháng trước</h4>
             </div>
             <div className="flex-1 text-center relative flex flex-col">
               <div className="flex-1">
@@ -215,7 +215,7 @@ export const Dashboard = ({
                   </PieChart>
                 </ResponsiveContainer>
               </div>
-              <h4 className="text-secondary font-bold text-gray-600 mt-2">Cùng kỳ năm trước</h4>
+              <h4 className="text-secondary font-bold text-gray-700 mt-2">Cùng kỳ năm trước</h4>
             </div>
           </div>
           <div className="mt-4 flex justify-center">
@@ -229,9 +229,9 @@ export const Dashboard = ({
             </div>
           </div>
         </div>
-        <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-100 hover:shadow-xl hover:border-blue-200 transition-all duration-300 group">
+        <div className="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 hover:shadow-xl hover:border-blue-200 transition-all duration-300 group">
           <DesignTooltip id="title_su_co_3_thang">
-            <h3 className="text-gray-500 font-bold mb-4 flex items-center gap-2 uppercase text-[12pt]">
+            <h3 className="text-gray-700 font-bold mb-4 flex items-center gap-2 uppercase text-[12pt]">
               <AlertTriangle className="w-5 h-5 text-red-500 group-hover:scale-110 transition-transform" />
               Sự cố 3 tháng gần nhất
             </h3>
@@ -258,7 +258,7 @@ export const Dashboard = ({
         <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
           <div className="p-4 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
             <DesignTooltip id="title_su_co_moi_nhat">
-              <h3 className="text-gray-500 font-bold flex items-center gap-2 uppercase text-[12pt]">
+              <h3 className="text-gray-700 font-bold flex items-center gap-2 uppercase text-[12pt]">
                 <AlertTriangle className="w-5 h-5 text-red-500" />
                 Sự cố mới nhất
               </h3>
@@ -272,7 +272,7 @@ export const Dashboard = ({
           <div className="divide-y divide-gray-100">
             {dynamicIncidentList.map((item) => (
               <div key={item.id} className="p-4 hover:bg-[#f6f8fc] transition-colors cursor-pointer flex gap-4 items-start group/card">
-                <div className="w-10 h-10 rounded-lg bg-gray-50 flex items-center justify-center shrink-0 mt-0.5">
+                <div className="w-10 h-10 rounded-full bg-gray-50 flex items-center justify-center shrink-0 mt-0.5">
                   {item.type === 'Trạm' && <Database className="w-6 h-6 text-blue-500" />}
                   {item.type === 'Đường dây' && <Network className="w-6 h-6 text-green-500" />}
                   {item.type === 'Nút' && <GitCommit className="w-6 h-6 text-orange-500" />}
@@ -290,10 +290,10 @@ export const Dashboard = ({
           </div>
         </div>
 
-        <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
           <div className="p-4 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
             <DesignTooltip id="title_chi_dao_cbm">
-              <h3 className="text-gray-500 font-bold flex items-center gap-2 uppercase text-[12pt]">
+              <h3 className="text-gray-700 font-bold flex items-center gap-2 uppercase text-[12pt]">
                 <Wrench className="w-5 h-5 text-orange-500" />
                 Chỉ đạo xử lý tồn tại CBM
               </h3>
@@ -309,7 +309,7 @@ export const Dashboard = ({
               <div key={item.id} className="p-4 hover:bg-blue-50/80 transition-all cursor-pointer flex items-start gap-4 group/card hover:shadow-md">
                 <div className="w-16 shrink-0 flex flex-col items-center group-hover/card:scale-110 transition-transform">
                   <div className="w-12 h-12 border border-gray-200 bg-white rounded-[10px] flex flex-col items-center justify-center shadow-sm group-hover/card:border-blue-300 group-hover/card:shadow-md transition-all border-t-2 border-t-[#164399]">
-                    <span className="text-[7pt] text-[#164399] font-bold uppercase tracking-wider mb-0.5">Ngày</span>
+                    <span className="text-[7pt] text-gray-700 font-bold uppercase tracking-wider mb-0.5">Ngày</span>
                     <span className="text-secondary font-bold text-[#164399] leading-none text-[14pt]">{item.date.split('/')[0]}</span>
                   </div>
                 </div>
@@ -319,7 +319,7 @@ export const Dashboard = ({
                       <span className="text-[#555555] text-[12pt] group-hover/card:text-blue-600 transition-colors truncate">{item.title}</span>
                       <span className="text-secondary px-2 py-0.5 rounded bg-gray-100 text-gray-500 shrink-0">{item.type}</span>
                     </div>
-                    <span className={`text-[7pt] px-2.5 py-1 rounded-full uppercase tracking-wider shrink-0 whitespace-nowrap ${
+                    <span className={`text-[7pt] px-2.5 py-1 rounded-[10px] uppercase tracking-wider shrink-0 whitespace-nowrap ${
                       item.status === 'Đã hoàn thành' || item.status === 'Hoàn thành' ? 'bg-green-100 text-green-700' :
                       item.status === 'Chờ duyệt' ? 'bg-yellow-100 text-yellow-700' :
                       item.status === 'Mới tạo' ? 'bg-purple-100 text-purple-700' :
@@ -336,9 +336,9 @@ export const Dashboard = ({
       
       {/* Bottom Row */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 pb-8">
-        <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-100 lg:col-span-2 hover:shadow-xl hover:border-blue-200 transition-all duration-300 group">
+        <div className="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 lg:col-span-2 hover:shadow-xl hover:border-blue-200 transition-all duration-300 group">
           <DesignTooltip id="title_khoi_luong_cong_viec">
-            <h3 className="text-gray-500 font-bold mb-4 flex items-center gap-2 uppercase text-[12pt]">
+            <h3 className="text-gray-700 font-bold mb-4 flex items-center gap-2 uppercase text-[12pt]">
               <Activity className="w-5 h-5 text-green-500 group-hover:scale-110 transition-transform" />
               Khối lượng công việc
             </h3>
@@ -360,10 +360,10 @@ export const Dashboard = ({
           </div>
         </div>
         
-        <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden flex flex-col">
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden flex flex-col">
           <div className="p-4 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
             <DesignTooltip id="title_thong_bao_he_thong">
-              <h3 className="text-gray-500 font-bold flex items-center gap-2 uppercase text-[12pt]">
+              <h3 className="text-gray-700 font-bold flex items-center gap-2 uppercase text-[12pt]">
                 <Bell className="w-5 h-5 text-blue-500" />
                 Thông báo hệ thống
               </h3>

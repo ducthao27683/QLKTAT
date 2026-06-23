@@ -12,6 +12,7 @@ interface ConfigModalProps {
 export const ConfigModal = ({ isOpen, onClose, config, onSave }: ConfigModalProps) => {
   const [mainIds, setMainIds] = useState<string[]>(config.mainModuleIds);
   const [secIds, setSecIds] = useState<string[]>(config.secondaryModuleIds);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
   if (!isOpen) return null;
 
@@ -26,7 +27,8 @@ export const ConfigModal = ({ isOpen, onClose, config, onSave }: ConfigModalProp
 
   const moveToMain = (id: string) => {
     if (mainIds.length >= 4) {
-      alert("Chỉ được chọn tối đa 4 module nổi bật.");
+      setErrorMsg("Chỉ được chọn tối đa 4 module nổi bật.");
+      setTimeout(() => setErrorMsg(null), 3500);
       return;
     }
     setSecIds(secIds.filter(mId => mId !== id));
@@ -67,11 +69,17 @@ export const ConfigModal = ({ isOpen, onClose, config, onSave }: ConfigModalProp
           </button>
         </div>
 
+        {errorMsg && (
+          <div className="mx-6 mt-4 bg-red-50 border border-red-200 text-red-700 text-[9.5pt] font-semibold px-4 py-2.5 rounded-lg animate-in fade-in duration-150">
+            {errorMsg}
+          </div>
+        )}
+
         <div className="flex-1 overflow-y-auto p-6 flex gap-6 flex-col md:flex-row">
           {/* Main Modules Column */}
           <div className="flex-1 bg-blue-50/50 rounded-lg p-4 border border-blue-100">
             <div className="flex justify-between items-center mb-4">
-              <h3 className="font-semibold text-blue-900">Module Nổi Bật</h3>
+              <h3 className="font-semibold text-gray-700">Module Nổi Bật</h3>
               <span className="text-sm bg-blue-200 text-blue-800 px-2 py-1 rounded-full">{mainIds.length}/4</span>
             </div>
             <div className="space-y-3">
@@ -163,13 +171,13 @@ export const ConfigModal = ({ isOpen, onClose, config, onSave }: ConfigModalProp
         <div className="p-6 border-t border-gray-200/50 flex justify-end gap-3 bg-gray-50/50 rounded-b-xl">
           <button 
             onClick={onClose}
-            className="px-5 py-2 text-gray-700 hover:bg-gray-200/80 rounded-md font-medium transition-colors"
+            className="px-5 py-2 text-gray-700 hover:bg-gray-200/80 rounded-lg font-medium transition-colors"
           >
             Hủy
           </button>
           <button 
             onClick={handleSave}
-            className="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md font-medium transition-colors shadow-sm"
+            className="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors shadow-sm"
           >
             Lưu cấu hình
           </button>

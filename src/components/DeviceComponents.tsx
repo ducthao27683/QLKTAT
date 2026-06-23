@@ -43,7 +43,7 @@ export const DeviceTreeList = ({
             {filteredTypes.map(type => (
               <button 
                 key={type}
-                className={`px-3 py-1 rounded-full text-[10pt] font-medium transition-all ${selectedType === type ? 'bg-[#164399] text-white shadow-md' : 'bg-white text-gray-600 hover:bg-gray-100 border border-gray-200'}`}
+                className={`px-3 py-1 rounded-lg text-[10pt] font-medium transition-all ${selectedType === type ? 'bg-[#164399] text-white shadow-md' : 'bg-white text-gray-600 hover:bg-gray-100 border border-gray-200'}`}
                 onClick={() => onSelectType && onSelectType(type)}
               >
                 {type}
@@ -69,7 +69,7 @@ export const DeviceTreeList = ({
             <button 
               key={opt}
               data-instance={opt}
-              className={`w-full text-left px-3 py-2 text-[10pt] rounded-md transition-all duration-200 flex items-center justify-between group ${selectedInstance === opt ? 'bg-[#ECF3FE] text-[#555555] border border-transparent' : 'text-gray-600 hover:bg-gray-50 border border-transparent hover:border-gray-300'}`}
+              className={`w-full text-left px-3 py-2 text-[10pt] rounded-lg transition-all duration-200 flex items-center justify-between group ${selectedInstance === opt ? 'bg-[#ECF3FE] text-[#555555] border border-transparent' : 'text-gray-600 hover:bg-gray-50 border border-transparent hover:border-gray-300'}`}
               onClick={() => onSelectInstance && onSelectInstance(opt)}
             >
               <span className="truncate pr-2">{opt}</span>
@@ -140,7 +140,7 @@ export const GroupedDeviceColumn = ({
             {typeOptions.map(opt => (
               <button
                 key={opt}
-                className={`px-2 py-1.5 text-[10pt] rounded-md transition-all flex-1 text-center whitespace-nowrap flex items-center justify-center gap-1.5 ${selectedType === opt ? 'bg-[#ECF3FE] text-[#555555] border border-transparent' : 'text-gray-600 border border-transparent hover:border-gray-300'}`}
+                className={`px-2 py-1.5 text-[10pt] rounded-lg transition-all flex-1 text-center whitespace-nowrap flex items-center justify-center gap-1.5 ${selectedType === opt ? 'bg-[#ECF3FE] text-[#555555] border border-transparent' : 'text-gray-600 border border-transparent hover:border-gray-300'}`}
                 onClick={() => onSelectType(opt)}
                 title={opt}
               >
@@ -173,7 +173,7 @@ export const GroupedDeviceColumn = ({
             <button 
               key={opt}
               data-instance={opt}
-              className={`w-full text-left px-3 py-2 text-[10pt] rounded-md transition-all duration-200 flex items-center justify-between group ${selectedInstance === opt ? 'bg-[#ECF3FE] text-[#555555] border border-transparent' : 'text-gray-600 hover:bg-gray-50 border border-transparent hover:border-gray-300'}`}
+              className={`w-full text-left px-3 py-2 text-[10pt] rounded-lg transition-all duration-200 flex items-center justify-between group ${selectedInstance === opt ? 'bg-[#ECF3FE] text-[#555555] border border-transparent' : 'text-gray-600 hover:bg-gray-50 border border-transparent hover:border-gray-300'}`}
               onClick={() => onSelectInstance && onSelectInstance(opt)}
             >
               <span className="truncate pr-2">{opt}</span>

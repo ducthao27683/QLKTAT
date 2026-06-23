@@ -1,0 +1,47 @@
+                                   return (
+                                      <div className="bg-slate-50/50 p-4 rounded-3xl space-y-3">
+                                        {/* Row 1: ĐVĐK */}
+                                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 bg-white px-3 py-2 rounded-2xl shadow-3xs border-none">
+                                          <div className="flex flex-col text-left shrink-0">
+                                            <span className="text-[9.5pt] font-extrabold text-gray-800 leading-tight">Đơn vị đăng ký</span>
+                                            <span className="text-[8pt] font-black text-[#164399] tracking-tight leading-normal">(ĐVĐK / Chi nhánh)</span>
+                                          </div>
+                                          <div className="flex flex-wrap items-center gap-2">
+                                            <span className="text-[8.5pt] font-bold text-gray-550 bg-slate-50 px-2.5 py-1 rounded-md">
+                                              Tổng: {devicesList.length}
+                                            </span>
+                                            <span className="text-[8.5pt] font-black text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-md">
+                                              Duyệt: {dvdkDuyet}
+                                            </span>
+                                            <span className="text-[8.5pt] font-black text-red-600 bg-red-50 px-2.5 py-1 rounded-md">
+                                              Không Duyệt: {dvdkKhongDuyet}
+                                            </span>
+                                            <span className="text-[8.5pt] font-bold text-amber-600 bg-amber-50 px-2.5 py-1 rounded-md">
+                                              Chờ duyệt: {dvdkChoDuyet}
+                                            </span>
+                                          </div>
+                                        </div>
+
+                                        {/* Row 2: ĐVTN */}
+                                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 bg-white px-3 py-2 rounded-2xl shadow-3xs border-none">
+                                          <div className="flex flex-col text-left shrink-0">
+                                            <span className="text-[9.5pt] font-extrabold text-gray-800 leading-tight">Đơn vị thí nghiệm</span>
+                                            <span className="text-[8.5pt] font-black text-[#164399] tracking-tight leading-normal">(ĐVTN / Công ty)</span>
+                                          </div>
+                                          <div className="flex flex-wrap items-center gap-2">
+                                            <span className="text-[8.5pt] font-bold text-gray-550 bg-slate-50 px-2.5 py-1 rounded-md">
+                                              Tổng: {devicesList.length}
+                                            </span>
+                                            <span className="text-[8.5pt] font-black text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-md">
+                                              Duyệt: {dvtnDuyet}
+                                            </span>
+                                            <span className="text-[8.5pt] font-black text-red-600 bg-red-50 px-2.5 py-1 rounded-md">
+                                              Không Duyệt: {dvtnKhongDuyet}
+                                            </span>
+                                            <span className="text-[8.5pt] font-bold text-amber-600 bg-amber-50 px-2.5 py-1 rounded-md">
+                                              Chờ duyệt: {dvtnChoDuyet}
+                                            </span>
+                                          </div>
+                                        </div>
+                                      </div>
+                                   );

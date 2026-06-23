@@ -37,11 +37,11 @@ export const WorkLocationPopup = ({
     <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
       <div className="bg-white rounded-xl shadow-2xl w-[90vw] h-[90vh] flex flex-col overflow-hidden">
         <div className="p-4 border-b border-gray-200 flex justify-between items-center bg-gray-50">
-          <h3 className="font-bold text-[12pt] text-[#164399] flex items-center gap-2">
+          <h3 className="font-bold text-[12pt] text-gray-700 flex items-center gap-2">
             <Network className="w-5 h-5" />
             Chọn Vị trí/Thiết bị làm việc
           </h3>
-          <button className="p-1 hover:bg-gray-200 rounded-full transition-colors" onClick={() => setShowDeviceTreePopup(false)}>
+          <button className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors cursor-pointer" onClick={() => setShowDeviceTreePopup(false)}>
             <X className="w-5 h-5 text-gray-500" />
           </button>
         </div>
